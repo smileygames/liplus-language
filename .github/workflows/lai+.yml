@@ -1,0 +1,38 @@
+name: lai+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require Issue reference (Lai+ R1)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const text = `${pr.title}\n${pr.body || ""}`;
+
+            // Accept patterns:
+            // - "#123"
+            // - "Issue: <anything>"
+            // - "GH-123"
+            const ok =
+              /#\d+/.test(text) ||
+              /GH-\d+/i.test(text) ||
+              /Issue:\s*\S+/i.test(text);
+
+            if (!ok) {
+              core.setFailed(
+                "Lai+ R1 violation: PR title or body must reference an Issue (e.g., #123)."
+              );
+            }
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Placeholder (Lai+ v0.1)
+        run: |
+          echo "Lai+ v0.1: tests are optional for now. Add real tests later."
