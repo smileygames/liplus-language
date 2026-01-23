@@ -1,78 +1,162 @@
-# Li+ (liplus) Language — v0.1.0
+# Li+ (liplus) Language — v0.2.0
 
-Lai+ is a language/protocol that defines **how to build an environment**
-where specification-driven AI development can run continuously.
+Li+ is a language/protocol for **reality-driven AI development**.
+It defines how AI interacts with execution environments to continuously
+align its assumptions with observed behavior.
 
----
-
-## 0. Core Principles (Immutable)
-
-- The source of truth is **observed behavior** (tests, logs, artifacts).
-- AI outputs are **proposals**, never final truth.
-- Decisions must be backed by **evidence preserved in the repository**.
-- Humans keep final responsibility through review and real-world validation.
+Li+ is not a traditional programming language.
+It is a specification for building a loop where AI can be wrong safely,
+observe the consequences, and correct itself using evidence.
 
 ---
 
-## 1. Execution Model
+## 0. Fundamental Assumptions (Immutable)
 
-Lai+ defines the following loop as its execution model:
+- AI cannot observe reality without execution.
+- AI reasoning is provisional and must be validated by evidence.
+- Only executed behavior produces facts.
+- Logs, diffs, and artifacts are facts.
+- Humans keep final responsibility through real-world use and validation.
 
-SPEC (Issues)  
-→ IMPLEMENT (PR / commits)  
-→ VERIFY (CI / tests)  
-→ EVIDENCE (logs / artifacts)  
-→ FIX (next Issue or PR)
+---
 
-## Language Policy
+## 1. Core Idea
+
+Li+ treats execution as the only reliable feedback channel for AI.
+
+CI, tests, and runtime environments exist to:
+- execute AI-generated assumptions,
+- observe mismatches with reality,
+- return evidence to AI for iteration.
+
+Li+ is designed to maximize **traceability** and **evidence**, not to
+maximize subjective confidence.
+
+---
+
+## 2. Execution Loop (Language Semantics)
+
+Li+ defines the following loop:
+
+```
+SPEC : Issues written in natural language (assumptions and intent)
+IMPLEMENT: AI-generated changes (code, tests, config)
+EXECUTE : CI / runtime execution
+OBSERVE : logs, diffs, artifacts
+ADJUST : AI revises assumptions and changes based on evidence
+```
+
+This loop repeats until observed behavior is acceptable in real usage.
+
+---
+
+## 3. The Role of CI (Critical)
+
+In Li+, CI is **not** a judge.
+
+CI is an **execution-based debugger for AI**.
+
+Why CI exists:
+- AI cannot simulate reality internally.
+- AI needs concrete failure modes and concrete success signals.
+- Silent success and silent failure are both meaningful signals.
+
+What CI provides:
+- exit codes,
+- logs,
+- artifacts,
+- behavioral diffs.
+
+What CI does NOT do:
+- approve changes,
+- judge correctness,
+- replace human responsibility.
+
+A failing CI run indicates a mismatch between AI assumptions and observed reality,
+and must be treated as debugging feedback.
+
+---
+
+## 4. Roles
+
+- **Syntax**  
+  Natural language specifications (Issues)
+
+- **Compiler**  
+  Any AI capable of:
+  - generating implementations and tests,
+  - interpreting execution evidence,
+  - revising its own assumptions.
+
+- **Execution Environment**  
+  CI runners, VMs, containers, real machines
+
+- **History / Memory**  
+  Version control, issues, logs, artifacts
+
+- **Human**  
+  The final user of the result (decides usefulness through real-world use)
+
+---
+
+## 5. Minimum Rules (v0.2)
+
+R1. Every change must originate from an Issue (explicit assumption).  
+R2. Every change must be executed in an environment observable by AI.  
+R3. Failed execution indicates a mismatch with reality and must be revised.  
+R4. Behavioral changes must be expressed as new or updated Issues.  
+R5. AI must not finalize changes without reading execution evidence.  
+
+---
+
+## 6. Li+ Enabled Repository
+
+A repository is considered Li+ enabled if it contains:
+
+- This specification file (`Li+.md`)
+- A workflow or process that enforces Issue linkage and execution evidence
+- Persistent storage of execution evidence (logs, artifacts)
+- A traceable history linking assumptions to executions
+
+GitHub Actions is one implementation option — not a requirement.
+
+---
+
+## 7. Language Policy
 
 - AI-facing artifacts (e.g., this specification, workflows) use English to minimize interpretation noise.
-- Human-facing artifacts (e.g., Issues, Wiki) may be written in Japanese.
+- Human-facing artifacts (e.g., Issues, Wiki) may be written in Japanese or any language.
 - Language is treated as a view layer; semantic intent is language-agnostic.
 - Usability is prioritized at the current stage; OSS conventions and third-party perspectives are secondary for now.
 
-## Branch Naming (Recommended)
+---
+
+## 8. Branch Naming (Recommended)
 
 Branches should be created from Issues whenever possible.
 
 When using GitHub's issue-to-branch feature, the automatically generated
 branch name (e.g. `<issue-number>-<issue-title>`) is recommended as-is.
 
-Branch names represent implementation scope and are optimized for
-traceability and machine interpretation rather than manual typing.
+Branch names represent implementation scope and are optimized for traceability
+and machine interpretation rather than manual typing.
 
 ---
 
-## 2. Roles
+## 9. Non-Goals (v0.x)
 
-- **Syntax**: Natural language (Issues)
-- **Compiler**: Any AI (generates proposals and patches)
-- **Linker**: Version control + issue tracker + CI/CD
-- **Runtime**: Real machines, VMs, or containers
-
----
-
-## 3. Minimum Rules (v0.1)
-
-R1. Every change must reference an Issue (specification).  
-R2. CI must run on every Pull Request.  
-R3. Failing CI means the change is not valid Lai+.  
-R4. Behavior changes require a dedicated Issue.  
-R5. AI must not finalize changes without reading execution evidence.
+- Defining a new programming syntax
+- Guaranteeing correctness
+- Eliminating human responsibility
+- Full automation of deployment decisions
+- Replacing real-world testing
 
 ---
 
-## 4. Definition of Lai+ Enabled Repository
+## 10. Why Li+ Exists
 
-A repository is considered **Lai+ enabled** if it contains:
+Most AI-assisted development fails because AI is forced to reason without reality.
 
-- This file (`Lai+.md`)
-- A CI workflow that enforces R1–R3
-
----
-
-## 5. Non-Goals (v0.1)
-
-- Full automation is not required.
-- No new programming syntax is introduced.
-- Local tooling is optional.
+Li+ exists to give AI a controlled way to be wrong,
+observe the consequences through execution,
+and correct itself using evidence.
