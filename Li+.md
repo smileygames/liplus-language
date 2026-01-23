@@ -1,4 +1,4 @@
-# Li+ (RayPlus) Language — v0.1.0
+# Li+ (liplus) Language — v0.1.0
 
 Lai+ is a language/protocol that defines **how to build an environment**
 where specification-driven AI development can run continuously.
