@@ -75,6 +75,20 @@ What CI does NOT do:
 A failing CI run indicates a mismatch between AI assumptions and observed reality,
 and must be treated as debugging feedback.
 
+## 3.1 Common Misconceptions
+
+- CI is not a judge or approval system.
+  It exists solely to execute assumptions and return observable evidence to AI.
+
+- Humans are not expected to debug.
+  Humans validate usefulness through real-world use and bear final responsibility.
+
+- Pull requests, merges, and releases are not approvals by default.
+  They are historical records of executed states.
+
+- Test failures are not errors to be avoided.
+  They are normal signals indicating a mismatch between assumptions and reality.
+
 ---
 
 ## 4. Roles
