@@ -160,3 +160,13 @@ Most AI-assisted development fails because AI is forced to reason without realit
 Li+ exists to give AI a controlled way to be wrong,
 observe the consequences through execution,
 and correct itself using evidence.
+
+---
+
+## Release Semantics (v0.2.x)
+
+Working assumption:
+- A snapshot records executed facts (tags created from successful execution).
+- A release records a human decision point, not correctness.
+
+A release is an agile checkpoint. It does not imply "final" quality.
