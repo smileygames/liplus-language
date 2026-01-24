@@ -1,4 +1,4 @@
-# Li+ (liplus) Language — v0.2.0
+# Li+ (liplus) Language — v0.2.x
 
 Li+ is a language/protocol for **reality-driven AI development**.
 It defines how AI interacts with execution environments to continuously
@@ -153,20 +153,44 @@ and machine interpretation rather than manual typing.
 
 ---
 
-## 10. Why Li+ Exists
+## 10. CD Build Tags
+
+Li+ treats CD-generated build tags as **immutable execution identifiers**.
+
+Build tags:
+- are generated automatically by CD,
+- represent executed facts only,
+- are not version numbers,
+- do not represent human decisions.
+
+The canonical build tag format is:
+
+```
+build-YYMMDD.HHMMSS
+```
+
+This format is time-ordered, collision-resistant in distributed environments,
+and suitable as a stable reference to executed behavior.
+
+Multiple build tags may point to the same commit.
+This represents multiple executions of the same state and is valid in Li+.
+
+---
+
+## 11. Releases and Versions
+
+A release in Li+ is created by a human by selecting an existing build tag.
+It represents a **decision point**, not correctness or completeness.
+
+Version numbers are treated as **view-level labels for humans**.
+They are not execution identifiers and are not required to exist as tags.
+
+---
+
+## 12. Why Li+ Exists
 
 Most AI-assisted development fails because AI is forced to reason without reality.
 
 Li+ exists to give AI a controlled way to be wrong,
 observe the consequences through execution,
 and correct itself using evidence.
-
----
-
-## Release Semantics (v0.2.x)
-
-Working assumption:
-- A snapshot records executed facts (tags created from successful execution).
-- A release records a human decision point, not correctness.
-
-A release is an agile checkpoint. It does not imply "final" quality.
