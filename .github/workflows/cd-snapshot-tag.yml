@@ -25,9 +25,10 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
-      - name: Create snapshot tag
+      - name: Create build tag
         run: |
-          TAG="snapshot-$(date -u +%Y%m%d-%H%M%S)"
+          TAG="build-$(date -u +%y%m%d.%H%M%S)"
           echo "Tagging $TAG at $GITHUB_SHA"
           git tag "$TAG" "$GITHUB_SHA"
           git push origin "$TAG"
+          
