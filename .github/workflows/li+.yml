@@ -8,6 +8,7 @@ on:
 
 jobs:
   gate:
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - name: Require Issue reference (Lai+ R1)
