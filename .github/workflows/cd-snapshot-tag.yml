@@ -2,7 +2,7 @@ name: CD - snapshot tag
 
 on:
   workflow_run:
-    workflows: ["li+"]   # CIワークフロー名（今の現実）
+    workflows: ["li-ci"]   # CIワークフロー名（今の現実）
     types: [completed]
 
 permissions:

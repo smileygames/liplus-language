@@ -1,11 +1,10 @@
-name: li+
+name: li-ci
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
   push:
     branches: [main]
-
-
+    
 jobs:
   gate:
     if: ${{ github.event_name == 'pull_request' }}
