@@ -1,0 +1,34 @@
+name: CD - snapshot tag
+
+on:
+  workflow_run:
+    workflows: ["li+"]   # CIワークフロー名（今の現実）
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cd-snapshot-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the exact commit that CI tested
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Create snapshot tag
+        run: |
+          TAG="snapshot-$(date -u +%Y%m%d-%H%M%S)"
+          echo "Tagging $TAG at $GITHUB_SHA"
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "$TAG"
