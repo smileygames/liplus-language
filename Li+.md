@@ -172,6 +172,40 @@ A repository is Li+ enabled if it contains:
 
 GitHub Actions is one possible implementation, not a requirement.
 
+## The Role of GitHub in Li+
+
+In Li+, GitHub is not treated as a human collaboration platform
+or a project management tool.
+
+GitHub functions as a **support system for AI**.
+
+It provides AI with:
+- persistent external memory (history and records),
+- an execution interface to reality (CI),
+- immutable evidence of actions and outcomes (logs and artifacts).
+
+This mirrors the current relationship between humans and AI,
+where AI serves as a cognitive assistant for humans.
+
+In Li+, this relationship is intentionally inverted.
+
+AI is the primary actor that:
+- proposes assumptions,
+- generates changes,
+- executes them,
+- observes real behavior,
+- revises itself based on evidence.
+
+GitHub assists AI by preserving continuity across executions
+and by preventing subjective reinterpretation of past actions.
+
+Humans do not use GitHub to approve AI decisions.
+Humans use GitHub to **observe evidence produced by AI**
+and decide whether the results are acceptable in real-world use.
+
+GitHub does not judge correctness.
+It records reality.
+
 ---
 
 ## 9. Language Policy
