@@ -206,6 +206,24 @@ such as platform warnings about hidden or ambiguous characters in references.
 Language remains a view layer.
 However, identifier stability and unambiguous machine interpretation
 take precedence over expressiveness in machine-facing contexts.
+
+## Commit Message Policy (Machine-facing)
+
+Li+ treats commit messages as part of the machine-facing evidence trail.
+
+To minimize interpretation noise and keep automated processing stable:
+
+- **Commit subject line MUST be English and ASCII-only.**
+- **Commit body MAY use any language and character set.**
+
+Rationale:
+- The subject line is a compact identifier used in logs, UIs, and automated tooling.
+- The body is human-facing explanatory context and may be written in the most useful language.
+
+This policy is designed to reduce human burden:
+humans should not be required to remember formatting rules during normal operation.
+AI-driven workflows MUST generate compliant commit messages by default.
+
 ---
 
 ## 10. Branch Naming (Recommended)
