@@ -173,10 +173,39 @@ GitHub Actions is one possible implementation, not a requirement.
 ## 9. Language Policy
 
 - AI-facing artifacts (specifications, workflows) use English to reduce interpretation noise.
-- Human-facing artifacts (Issues, Wiki) may use any language.
+- Human-facing artifacts (Issues, Wiki, discussions) may use any language.
 - Language is treated as a view layer; semantic intent is language-agnostic.
-- Current usability is prioritized over OSS convention strictness.
+- Current usability is prioritized over strict OSS convention compliance.
 
+## Identifier Language Policy (Machine-facing)
+
+Li+ explicitly distinguishes between **machine-facing identifiers** and
+**human-facing descriptive text**.
+
+Machine-facing identifiers are primarily consumed by tools, CI systems,
+version control platforms, and automated agents.
+To minimize interpretation noise and platform-specific ambiguity,
+machine-facing identifiers MUST use ASCII characters only.
+
+### Machine-facing identifiers include (but are not limited to):
+- Issue titles
+- Branch names
+- References automatically derived from Issue titles
+
+### Human-facing descriptive text includes:
+- Issue bodies
+- Documentation
+- Comments and discussion text
+
+Human-facing descriptive text MAY use any language and character set.
+
+This rule is not a stylistic preference.
+It is an execution-driven constraint derived from observed platform behavior,
+such as platform warnings about hidden or ambiguous characters in references.
+
+Language remains a view layer.
+However, identifier stability and unambiguous machine interpretation
+take precedence over expressiveness in machine-facing contexts.
 ---
 
 ## 10. Branch Naming (Recommended)
