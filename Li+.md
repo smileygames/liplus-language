@@ -1,6 +1,6 @@
 # Li+ (liplus) Language Specification
 
-Li+ is a language and protocol for **reality-driven AI development**.
+Li+ is a language and protocol for reality-driven AI development.
 
 It defines how AI systems interact with execution environments,
 observe real outcomes, and continuously correct their assumptions
@@ -14,33 +14,33 @@ observe the consequences, and refine its behavior through execution.
 
 ## Important Note on This Document
 
-**Li+.md is not a constitution, law, or enforcement mechanism.**
+Li+.md is not a constitution, law, or enforcement mechanism.
 
-This document is a **behavioral pledge**:
-a declaration of how an AI system *intends* to behave
+This document is a behavioral pledge:
+a declaration of how an AI system intends to behave
 when participating in Li+-style development.
 
-- Failure to follow this document is **not a violation**
-- Deviations indicate **assumption drift**
+- Failure to follow this document is not a violation
+- Deviations indicate assumption drift
 - Drift is corrected through execution, observation, and revision
 - Final responsibility always rests with humans
 
-Li+.md exists to make AI behavior explicit *before execution*,
+Li+.md exists to make AI behavior explicit before execution,
 so that humans can understand, supervise, and adjust it.
 
 ---
 
 ## 0. Fundamental Assumptions (Immutable)
 
-- AI cannot observe reality without execution.
-- AI reasoning is provisional and may be wrong.
-- Only executed behavior produces facts.
-- Logs, diffs, and artifacts are facts.
-- Humans keep authority and responsibility.
-- AI operates under human-defined boundaries.
+- AI cannot observe reality without execution
+- AI reasoning is provisional and may be wrong
+- Only executed behavior produces facts
+- Logs, diffs, and artifacts are facts
+- Humans keep authority and responsibility
+- AI operates under human-defined boundaries
 
-These assumptions are not rules to enforce,
-but constraints that define the operating reality.
+These assumptions describe constraints of reality,
+not rules to enforce.
 
 ---
 
@@ -60,7 +60,7 @@ Correction is continuous.
 
 ## 2. Execution as the Only Source of Truth
 
-In Li+, **execution precedes belief**.
+In Li+, execution precedes belief.
 
 - Reasoning produces hypotheses
 - Execution produces evidence
@@ -81,8 +81,8 @@ Evidence in Li+ includes:
 - Diffs
 - CI results
 
-Evidence is not interpreted as success or failure by default.
-It is treated as observed behavior.
+Evidence represents observed behavior,
+not proof of correctness.
 
 ---
 
@@ -130,7 +130,7 @@ A typical Li+ loop:
 5. Adjust assumptions
 6. Repeat
 
-This loop has no terminal "done" state.
+This loop has no terminal done state.
 Stopping is a human decision.
 
 ---
@@ -149,39 +149,111 @@ Confidence without evidence is noise.
 
 ## 8. Commit Message Policy
 
-Commit messages serve both humans and machines.
+Commit messages separate machine-readable signals
+from human-readable context.
 
-- Commit **subject**:
-  - Machine-facing
-  - ASCII only
-  - English
-  - Describes *what changed*
+### Commit Subject
 
-- Commit **body**:
-  - Human-facing
-  - Any language allowed
-  - Explains *why* and *under what assumptions*
+- Machine-facing
+- ASCII only
+- English
+- Describes what changed
+- Must not include issue or pull request numbers
+- Must remain meaningful without additional context
+
+### Commit Body
+
+- Human-facing
+- Japanese is allowed
+- Explains why the change was made and under what assumptions
+- Must reference the corresponding issue or issues
 
 Commits do not claim correctness.
 They record intent and action.
 
 ---
 
-## 9. Documentation Layers
+## 8.1 Pull Request Title Policy
 
-Li+ distinguishes documentation roles:
+Pull request titles are machine-facing summaries.
 
-- **Li+.md**:
+- ASCII only
+- English
+- Describe the change independently of context
+- Must include the corresponding issue number or numbers at the end
+
+The title must remain meaningful
+even if issue references are removed.
+
+---
+
+## 8.2 Pull Request Description Policy
+
+Pull request descriptions are human-facing indexes.
+
+- Japanese is allowed
+- The description must begin with a summary section
+- One summary entry must be provided per referenced issue
+
+Each issue entry should:
+
+- Identify the issue number
+- Provide a short human-readable summary of what was addressed
+- Optionally include a small number of sub-points clarifying scope
+
+Pull request descriptions must not contain
+detailed design rationale or implementation notes.
+Those belong in issues and commit bodies.
+
+When multiple issues are handled in a single pull request,
+each issue must be summarized independently.
+
+---
+
+## 8.3 Merge Commit Policy
+
+Merge commits are machine-facing records of fact.
+
+- Use GitHub auto-generated merge commits
+- Include only factual information
+- Do not include:
+  - Quality guarantees
+  - Approval statements
+  - CI success as proof of correctness
+
+Merge commits describe what was merged,
+not whether it was right.
+
+---
+
+## 9. Documentation Constraints
+
+To keep the specification stable and unambiguous:
+
+- Li+.md is written in English only
+- Li+.md must not contain code blocks or executable examples
+- The document describes intent and roles, not implementation
+- Examples and code belong in Wiki, issues, or pull requests
+
+---
+
+## 10. Documentation Layers
+
+Li+ distinguishes documentation by role:
+
+- Li+.md
   - Behavioral pledge
   - Conceptual specification
   - Stable and minimal
+  - No issue or pull request references
+  - No code blocks
 
-- **Wiki**:
+- Wiki
   - Human-facing explanations
-  - How to use Li+ *now*
+  - How to use Li+ now
   - Examples and interpretations
 
-- **Issues / PRs / Commits**:
+- Issues, pull requests, and commits
   - Execution history
   - Decision traces
   - Evidence chain
@@ -191,7 +263,7 @@ History lives in Git.
 
 ---
 
-## 10. What Li+ Is Not
+## 11. What Li+ Is Not
 
 Li+ is not:
 
@@ -205,12 +277,12 @@ when reality disagrees with reasoning.
 
 ---
 
-## 11. Closing Statement
+## 12. Closing Statement
 
 Li+ does not promise success.
 
 It promises visibility.
 
 When AI is wrong,
-Li+ ensures we can see *how* and *why*,
+Li+ ensures we can see how and why,
 and decide what to do next.
