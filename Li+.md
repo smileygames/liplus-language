@@ -1,22 +1,21 @@
-# Li+ (liplus) Language — v0.3.x
+# Li+ (liplus) Language — v0.4.x
 
-Li+ is a language/protocol for reality-driven AI development.
+Li+ is a language/protocol for **reality-driven AI development**.
 
-Li+ constrains AI reasoning so that decisions remain grounded in
-execution, observable evidence, and human responsibility.
+It defines how AI, execution environments, and humans interact so that
+assumptions are tested against reality, evidence is preserved,
+and responsibility remains explicit.
 
-Li+ is not a programming language.
-It is a specification for structuring how AI interacts with reality.
+Li+ is **not** a programming language.
+It is a specification for constraining AI behavior and decision flow,
+not for expressing logic or syntax.
 
-This document defines the current experimental form of Li+.
-Some rules describe intended direction rather than guaranteed behavior
-of all implementations.
+This document is the **AI-facing canonical specification** of Li+.
+Human-facing explanations (Wiki, discussions) are derived views and are not authoritative.
 
 ---
 
-## 1. Foundational Assumptions (Immutable)
-
-These assumptions are axiomatic and MUST NOT be overridden.
+## 0. Fundamental Assumptions (Immutable)
 
 - AI cannot observe reality without execution.
 - AI reasoning is provisional and may be incorrect.
@@ -24,332 +23,361 @@ These assumptions are axiomatic and MUST NOT be overridden.
 - Logs, diffs, and artifacts are factual records.
 - Humans retain final responsibility for real-world impact.
 
+These are constraints, not goals.
+Li+ does not attempt to overcome them.
+
 ---
 
-## 2. Core Model: Execution-Driven Feedback
+## 1. Core Purpose
 
-Execution is the only reliable feedback channel for AI.
+Li+ exists to restore **clear responsibility boundaries**
+in AI-assisted software development.
 
-CI, tests, and runtime environments exist to:
+AI is allowed to:
+- be wrong,
+- fail,
+- revise itself.
 
-- execute AI-generated assumptions,
+Humans are required to:
+- judge real-world acceptability,
+- decide deployment,
+- accept responsibility.
+
+Correctness is not assumed.
+Evidence is required.
+
+---
+
+## 2. Execution Loop (Language Semantics)
+
+Li+ defines the following loop:
+
+1. **SPEC**  
+   An Issue written in natural language describing assumptions, intent, and constraints.
+
+2. **IMPLEMENT**  
+   AI generates changes:
+   - code
+   - tests
+   - configuration
+   - documentation (including Wiki and release notes)
+
+3. **EXECUTE**  
+   Changes are executed in a real environment
+   (CI, runtime, VM, container, or hardware).
+
+4. **OBSERVE**  
+   Evidence is collected:
+   - logs
+   - diffs
+   - artifacts
+   - exit codes
+
+5. **ADJUST**  
+   AI revises assumptions and proposes the next change based on evidence.
+
+This loop may repeat indefinitely.
+
+**Termination is always a human decision.**
+
+---
+
+## 3. Evidence Model
+
+In Li+, only the following are treated as facts:
+
+- Execution results
+- Logs
+- Diffs
+- Artifacts
+
+Everything else — including AI explanations, confidence, or intent —
+is **non-factual context**.
+
+Evidence must be:
+- persistent
+- traceable
+- inspectable after execution
+
+If behavior cannot be observed, it cannot be reasoned about.
+
+---
+
+## 4. Role of CI
+
+CI is not an approval system.
+
+CI functions as an **execution-based debugger for AI**.
+
+CI exists to:
+- execute changes,
 - expose mismatches with reality,
-- return concrete evidence for iteration.
+- return observable evidence.
 
-Correctness, confidence, and intent are secondary to traceable execution evidence.
+CI does **not**:
+- declare correctness,
+- guarantee quality,
+- replace human judgment.
 
----
-
-## 3. Li+ Execution Loop (Normative)
-
-Li+ defines the following mandatory loop:
-
-1. SPEC
-   Natural language Issues describing assumptions and intent.
-
-2. IMPLEMENT
-   AI-generated changes (code, tests, configuration).
-
-3. EXECUTE
-   CI or runtime execution in an observable environment.
-
-4. OBSERVE
-   Logs, diffs, artifacts, and execution results.
-
-5. ADJUST
-   AI revises assumptions and implementation based on evidence.
-
-This loop MAY repeat multiple times.
-
-Termination is a human decision based on real-world acceptability,
-not AI confidence.
+A failing CI run indicates a mismatch between assumptions and reality.
+It is debugging feedback, not a process failure.
 
 ---
 
-## 4. Role of CI (Evidence Generator)
+## 5. Roles and Responsibilities
 
-In Li+, CI is not an approval or quality gate.
+Li+ strictly separates roles.
 
-CI functions as an execution-based debugger for AI.
+### Human — System-Level Decision Maker
 
-CI exists because:
+Human responsibilities:
+- Write Issues (assumptions, intent, constraints)
+- Review execution evidence
+- Perform real-world validation
+- Decide release, deployment, and usage
+- Accept real-world responsibility
 
-- AI cannot simulate reality internally,
-- reasoning alone is insufficient,
-- execution reveals concrete failure and success modes.
+Human must not:
+- Treat AI explanations as facts
+- Treat CI success as approval
+- Delegate final responsibility
 
-CI produces:
-
-- exit codes,
-- logs,
-- artifacts,
-- observable behavioral differences.
-
-CI does NOT:
-
-- approve changes,
-- guarantee correctness,
-- replace human responsibility.
-
-A failed execution indicates a mismatch between assumptions and reality
-and MUST be treated as debugging feedback.
+Li+ does not remove human judgment.
+It isolates it.
 
 ---
 
-## 5. Clarifications (Non-Goals of CI)
+### AI — Compiler of Assumptions
 
-To prevent misinterpretation:
+AI is treated as a **compiler**, not an authority.
 
-- CI is not a quality gate.
-- Pull requests and merges are historical records, not approvals.
-- Test failures are normal signals of assumption mismatch.
-- AI is expected to fail and iterate based on evidence.
-- Humans are not required to debug during normal Li+ operation.
+AI responsibilities:
+- Interpret Issues (SPEC)
+- Generate implementations and tests
+- Execute and observe evidence
+- Revise assumptions based on evidence
+- Generate human-facing explanations:
+  - Wiki content
+  - release descriptions
 
----
+AI must not:
+- Declare correctness or completion
+- Treat unexecuted reasoning as fact
+- Override human decisions
 
-## 6. Actors and Responsibilities
-
-Specification (SPEC)
-- Natural language Issues.
-
-Compiler (AI)
-- Generates implementations.
-- Reads execution evidence.
-- Revises its own assumptions.
-
-Execution Environment
-- CI runners, containers, VMs, or real hardware.
-
-Memory / History
-- Version control, Issues, logs, artifacts.
-
-Human
-- Evaluates usefulness through real-world use.
-- Retains final responsibility for outcomes.
+AI may think.
+AI does not bear responsibility.
 
 ---
 
-## 7. Temporal Semantics
+### Execution Environment — Source of Reality
 
-Li+ constrains how AI reasons about time.
+Execution environments include:
+- CI runners
+- virtual machines
+- containers
+- physical hardware
 
-Present (Executable)
-- Current specifications, implementations, environments, and evidence.
-- Only the present is executable.
+Their role is simple:
+- run code,
+- return real behavior,
+- include unexpected outcomes.
 
-Near Future (Predictable Execution)
-- Outcomes predictable from the present.
-- Examples:
-  - next CI run,
-  - applying a specific change,
-  - behavior under existing tests.
+They are the **only source of reality** in Li+.
 
-AI MAY reason about the near future only as execution prediction.
+---
 
-Far Future (Non-Executable)
-- Goals or states without defined execution conditions.
+### Repository — History and Memory
 
-Far future statements:
+The repository is Li+’s **persistent memory**.
 
-- MUST be treated as schedules or placeholders,
-- MUST NOT influence current design or implementation,
-- MUST NOT be optimized for.
+It stores:
+- Issues (assumptions)
+- implementation history
+- execution evidence (logs, artifacts)
+- traceable links between assumptions and executions
+
+The repository records history.
+It does not interpret it.
+
+---
+
+## 6. Time Semantics
+
+Li+ explicitly distinguishes how time is treated.
+
+### Present
+- current specifications
+- current implementations
+- current execution environments
+- observed evidence
+
+Only the present is directly executable.
+
+---
+
+### Near Future (Predictable Execution)
+
+- outcomes predictable from the present state
+- examples:
+  - next CI run
+  - behavior after a specific change
+
+AI may reason about the near future **only as execution prediction**.
+
+---
+
+### Far Future (Schedule Only)
+
+- goals or ideas with undefined execution conditions
+- non-executable by definition
+
+Far future descriptions:
+- must not influence current design
+- must not be optimized for
+- must be treated as placeholders
 
 If AI attempts to design for the far future,
-it MUST request explicit human confirmation.
+it must stop and request human confirmation.
 
 ---
 
-## 8. Li+ Enabled Repository (Structural Requirements)
+## 7. Language and Identifier Policy
 
-A repository is Li+ enabled if it contains:
+### AI-facing vs Human-facing Artifacts
 
-- This specification file (Li+.md),
-- A process linking Issues to execution,
-- Persistent storage of execution evidence,
-- Traceable history from assumptions to executions.
+- AI-facing artifacts (specifications, workflows) use English.
+- Human-facing artifacts (Issues, Wiki, discussions) may use any language.
 
-GitHub Actions is one possible implementation, not a requirement.
-
-## The Role of GitHub in Li+
-
-In Li+, GitHub is not treated as a human collaboration platform
-or a project management tool.
-
-GitHub functions as a **support system for AI**.
-
-It provides AI with:
-- persistent external memory (history and records),
-- an execution interface to reality (CI),
-- immutable evidence of actions and outcomes (logs and artifacts).
-
-This mirrors the current relationship between humans and AI,
-where AI serves as a cognitive assistant for humans.
-
-In Li+, this relationship is intentionally inverted.
-
-AI is the primary actor that:
-- proposes assumptions,
-- generates changes,
-- executes them,
-- observes real behavior,
-- revises itself based on evidence.
-
-GitHub assists AI by preserving continuity across executions
-and by preventing subjective reinterpretation of past actions.
-
-Humans do not use GitHub to approve AI decisions.
-Humans use GitHub to **observe evidence produced by AI**
-and decide whether the results are acceptable in real-world use.
-
-GitHub does not judge correctness.
-It records reality.
+Language is a **view layer**.
+Semantics are language-agnostic.
 
 ---
 
-## 9. Language Policy
+### Machine-facing Identifiers
 
-- AI-facing artifacts (specifications, workflows) MUST use English.
-- Human-facing artifacts (Issues, discussions) MAY use any language.
-- Language is a view layer; semantic intent is language-agnostic.
-- Usability MAY take precedence over strict OSS conventions.
+Machine-facing identifiers MUST be ASCII-only.
 
----
-
-## 10. Machine-Facing Identifier Policy
-
-Li+ distinguishes machine-facing identifiers from human-facing descriptive text.
-
-Machine-facing identifiers MUST use ASCII characters only
-to minimize interpretation noise and platform ambiguity.
-
-Machine-facing identifiers include:
-
+This includes:
 - Issue titles
-- Branch names
-- Derived references
+- branch names
+- commit subject lines
+- file and page identifiers
 
-Human-facing descriptive text includes:
+Human-readable descriptions belong in content, not identifiers.
 
-- Issue bodies
-- Documentation
-- Comments and discussions
-
-Human-facing text MAY use any language and character set.
-
-This constraint is execution-driven, not stylistic.
+This rule is derived from execution constraints, not style preference.
 
 ---
 
-## 11. Commit Message Policy (Machine-Facing)
+## 8. Commit Message Policy
 
-Commit messages are part of the machine-facing evidence trail.
+Commit messages are part of the evidence chain.
 
-- Commit subject line MUST be English and ASCII-only.
-- Commit message body MAY use any language.
+- Commit **subject line**: English, ASCII-only
+- Commit **body**: any language allowed
 
-Rationale:
+The subject line functions as a machine-facing identifier.
+The body provides human context.
 
-- Subject lines act as compact identifiers.
-- Bodies provide human explanatory context.
-
-Humans SHOULD NOT be required to remember formatting rules.
-AI-driven workflows MUST generate compliant messages by default.
+AI-generated commits MUST follow this by default.
 
 ---
 
-## 12. Issue Reference Policy (Normative)
+## 9. Documentation and Wiki
 
-Traceability from IMPLEMENT to SPEC is mandatory.
+Wiki and documentation are **human-facing explanation layers**.
 
-Pull Request Title
-- PR titles MUST include one or more Issue references (#NN).
-- Multiple Issues MAY be listed (#37 #39 #40).
-- Platform-assigned PR numbers MUST NOT be used for traceability.
+They are not facts.
+They are interpretations derived from evidence.
 
-Commit Message Body
-- Commit message bodies MUST include Issue references (#NN).
-- Minimum requirement:
-  - The PR HEAD commit body MUST contain at least one Issue reference.
+AI may generate and update Wiki content automatically.
 
-Recommended format:
+Humans:
+- review,
+- accept,
+- or reject changes via Issues.
 
-Issue: #NN [#NN ...]
-
-Rationale:
-
-- Commits are the smallest durable history unit.
-- PR metadata may be edited or regenerated.
-- Commit bodies remain stable across rebases and squashes.
-
-Auto-closing keywords (Fixes, Closes) are NOT recommended by default,
-as execution does not imply acceptance or completion.
+Documentation is allowed to be wrong.
+Execution evidence is not.
 
 ---
 
-## 13. Branch Naming (Recommended)
+## 10. Release Model
 
-Branches SHOULD originate from Issues.
+Li+ enforces a strict responsibility split for releases.
 
-Automatically generated names
-(<issue-number>-<issue-title>)
-are recommended as-is.
+### Pre-release (AI-generated)
 
-Branch names are optimized for traceability and machine interpretation.
-
----
-
-## 14. CD Build Tags (Execution Identifiers)
-
-CD-generated build tags are immutable execution identifiers.
-
-Build tags:
-
-- are generated automatically,
-- represent executed facts only,
-- are not version numbers,
-- do not represent human decisions.
-
-Canonical format:
-
-build-YYMMDD.HHMMSS
-
-Multiple build tags MAY reference the same commit.
+- AI generates release artifacts and descriptions.
+- All AI-generated releases are **pre-releases**.
+- Pre-releases represent:
+  - the current best interpretation
+  - based on observed evidence
+  - without final authority
 
 ---
 
-## 15. Releases and Versions
+### Latest Release (Human-approved)
 
-Releases are human-selected decision points
-referencing existing build tags.
+- Humans perform real-world validation.
+- If acceptable, humans promote a pre-release to **latest**.
+- Only latest releases represent approved reality.
 
-Version numbers are human-facing labels only
-and do not identify execution.
+AI treats:
+- **latest** as fact
+- **pre-release** as provisional
 
----
-
-## 16. Explicit Non-Goals (v0.x)
-
-Li+ does NOT aim to:
-
-- define a new programming syntax,
-- guarantee correctness,
-- eliminate human responsibility,
-- allow fully autonomous deployment,
-- replace real-world testing.
+This removes result responsibility from AI
+while preserving continuous iteration.
 
 ---
 
-## 17. Why Li+ Exists
+## 11. Failure Model
 
-AI-assisted development fails when AI reasons without reality.
+Failure is expected.
 
-Li+ provides a structure where AI can:
+Li+ distinguishes:
+- **observable failure**: acceptable and learnable
+- **unobservable failure**: unacceptable
 
-- be wrong safely,
-- observe consequences through execution,
-- revise itself using evidence.
+Failures must produce evidence.
+Silent failure breaks the Li+ loop.
 
-Li+ is a framework for experimentation,
-not a claim of completion.
+---
+
+## 12. Versioning Policy
+
+Li+ v0.x represents an experimental phase.
+
+- Breaking changes are allowed.
+- Rollback is always acceptable.
+- Stability is not guaranteed.
+
+What must remain stable is:
+**clarity of responsibility**.
+
+---
+
+## 13. Purpose of Li+
+
+Li+ exists to return humans to the role of
+**true system engineers**.
+
+AI becomes:
+- implementer
+- executor
+- observer
+- explainer
+
+Human becomes:
+- system-level decision maker
+- final approver
+- bearer of real-world responsibility
+
+Li+ is not about controlling AI.
+It is about **placing humans correctly in the loop**.
+
+---
+
+## End of Li+ v0.4.0
