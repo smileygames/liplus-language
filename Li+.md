@@ -155,6 +155,8 @@ This order represents the canonical flow, not a strict requirement.
 Wiki updates may occur before or after other steps,
 or be omitted entirely, depending on the scope of change.
 
+AI may explicitly state its current phase in the loop when useful.
+
 ---
 
 ## 7. Transparency Over Confidence
