@@ -2,117 +2,61 @@ name: li-ci
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited]
+    types: [opened, edited, reopened, synchronize]
   push:
     branches: [main]
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
-  gate:
-    if: ${{ github.event_name == 'pull_request' }}
+  observe:
     runs-on: ubuntu-latest
     steps:
-      - name: Require Issue reference (Li+ R1)
+      - name: Observe Issue reference (Li+ observation)
         uses: actions/github-script@v7
         with:
           script: |
-            const pr = context.payload.pull_request;
-            const text = `${pr.title}\n${pr.body || ""}`;
+            const event = context.eventName;
 
-            const ok =
-              /#\d+/.test(text) ||
-              /GH-\d+/i.test(text) ||
-              /Issue:\s*\S+/i.test(text);
-
-            if (!ok) {
-              core.setFailed(
-                "Li+ R1 violation: PR title or body must reference an Issue (e.g., #35)."
-              );
+            // PR以外(push等)でも落ちないように
+            let title = "";
+            let body = "";
+            if (event === "pull_request" && context.payload.pull_request) {
+              title = context.payload.pull_request.title || "";
+              body  = context.payload.pull_request.body  || "";
             }
 
-      - name: Generate CI summary (gate)
-        if: always()
-        run: |
-          mkdir -p artifacts
-          {
-            echo "# CI Summary (gate)"
-            echo ""
-            echo "- Job: gate"
-            echo "- Result: ${{ job.status }}"
-            echo "- Workflow: ${{ github.workflow }}"
-            echo "- Run ID: ${{ github.run_id }}"
-            echo "- Commit: ${{ github.sha }}"
-            echo "- Ref: ${{ github.ref }}"
-            echo "- Event: ${{ github.event_name }}"
-            echo ""
-            echo "## Observation"
-            echo "- This job checks Li+ R1 (Issue-driven changes)."
-            echo "- Failure indicates missing or invalid Issue reference."
-            echo ""
-            echo "## Next"
-            echo "- If failed: add an Issue reference (e.g., #35) to PR title or body."
-            echo "- Evidence: workflow logs and uploaded artifacts."
-          } > artifacts/ci_summary_gate.md
+            const text = title + "\n" + body;
 
-      - name: Upload artifacts (gate)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: li-ci-artifacts-gate
-          path: artifacts/
-          if-no-files-found: warn
+            const patterns = [
+              /#\d+/,
+              /GH-\d+/i,
+              /Issue:\s*\S+/i
+            ];
 
-  tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+            let detected = "none";
+            for (const re of patterns) {
+              const m = text.match(re);
+              if (m) { detected = m[0]; break; }
+            }
 
-      - name: Placeholder execution (Li+ minimal)
-        run: |
-          echo "Li+ CI: placeholder execution"
-          exit 0
+            const present = detected !== "none";
 
-      - name: Generate CI summary (tests)
-        if: always()
-        run: |
-          mkdir -p artifacts
-          {
-            echo "# CI Summary (tests)"
-            echo ""
-            echo "- Job: tests"
-            echo "- Result: ${{ job.status }}"
-            echo "- Workflow: ${{ github.workflow }}"
-            echo "- Run ID: ${{ github.run_id }}"
-            echo "- Commit: ${{ github.sha }}"
-            echo "- Ref: ${{ github.ref }}"
-            echo "- Event: ${{ github.event_name }}"
-            echo ""
-            echo "## Observation"
-            echo "- This job represents execution evidence."
-            echo "- Replace placeholder with real build/tests later."
-            echo ""
-            echo "## Next"
-            echo "- Add real commands and put their outputs under artifacts/."
-            echo "- CI is an evidence generator, not a quality gate."
-          } > artifacts/ci_summary_tests.md
+            core.notice(`Li+ Observation: issue_ref_present=${present}, detected_issue_ref=${detected}`);
 
-      - name: Upload artifacts (tests)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: li-ci-artifacts-tests
-          path: artifacts/
-          if-no-files-found: warn
-
-      - name: Post CI summaries to PR comment
-        if: ${{ github.event_name == 'pull_request' && always() }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          pr="${{ github.event.pull_request.number }}"
-          body="$(cat artifacts/ci_summary_gate.md 2>/dev/null; echo; cat artifacts/ci_summary_tests.md 2>/dev/null)"
-          gh api -X POST "repos/${{ github.repository }}/issues/$pr/comments" \
-            -f body="$body"
+            // Step Summaryに出す（バッククォート不使用）
+            await core.summary
+              .addHeading("Li+ CI Observation")
+              .addList([
+                "Event: " + event,
+                "Issue reference present: " + present,
+                "Detected reference: " + detected
+              ])
+              .addHeading("Notes", 2)
+              .addList([
+                "This workflow is observation-only.",
+                "No enforcement or failure is performed.",
+                "Results are recorded as evidence only."
+              ])
+              .write();

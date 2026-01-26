@@ -204,10 +204,9 @@ Pull request titles are machine-facing summaries.
 - ASCII only
 - English
 - Describe the change independently of context
-- Must include the corresponding issue number or numbers at the end
 
 The title must remain meaningful
-even if issue references are removed.
+without relying on issue references.
 
 ---
 
