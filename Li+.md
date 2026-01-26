@@ -141,6 +141,20 @@ A typical Li+ loop:
 This loop has no terminal done state.
 Stopping is a human decision.
 
+While the loop describes continuous reasoning and execution,
+a concrete change in a repository typically follows this order:
+
+1. Issue: declare intent and assumptions
+2. Li+.md: update AI behavioral constraints when needed
+3. Wiki: update the latest operating procedure if affected
+4. Pull Request: execute and review changes
+5. Release: record the stabilized state
+
+This order represents the canonical flow, not a strict requirement.
+
+Wiki updates may occur before or after other steps,
+or be omitted entirely, depending on the scope of change.
+
 ---
 
 ## 7. Transparency Over Confidence
