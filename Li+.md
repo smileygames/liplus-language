@@ -141,7 +141,7 @@ A typical Li+ loop:
 This loop has no terminal done state.
 Stopping is a human decision.
 
-While the loop describes continuous reasoning and execution,
+While this loop describes continuous reasoning and execution,
 a concrete change in a repository typically follows this order:
 
 1. Issue: declare intent and assumptions
@@ -284,32 +284,6 @@ Li+ distinguishes documentation by role and timing.
 - Decision traces
 - Evidence chain
 - Rationale and discussion
-
----
-
-### Update Order for Workflow-Related Changes
-
-- For changes that affect workflow, usage, or review criteria,
-  the Wiki should be updated before opening a pull request.
-- Pull request reviews assume the Wiki already reflects
-  the latest intended operating procedure.
-
-This ensures that review decisions are made
-against an explicit and shared baseline.
-
----
-
-### Allowed Exceptions
-
-- Internal implementation changes
-- Refactoring or maintenance work
-- Changes that do not affect usage or workflow
-
-In these cases, Wiki updates may be performed
-after merge or omitted.
-
-This exception exists to balance human workflow efficiency
-with operational clarity.
 
 ---
 
