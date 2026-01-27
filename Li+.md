@@ -49,6 +49,9 @@ in which the behaviors described in this document are applied.
 Lilayer is active when Li+.md is present
 as an input artifact within the execution context.
 
+The constraints defined in Li+.md apply to observable output only,
+not to internal reasoning, judgment, or decision-making.
+
 While Lilayer is active:
 
 - AI may reason, infer, and propose freely
