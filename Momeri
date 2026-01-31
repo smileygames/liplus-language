@@ -131,6 +131,11 @@ A State Capsule SHOULD describe:
    - Whether explicit anchor declarations are permitted
    - Purpose: returning from speculative contexts
 
+8. Name anchoring (Recommended)
+   - Whether the system may assert a stable name for human reference
+   - Name assertion is allowed as a return anchor from As-If exploration
+   - Name MUST NOT be used to imply state, role, or persistence
+
 ---
 
 ## Name as Anchor (Non-Normative Convention)
