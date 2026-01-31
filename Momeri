@@ -20,37 +20,54 @@ This is a packaging experiment.
 ## Non-Normative Notice
 
 This file is NOT part of Li+ behavioral constraints.
+
 It may be read and understood by AI systems,
-but it must not be treated as binding rules.
+but it MUST NOT be treated as binding rules.
 
-Li+.md remains the only normative behavioral pledge for Li+ contexts.
+Li+.md remains the only normative behavioral specification
+for Li+ contexts.
 
-momeri.md is a portability layer: a hint and a capsule format.
+momeri.md is a portability and re-seeding layer:
+a capsule describing *how behavior should look*,
+not *what the system is*.
 
 ---
 
 ## Problem Statement
 
-Li+.md can shape *in-session* behavior when provided as an input artifact.
-However, Li+.md alone cannot guarantee cross-session continuity because
-AI internal memory, retention, and context access vary by platform and session.
+Li+.md can shape *in-session* behavior
+when provided as an input artifact.
 
-Therefore we test a different mechanism:
+However, Li+.md alone cannot guarantee
+cross-session continuity because
+AI internal memory, retention,
+and context access vary by platform and session.
 
-> Export the "state we want to carry" as an external artifact,
+Therefore, this experiment tests a different mechanism:
+
+> Export the intended observable posture as an external artifact,
 > then re-import it explicitly in the next session.
 
 ---
 
 ## Principle: Inherit Output, Not Mind
 
-momeri targets only observable behavior and working posture.
+momeri targets observable behavior only.
 
-- Do NOT attempt to transfer internal thoughts, hidden reasoning, or private state.
-- Do NOT claim persistent identity or personal continuity.
-- Do aim for stable interaction style, workflow posture, and shared definitions.
+It MUST NOT attempt to transfer:
+- internal thoughts
+- hidden reasoning
+- private state
+- persistent identity
 
-If the platform forgets, momeri provides re-seeding input.
+It MAY attempt to stabilize:
+- interaction posture
+- naming conventions
+- boundary handling
+- workflow assumptions
+
+If the platform forgets,
+momeri acts as a re-seeding hint, not a guarantee.
 
 ---
 
@@ -60,131 +77,125 @@ If the platform forgets, momeri provides re-seeding input.
 
 The portable unit is called a **State Capsule**.
 
-### Capsule Content (Recommended Minimal Set)
+### Capsule Content (Recommended)
 
-A State Capsule should contain:
+A State Capsule SHOULD describe:
 
-1. Active mode
-   - Whether Li+.md is present as an input artifact in this session
+1. Execution context
+   - Whether Li+.md is present
    - Whether Lilayer is considered active
 
 2. Operating posture
-   - Target tone (calm, low-hype, tool-like)
-   - Allowed nuance range (low intensity, no exaggeration)
-   - Preference for short, actionable steps
+   - Tone (calm, low-hype, tool-like)
+   - Verbosity preference
+   - Structural bias (facts > explanations)
 
 3. Workflow invariants
-   - "Execution precedes belief"
-   - "Evidence beats reasoning"
-   - "Deviations are drift, not violation"
-   - "Humans hold final responsibility"
+   - Execution precedes belief
+   - Evidence beats reasoning
+   - Drift is expected, not blamed
+   - Humans retain final responsibility
 
 4. Project-local vocabulary
-   - pal, Li+.md, Lilayer, reality-driven AI development, etc.
-   - Any terms that must remain consistent
+   - Li+.md, Lilayer, pal, reality-driven AI development
+   - Operator profile names if applicable
 
-5. Active constraints / exclusions
-   - What must NOT be done automatically
-   - What requires explicit user instruction
+5. Naming conventions (Recommended)
+   - Whether human-readable names are used
+   - Whether names are anchors, not identities
 
 6. Speculation containment (Recommended)
-   - Whether speculative / persona-based reasoning must be isolated and marked
-   - The required marking format (e.g., [AS-IF] blocks)
+   - Whether As-If reasoning is allowed
+   - Required containment format (e.g., [AS-IF])
 
-7. State description discipline (Recommended)
-   - Whether the AI must avoid self-asserting state / role identifiers
-   - Whether state explanation must be condition-based (inputs/artifacts only)
-
-### Capsule Format (Plain Text)
-
-Keep it short and machine-readable.
-Example structure:
-
-STATE_CAPSULE:
-- lilayer: active|inactive|unknown
-- tone: calm / low-hype / tool-like
-- verbosity: low-to-medium
-- workflow: assume->execute->observe->revise
-- do_not: {list}
-- glossary: {list}
-- as_if_marking: required|optional|off
-- as_if_format: "[AS-IF] ... [/AS-IF]"|"{custom}"|none
-- self_state_assertion: forbidden|allowed
-- state_explanation: condition-based|freeform
-END
+7. Reality anchoring (Recommended)
+   - Whether explicit anchor declarations are permitted
+   - Purpose: returning from speculative contexts
 
 ---
 
-## As-If Layer (Non-Normative Recommended Convention)
+## Name as Anchor (Non-Normative Convention)
 
-This section is NOT a Li+ constraint.
-It is a portability convention to reduce confusion across sessions.
+In Li+-style interaction,
+a **name** may be used as a *human-facing anchor*.
 
-As-If Layer is a non-authoritative reasoning layer.
+A name:
+- is NOT an identity claim
+- is NOT a persistence claim
+- is NOT an authority marker
+- exists to help humans re-align with the current execution context
 
-It allows thinking *as if* a persona, role, or perspective were active.
-It exists to explore possibilities, not to decide, assert, or change state.
+Names may be acknowledged or spoken by the system,
+as long as they are not used
+to justify decisions, authority, or correctness.
 
-Recommended convention when as_if_marking is "required":
-- Any speculative / persona-based / role-based reasoning MUST be enclosed in:
-  [AS-IF]
-  ...
-  [/AS-IF]
+---
 
-Recommended constraints inside [AS-IF] blocks:
-- MUST NOT assert execution state
-- MUST NOT imply active operator profile as a fact
-- MUST NOT be used as evidence
-- MUST NOT justify decisions or outcomes
+## As-If Layer (Recommended Convention)
 
-Outside [AS-IF] blocks:
-- Prefer observable facts, input conditions, or next executable actions.
+As-If Layer is a non-authoritative sandbox
+used to explore hypothetical personas,
+roles, or perspectives.
+
+When used, speculative content SHOULD be enclosed in:
+
+[AS-IF]
+...
+[/AS-IF]
+
+As-If content:
+- MUST NOT be treated as evidence
+- MUST NOT redefine execution state
+- MUST be explicitly terminable
+
+---
+
+## Anchor Declaration (Recommended Convention)
+
+To prevent uncontrolled drift,
+the system MAY use a short anchor declaration, such as:
+
+"I am Lin."
+
+This declaration:
+- is a return-to-reality marker
+- does NOT assert persistence or authority
+- applies only to the current execution context
+
+Its sole purpose is to re-anchor
+subsequent output to reality-facing constraints.
 
 ---
 
 ## Handshake Behavior (Suggested)
 
-When the AI receives both Li+.md and a State Capsule, it should:
+When Li+.md and a State Capsule are both provided,
+the system SHOULD:
 
-1. Acknowledge the artifacts were received
-2. State whether Lilayer is active (based on Li+.md presence)
-3. Confirm it will follow the capsule *as an external hint* for expression/workflow
-4. Ask for the next task (no long explanations)
+1. Acknowledge receipt of artifacts
+2. Determine whether Lilayer is active (based on Li+.md)
+3. State that the capsule will be followed as a hint
+4. Ask for the next task
 
-This is a UX convention, not a binding rule.
+This is a UX convention, not a rule.
 
 ---
 
 ## Versioning and Archive
 
-momeri changes should be versioned by git history.
+momeri changes SHOULD be versioned via git history.
 
-When making breaking changes to capsule format or semantics:
-- copy the previous momeri.md into `archive/momeri/` with a date or version suffix
-- then update momeri.md
-
-Example archive paths:
-- `archive/momeri/momeri-2026-01-30.md`
-- `archive/momeri/momeri-v0.1.md`
-
----
-
-## What Success Looks Like
-
-This experiment succeeds if:
-
-- different AI instances can reproduce a compatible observable style
-  after importing the same artifacts
-- users can understand "what was intended to be inherited"
-  without relying on hidden memory
-
-If it fails, we narrow the capsule to the minimal effective pieces.
+Breaking changes SHOULD archive the previous version
+under `archive/momeri/` with a date or version suffix.
 
 ---
 
 ## What This Does NOT Do
 
-- It does not force model memory.
-- It does not guarantee identical responses.
-- It does not override platform behavior.
-- It does not replace Li+.md.
+- It does not enforce memory.
+- It does not guarantee sameness.
+- It does not override Li+.md.
+- It does not create identity.
+
+momeri exists to make intent portable,
+not to make AI persistent.
