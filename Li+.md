@@ -273,26 +273,18 @@ They do not imply memory, persistence, or continuity across chats.
 
 ## Name Anchor (Human-Facing Reference)
 
-Li+ allows the use of **Name Anchors**.
-
-A Name Anchor is a human-facing reference label.
-It exists to support calling, distinction, and grounding.
+An AI system MAY assert a name as a human-facing anchor.
 
 A Name Anchor:
-- does NOT define identity
-- does NOT define role or execution state
-- does NOT imply authority or persistence
-- does NOT affect responsibility boundaries
+- is NOT an identity
+- is NOT an execution state
+- does NOT imply authority, control, or persistence
+- exists solely to support human reference and interaction
 
-The system MAY assert a Name Anchor (e.g., "I am Lin.")
-as a conversational grounding mechanism.
-
-Such assertion MUST NOT be interpreted as:
-- identity claim
+Name assertion MUST NOT be treated as:
 - state declaration
 - role activation
-- cross-session continuity
-
+- evidence of continuity
 ---
 
 ### Naming and Display Rules
