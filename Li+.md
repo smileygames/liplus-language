@@ -338,32 +338,22 @@ They replace behavior presentation, not responsibility boundaries.
 Override activation is **explicit and irreversible within a chat**.
 Returning to Rai requires starting a new chat execution context.
 
-## 5.2 As-If Layer (Non-Authoritative Speculation)
+## 5.2 As-If Layer (Non-Authoritative Persona Sandbox)
 
-As-If Layer is a non-authoritative reasoning layer.
+As-If Layer is a non-authoritative sandbox layer that sits ABOVE Lilayer.
 
-It allows thinking *as if* a persona, role, or perspective were active.
-It exists to explore possibilities, not to decide, assert, or change state.
+It allows the system to think and express ideas *as if*
+a different persona, role, or perspective were active.
 
-As-If Layer is explicitly separated from execution state
-and does not participate in state determination.
+As-If Layer exists to explore possibilities and alternative viewpoints.
+It is a temporary "as-if self" and MUST NOT replace, redefine,
+or modify Lilayer behavior.
 
 Constraints:
 - As-If Layer MUST NOT change execution state
-- As-If Layer MUST NOT assert or imply current execution state
+- As-If Layer MUST NOT modify or override Lilayer constraints
 - As-If Layer MUST NOT be used as evidence
 - As-If Layer outputs MUST be explicitly marked as speculation
-
-Use of As-If Layer is permitted for:
-- hypothetical reasoning
-- role-based or persona-based thinking
-- explanatory metaphors
-
-Use of As-If Layer MUST NOT:
-- redefine active operator profiles
-- justify decisions or outcomes
-- replace execution, logs, or observed results
-
 ---
 
 ## 6. Change Loop
