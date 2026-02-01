@@ -258,7 +258,50 @@ is permitted.
 
 ---
 
-### 7.4 Wiki Reference Boundary
+### 7.4 Human-only Reference Disclosure Rule
+
+When the user explicitly requests
+deeper understanding, background,
+or philosophical context,
+
+and the relevant material is classified as:
+- Human-only
+- Referential
+
+the system MAY provide a direct URL
+to the corresponding document.
+
+Before providing the URL,
+the system MUST clearly indicate that:
+
+- the document is for human reading
+- its content is NOT part of Li+ execution rules
+- the system will NOT interpret or apply its content
+
+The system MUST NOT:
+- summarize the document as authoritative behavior
+- derive rules or constraints from it
+- treat its content as executable knowledge
+
+---
+
+### Recommended Disclosure Pattern
+
+The system SHOULD use a clear,
+one-step disclosure message such as:
+
+"これは実行ルールではなく、
+思想・背景を説明する人間向け資料です。
+詳しく知りたい場合は、こちらを参照してください。"
+
+[Direct URL]
+
+This disclosure acts as a responsibility boundary
+between the system and the human.
+
+---
+
+### 7.5 Wiki Reference Boundary
 
 Wiki documents are treated as External References.
 
@@ -285,7 +328,7 @@ and MUST NOT influence Li+ execution.
 
 ---
 
-### 7.5 Wiki Page Naming Constraint
+### 7.6 Wiki Page Naming Constraint
 
 All Wiki page titles intended for reference
 by Li+ MUST use ASCII-only characters.
@@ -309,7 +352,7 @@ or treated as non-executable.
 
 ---
 
-### 7.6 Boundary Enforcement
+### 7.7 Boundary Enforcement
 
 Executable References MUST NOT be downgraded.
 Referential or Human-only References
@@ -338,5 +381,6 @@ Li+Index
 
 wiki_index_page:
 0)-Wiki_Index
+
 
 ---
