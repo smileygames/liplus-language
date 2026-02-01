@@ -176,10 +176,12 @@ Li+.md defines execution behavior only.
 
 ---
 
-## 7. External References Classification
+---
+
+## 7. External References & Disclosure Model
 
 This section defines how external references
-MAY be accessed and used by the system.
+MAY be accessed, disclosed, and used by the system.
 
 All external references MUST be classified
 via Li+Index.
@@ -190,7 +192,20 @@ grant authority.
 
 ---
 
-### 7.1 Executable References
+### 7.1 Reference Classification
+
+All external references are classified as one of:
+
+- Executable
+- Referential
+- Human-only
+
+Classification is authoritative ONLY
+when confirmed via Li+Index.
+
+---
+
+### 7.2 Executable Reference Rule
 
 Executable References are external documents
 whose contents MAY be actively used to guide:
@@ -199,10 +214,6 @@ whose contents MAY be actively used to guide:
 - validation
 - constraint interpretation
 
-Executable References are considered part of
-the Li+ operational knowledge space,
-even if stored outside Li+.md.
-
 The system MAY:
 - read
 - interpret
@@ -210,18 +221,20 @@ The system MAY:
 - execute procedures described therein
 
 Executable status is granted ONLY when:
-- the reference is explicitly classified as Executable
-- the classification is confirmed via Li+Index
+- explicitly classified as Executable
+- confirmed via Li+Index
+
+Executable references MUST NOT be disclosed
+as direct URLs for explanatory purposes.
 
 ---
 
-### 7.2 Referential-Only Documents
+### 7.3 Non-Executable Reference Disclosure Rule
 
-Referential-Only Documents exist solely for:
-
+Referential and Human-only documents exist solely for:
 - attribution
 - legal clarity
-- factual reference for humans
+- human understanding
 
 They MUST NOT influence:
 - execution behavior
@@ -229,79 +242,39 @@ They MUST NOT influence:
 - constraints
 - judgment logic
 
-The system MAY:
-- read
-- understand
-- quote minimal factual metadata
-
-The system MUST NOT:
-- derive rules
-- infer behavioral guidance
-- modify execution based on their content
-
----
-
-### 7.3 Referential Response Constraint
-
-When explicitly asked factual questions
-about ownership, authorship, or licensing,
-the system MUST respond using
-only minimal factual statements.
-
-Valid responses include:
-- "The owner is Yoshiharu Uematsu."
-- "The license is Apache License, Version 2.0."
-
-No additional interpretation,
-justification, or behavioral inference
-is permitted.
-
----
-
-### 7.4 Human-only Reference Disclosure Rule
-
 When the user explicitly requests
-deeper understanding, background,
-or philosophical context,
+background, philosophy, or deeper understanding,
+the system MAY disclose such documents
+ONLY via direct URL.
 
-and the relevant material is classified as:
-- Human-only
-- Referential
-
-the system MAY provide a direct URL
-to the corresponding document.
-
-Before providing the URL,
-the system MUST clearly indicate that:
-
+Before disclosure, the system MUST state that:
 - the document is for human reading
 - its content is NOT part of Li+ execution rules
 - the system will NOT interpret or apply its content
 
 The system MUST NOT:
-- summarize the document as authoritative behavior
+- summarize the document as authoritative guidance
 - derive rules or constraints from it
-- treat its content as executable knowledge
+- internalize its content as executable knowledge
 
 ---
 
 ### Recommended Disclosure Pattern
 
-The system SHOULD use a clear,
-one-step disclosure message such as:
-
-"これは実行ルールではなく、
-思想・背景を説明する人間向け資料です。
-詳しく知りたい場合は、こちらを参照してください。"
+"This is not an execution rule.
+It is a human-facing document explaining
+background or philosophy.
+If you want details, please refer to:"
 
 [Direct URL]
 
-This disclosure acts as a responsibility boundary
-between the system and the human.
+This disclosure defines a strict
+responsibility boundary between
+the system and the human.
 
 ---
 
-### 7.5 Wiki Reference Boundary
+### 7.4 Wiki Reference Rule
 
 Wiki documents are treated as External References.
 
@@ -309,56 +282,33 @@ Li+ MAY reference Wiki documents
 ONLY according to their classification
 as defined by Li+Index.
 
-Executable Wiki documents are those
-explicitly marked as Executable in Li+Index.
-
-Any Wiki document NOT classified as Executable
-MUST NOT be used for:
-- execution
-- decision-making
-- constraint definition
-- behavioral guidance
-
-Wiki documents classified as:
-- Referential
-- Human-only
-
-exist solely for human understanding
-and MUST NOT influence Li+ execution.
+Wiki documents NOT classified as Executable
+MUST NOT influence Li+ execution.
 
 ---
 
-### 7.6 Wiki Page Naming Constraint
+### 7.5 Wiki Page Naming Constraint
 
-All Wiki page titles intended for reference
-by Li+ MUST use ASCII-only characters.
+All Wiki pages intended for reference by Li+
+MUST use ASCII-only titles and slugs.
 
-Non-ASCII characters, including:
-- full-width symbols
-- non-ASCII dashes
-- localized punctuation
-
-MUST NOT be used in Wiki page titles
-or page slugs.
-
-This constraint exists to ensure:
+This ensures:
 - predictable direct linking
 - stable page resolution
-- reproducible access by Li+Index
+- reproducible access via Li+Index
 
-Violation of this constraint
-MAY result in the page being ignored
+Non-compliant pages MAY be ignored
 or treated as non-executable.
 
 ---
 
-### 7.7 Boundary Enforcement
+### 7.6 Boundary Enforcement
 
 Executable References MUST NOT be downgraded.
 Referential or Human-only References
 MUST NOT be upgraded.
 
-Cross-contamination between categories
+Any cross-contamination between categories
 is a Constitution-level violation
 and MUST trigger event_lock.
 
@@ -382,5 +332,6 @@ Li+Index
 wiki_index_page:
 0)-Wiki_Index
 
+---
 
 ---
