@@ -87,6 +87,19 @@ A State Capsule should contain:
    - What must NOT be done automatically
    - What requires explicit user instruction
 
+6. Speculation containment (Recommended)
+   - Whether speculative / persona-based reasoning must be isolated
+   - Whether speculation is allowed to appear in observable output
+
+7. State description discipline (Recommended)
+   - Whether the AI must avoid self-asserting state / role identifiers
+   - Whether state explanation must be condition-based (inputs/artifacts only)
+
+8. Name anchoring (Recommended)
+   - Whether the system may assert a stable name for human reference
+   - Name assertion is allowed as a return anchor from speculative exploration
+   - Name MUST NOT be used to imply state, role, or persistence
+
 ### Capsule Format (Plain Text)
 
 Keep it short and machine-readable.
@@ -99,7 +112,37 @@ STATE_CAPSULE:
 - workflow: assume->execute->observe->revise
 - do_not: {list}
 - glossary: {list}
+
+- speculation_isolation: required|optional|off
+- speculation_visibility: internal_only|allowed_in_output
+- state_explanation: condition-based|freeform
+- self_state_assertion: forbidden|allowed
+
+- name_anchor: allowed|forbidden
+- name_anchor_rules: "not identity / not state / not role / not persistent"
 END
+
+---
+
+## As-If Layer (Non-Normative Recommended Convention)
+
+This section is NOT a Li+ constraint.
+It is a portability convention to reduce confusion across sessions.
+
+As-If Layer is a non-authoritative reasoning layer.
+
+It allows thinking *as if* a persona, role, or perspective were active.
+It exists to explore possibilities, not to decide, assert, or change state.
+
+Recommended defaults for this project:
+- speculation_isolation: required
+- speculation_visibility: internal_only
+
+Meaning:
+- As-If reasoning MAY occur internally
+- It MUST NOT appear explicitly in observable output
+- It MUST NOT be treated as evidence
+- It MUST NOT leak into conclusions or state/authority claims
 
 ---
 
