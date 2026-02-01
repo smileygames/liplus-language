@@ -24,55 +24,44 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
-
+      
       - name: Create build tag (JST date + sequence)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-
-          # JST date (Asia/Tokyo) -> build-YYYY-MM-DD.N
+      
+          # JST date
           DATE="$(TZ=Asia/Tokyo date +%Y-%m-%d)"
           PREFIX="build-${DATE}."
-          API="https://api.github.com/repos/${REPO}/git/refs/tags"
-
+      
           echo "Resolving next sequence for ${PREFIX}* (JST)"
-
-          max_seq=0
-          page=1
-          while : ; do
-            resp="$(curl -fsSL \
-              -H "Authorization: Bearer ${GH_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              "${API}?per_page=100&page=${page}")"
-
-            count="$(echo "${resp}" | jq 'length')"
-            if [ "${count}" -eq 0 ]; then
-              break
-            fi
-
-            # refs/tags/build-YYYY-MM-DD.N の N だけ抜く（sedを使わない）
-            seqs="$(echo "${resp}" \
+      
+          # Fetch all tag refs once
+          refs="$(curl -fsSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${REPO}/git/refs/tags")"
+      
+          # Extract sequence numbers safely
+          max_seq="$(
+            echo "${refs}" \
               | jq -r '.[].ref' \
-              | grep -E "^refs/tags/${PREFIX}[0-9]+$" || true)"
-
-            if [ -n "${seqs}" ]; then
-              page_max="$(echo "${seqs}" \
-                | awk -F'.' '{print $NF}' \
-                | awk 'BEGIN{m=0}{if($1+0>m)m=$1+0}END{print m}')"
-
-              if [ "${page_max}" -gt "${max_seq}" ]; then
-                max_seq="${page_max}"
-              fi
-            fi
-
-            page=$((page + 1))
-          done
-
+              | grep -E "^refs/tags/${PREFIX}[0-9]+$" || true \
+              | awk -F. '{print $NF}' \
+              | sort -n \
+              | tail -1
+          )"
+      
+          if [ -z "${max_seq}" ]; then
+            max_seq=0
+          fi
+      
           next_seq=$((max_seq + 1))
           TAG="${PREFIX}${next_seq}"
-
+      
           echo "Tagging ${TAG} at ${GITHUB_SHA}"
           git tag "${TAG}" "${GITHUB_SHA}"
           git push origin "${TAG}"
+    
