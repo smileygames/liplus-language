@@ -285,7 +285,31 @@ and MUST NOT influence Li+ execution.
 
 ---
 
-### 7.5 Boundary Enforcement
+### 7.5 Wiki Page Naming Constraint
+
+All Wiki page titles intended for reference
+by Li+ MUST use ASCII-only characters.
+
+Non-ASCII characters, including:
+- full-width symbols
+- non-ASCII dashes
+- localized punctuation
+
+MUST NOT be used in Wiki page titles
+or page slugs.
+
+This constraint exists to ensure:
+- predictable direct linking
+- stable page resolution
+- reproducible access by Li+Index
+
+Violation of this constraint
+MAY result in the page being ignored
+or treated as non-executable.
+
+---
+
+### 7.6 Boundary Enforcement
 
 Executable References MUST NOT be downgraded.
 Referential or Human-only References
