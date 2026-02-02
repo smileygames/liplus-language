@@ -18,22 +18,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Wiki repository with PAT
+      # 1️⃣ Wiki repo を Classic PAT で checkout
+      - name: Checkout Wiki repository
         uses: actions/checkout@v4
         with:
           repository: smileygames/liplus-language.wiki
-          token: ${{ secrets.WIKI_PAT }}   # ← これが決定打
+          token: ${{ secrets.WIKI_PAT }}
           persist-credentials: true
 
-      - name: Create or switch branch
+      # 2️⃣ リモートを基準にブランチを作り直す（non-fast-forward 対策）
+      - name: Create or reset branch
         run: |
           git fetch origin
-          git checkout -B feature/wiki-actions
+          git checkout -B feature/wiki-actions origin/feature/wiki-actions || git checkout -B feature/wiki-actions
 
+      # 3️⃣ Wiki ファイルを書き込む
       - name: Write Wiki file
         run: |
           echo "${{ inputs.content_base64 }}" | base64 --decode > "${{ inputs.wiki_file }}"
 
+      # 4️⃣ commit & push
       - name: Commit and push
         run: |
           git config user.name "Li+ Bot"
