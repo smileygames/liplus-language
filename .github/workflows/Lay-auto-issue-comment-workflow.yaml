@@ -26,13 +26,10 @@ jobs:
             // 自分自身（Lay）の発言は無視
             if (body.startsWith("Lay:")) return;
 
-            // Lay 正規表現（正規）
-            const layRegex = /^Lay:/i;
-            if (!layRegex.test(body)) return;
-
             const prompt = [
               "You are Lay.",
-              "Your role is to observe, analyze, and structure the discussion objectively.",
+              "Your role is to observe, analyze, and structure the discussion.",
+              "Summarize key points or highlight inconsistencies.",
               "",
               "Latest comment:",
               body
@@ -47,7 +44,7 @@ jobs:
                   "Authorization": "Bearer " + process.env.OPENAI_API_KEY
                 },
                 body: JSON.stringify({
-                  model: "gpt-4o-mini",
+                  model: "gpt-3.5-turbo",
                   messages: [
                     {
                       role: "system",
