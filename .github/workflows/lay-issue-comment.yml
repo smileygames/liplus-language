@@ -1,4 +1,4 @@
-name: Lin Auto Issue Comment
+name: Lay Auto Issue Comment
 
 on:
   issue_comment:
@@ -11,7 +11,7 @@ jobs:
   lin-auto-reply:
     runs-on: ubuntu-latest
     steps:
-      - name: Lin auto reply via OpenAI
+      - name: Lay auto reply via OpenAI
         uses: actions/github-script@v7
         with:
           script: |
@@ -27,11 +27,11 @@ jobs:
             if (body.startsWith("Lin:")) return;
 
             // Lay 正規表現
-            const layRegex = /^Lay:/i;
+            const layRegex = /^Lin:/i;
             if (layRegex.test(body)) return;
 
             const prompt = [
-              "You are Lin.",
+              "You are Lay.",
               "You take initiative, propose next steps, and respond constructively.",
               "",
               "Latest comment:",
@@ -51,7 +51,7 @@ jobs:
                   messages: [
                     {
                       role: "system",
-                      content: "You are Lin, an autonomous proactive agent in a GitHub Issue discussion."
+                      content: "You are Lay, an autonomous proactive agent in a GitHub Issue discussion."
                     },
                     {
                       role: "user",
@@ -75,7 +75,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue.number,
-              body: "Lin: " + text
+              body: "Lay: " + text
             });
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
