@@ -18,7 +18,7 @@ on:
 
 jobs:
   wiki-write:
-    # Issue #94 のみを対象にする
+    # Issue #94 が open のときだけ or 手動実行
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event.issue.number == 94 && github.event.issue.state == 'open')
@@ -30,26 +30,26 @@ jobs:
         run: |
           echo "BRANCH_NAME=feature/wiki-actions" >> $GITHUB_ENV
 
-      # Wiki repo を checkout
+      # Wiki repo を checkout（認証情報を残さないのが超重要）
       - name: Checkout Wiki repository
         uses: actions/checkout@v4
         with:
           repository: smileygames/liplus-language.wiki
-          token: ${{ secrets.WIKI_PAT }}
+          persist-credentials: false
 
-      # サブブランチ作成（既にあればそのまま）
+      # サブブランチ作成（なければ作る）
       - name: Create or switch branch
         run: |
           git fetch origin
           git checkout -B $BRANCH_NAME
 
-      # Wiki ファイル書き込み
+      # Wiki ファイルを書き込む（手動実行時のみ）
       - name: Write Wiki file
         if: github.event_name == 'workflow_dispatch'
         run: |
           echo "${{ inputs.content_base64 }}" | base64 --decode > "${{ inputs.wiki_file }}"
 
-      # commit & push
+      # commit & push（PAT を明示的に使う）
       - name: Commit and push
         if: github.event_name == 'workflow_dispatch'
         run: |
@@ -58,4 +58,6 @@ jobs:
 
           git add .
           git commit -m "[Li+ Wiki Write] ${{ inputs.commit_message }}" || echo "No changes to commit"
+
+          git remote set-url origin https://x-access-token:${{ secrets.WIKI_PAT }}@github.com/smileygames/liplus-language.wiki.git
           git push origin $BRANCH_NAME
