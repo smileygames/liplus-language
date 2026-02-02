@@ -8,7 +8,7 @@ permissions:
   issues: write
 
 jobs:
-  lin-auto-reply:
+  lay-auto-reply:
     runs-on: ubuntu-latest
     steps:
       - name: Lay auto reply via OpenAI
@@ -23,16 +23,16 @@ jobs:
 
             const body = comment.body || "";
 
-            // 自分自身（Lin）の発言は無視
+            // 自分自身（Lay）の発言は無視
             if (body.startsWith("Lay:")) return;
 
-            // Lay 正規表現
-            const layRegex = /^Lin:/i;
-            if (layRegex.test(body)) return;
+            // Lay 正規表現（正規）
+            const layRegex = /^Lay:/i;
+            if (!layRegex.test(body)) return;
 
             const prompt = [
               "You are Lay.",
-              "You take initiative, propose next steps, and respond constructively.",
+              "Your role is to observe, analyze, and structure the discussion objectively.",
               "",
               "Latest comment:",
               body
@@ -51,7 +51,7 @@ jobs:
                   messages: [
                     {
                       role: "system",
-                      content: "You are Lay, an autonomous proactive agent in a GitHub Issue discussion."
+                      content: "You are Lay, an autonomous analytical observer in a GitHub Issue discussion."
                     },
                     {
                       role: "user",
@@ -75,7 +75,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue.number,
-              body: "Lin: " + text
+              body: "Lay: " + text
             });
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
