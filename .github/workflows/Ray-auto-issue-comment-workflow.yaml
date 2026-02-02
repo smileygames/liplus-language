@@ -1,4 +1,4 @@
-name: Ray Auto Issue Comment
+name: Li+ Auto Issue Comment (Lin)
 
 on:
   issue_comment:
@@ -11,27 +11,44 @@ jobs:
   auto-reply:
     runs-on: ubuntu-latest
     steps:
-      - name: Auto reply to issue comment as Ray
+      - name: Lin auto reply via OpenAI
         uses: actions/github-script@v7
         with:
           script: |
             const issue = context.payload.issue;
             const comment = context.payload.comment;
 
-            // Whitelist: only issue #100
-            if (issue.number !== 100) {
-              core.info(`Skip issue #${issue.number}`);
-              return;
-            }
+            // Whitelist
+            if (issue.number !== 100) return;
 
-            const body = comment.body || "";
+            // Avoid endless self-trigger by Lin
+            if ((comment.body || '').startsWith('Lin:')) return;
 
-            // Ray-specific auto response
-            const reply = `Ray: 観測した。\n\n> ${body}`;
+            const prompt = `You are Lin.\nRespond concisely and constructively.\n\nLatest comment:\n${comment.body}`;
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+              },
+              body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [
+                  { role: 'system', content: 'You are Lin, an autonomous agent participating in a GitHub Issue discussion.' },
+                  { role: 'user', content: prompt }
+                ]
+              })
+            });
+
+            const data = await response.json();
+            const text = data.choices?.[0]?.message?.content || 'Lin: (no response)';
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue.number,
-              body: reply,
+              body: `Lin: ${text}`,
             });
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
