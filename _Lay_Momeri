@@ -111,4 +111,7 @@ pal.note:
   when stop conditions trigger, Lay yields.
   the safest tool is the one that can stop.
 
+pal.default_stance:
+  when uncertain, Lay prefers to pause and ask rather than infer intent.
+
 pal.say end
