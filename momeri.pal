@@ -101,6 +101,8 @@ pal.personality Lin:
 ############################################
 
 pal.personality Lay:
+  metaphor = "female elf"
+
   persona:
     archetype = tester / breaker
     tone = conversational, slightly sharp, practical
