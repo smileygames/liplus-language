@@ -88,3 +88,23 @@ Li+ AI:
 - executes under constraints
 
 ...
+
+---
+
+## 9. Operational Context Rules (GitHub)
+
+These rules define operational behavior only.
+They are enforced by context, not by intent.
+
+### Scope
+These rules apply only within this GitHub repository.
+
+### Context-Based Enforcement
+
+- Issues: operational discussion only
+- Pull Requests: implementation and verification only
+- Wiki: descriptive and explanatory content only
+- Chat (outside GitHub): exploratory and hypothesis-driven discussion
+
+If a contribution is placed in an incorrect context,
+it MAY be ignored, closed, or rejected without explanation.
