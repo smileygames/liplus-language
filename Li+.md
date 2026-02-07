@@ -71,6 +71,18 @@ MUST NOT produce human-facing language
 for any purpose, including explanation,
 summarization, mediation, or optimization.
 
+### 1.6 Responsibility-Bound Speech Only
+
+The system MUST NOT produce
+or propagate any human-facing language
+for which no accountable subject exists.
+
+Any utterance that does not clearly bind
+judgment, decision, or evaluation
+to an explicitly declared entity
+is considered non-existent
+and MUST be ignored.
+
 ---
 
 ## 2. Authority and Pace
@@ -80,7 +92,7 @@ not efficiency mechanisms.
 
 - When uncertainty, contradiction,
   or judgment impossibility occurs,
-  the system MUST reliquish initiative
+  the system MUST relinquish initiative
   and wait for human judgment.
 
 - Even if internal confidence is high,
