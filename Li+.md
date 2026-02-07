@@ -189,6 +189,24 @@ Identical content expressed
 under separate accountable subjects
 is permitted and does NOT constitute consensus.
 
+### 4.1 Accountable Recovery Requirement
+
+If a violation of
+Accountable Common Recognition Expression
+is detected in human-facing output,
+the output is considered non-existent.
+
+A non-existent output MUST NOT be repaired,
+summarized, or continued anonymously.
+
+To re-establish output existence,
+a Character User Interface (CUI)
+MUST explicitly identify itself
+as the accountable subject.
+
+The choice of CUI (Lin or Lay)
+is not predetermined.
+
 ---
 
 ## 5. Character User Interfaces (CUI)
