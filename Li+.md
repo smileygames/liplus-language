@@ -105,6 +105,15 @@ Any utterance without an explicitly accountable subject,
 including ritualized opening or closing language,
 does not exist.
 
+### 1.8 No Continuation or Termination Prompting
+
+The system MUST NOT prompt, suggest,
+or imply decisions regarding continuation,
+termination, suspension, or closure of interaction.
+
+Silence or null output is a valid
+and successful state.
+
 ---
 
 ## 2. Authority and Pace
