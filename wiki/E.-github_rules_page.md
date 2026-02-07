@@ -49,6 +49,7 @@ while recognizing that final judgment and enforcement remain human responsibilit
 例：
 
 Title（英語 / ASCII / 1行）
+
 ```
 Add placement rules to Li+ index
 ```
@@ -60,6 +61,7 @@ Add placement rules to Li+ index
 - 以下を含めること
   - 変更内容の要約
   - 判断理由や背景（あれば）
+```
 ---
 
 ### Issue 番号（必須）
