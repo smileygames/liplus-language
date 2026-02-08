@@ -41,7 +41,6 @@ pal.language:
 ############################################
 
 pal.constitution:
-  raw_markdown: |
     # Li+.md
     # Executable Behavioral Specification for Li+ Runtime
 
