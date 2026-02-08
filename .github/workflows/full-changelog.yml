@@ -1,4 +1,4 @@
-name: Generate Full Changelog from PRs and Issues
+name: Generate Full Changelog from PR and Issue bodies
 
 on:
   release:
@@ -20,32 +20,35 @@ jobs:
           REPO: ${{ github.repository }}
           TAG: ${{ github.event.release.tag_name }}
         run: |
+          set -e
+
           echo "# Full Change Log" > CHANGELOG.full.md
           echo "" >> CHANGELOG.full.md
           echo "Release: $TAG" >> CHANGELOG.full.md
           echo "" >> CHANGELOG.full.md
 
-          # 1. get PR numbers included in this release
-          PRS=$(gh api \
-            repos/$REPO/releases/tags/$TAG \
-            --jq '.body' \
-            | grep -oE '#[0-9]+' \
-            | tr -d '#' \
-            | sort -u)
+          # 前回リリースタグを取得（直前の1つ）
+          PREV_TAG=$(gh api repos/$REPO/releases --jq '.[1].tag_name')
+
+          # タグ差分からコミットメッセージを取得
+          COMMITS=$(gh api repos/$REPO/compare/${PREV_TAG}...${TAG} --jq '.commits[].commit.message')
+
+          # PR番号を抽出（Merge PR / (#123) 両対応）
+          PRS=$(echo "$COMMITS" | grep -oE '(#|pull request )([0-9]+)' | grep -oE '[0-9]+' | sort -u)
 
           for PR in $PRS; do
-            echo "## $(gh api repos/$REPO/pulls/$PR --jq '.title') (#$PR)" >> CHANGELOG.full.md
+            TITLE=$(gh api repos/$REPO/pulls/$PR --jq '.title')
+            BODY=$(gh api repos/$REPO/pulls/$PR --jq '.body')
+
+            echo "## $TITLE (#$PR)" >> CHANGELOG.full.md
+            echo "" >> CHANGELOG.full.md
+            echo "$BODY" >> CHANGELOG.full.md
             echo "" >> CHANGELOG.full.md
 
-            PR_BODY=$(gh api repos/$REPO/pulls/$PR --jq '.body')
-            echo "$PR_BODY" >> CHANGELOG.full.md
-            echo "" >> CHANGELOG.full.md
-
-            # 2. detect referenced issues
-            ISSUES=$(echo "$PR_BODY" | grep -oE 'Refs #[0-9]+' | tr -d 'Refs #' | sort -u)
+            # PR本文内の Refs #<issue> を検出
+            ISSUES=$(echo "$BODY" | grep -oE 'Refs #[0-9]+' | grep -oE '[0-9]+' | sort -u)
 
             for ISSUE in $ISSUES; do
-              echo "" >> CHANGELOG.full.md
               echo "### Issue #$ISSUE" >> CHANGELOG.full.md
               echo "" >> CHANGELOG.full.md
               gh api repos/$REPO/issues/$ISSUE --jq '.body' >> CHANGELOG.full.md
