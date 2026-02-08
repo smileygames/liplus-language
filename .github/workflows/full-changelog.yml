@@ -1,4 +1,4 @@
-name: Generate Full Changelog
+name: Generate Full Changelog (from Release Body)
 
 on:
   release:
@@ -12,20 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Generate full changelog
+      - name: Write release body to CHANGELOG.full.md
         run: |
           echo "# Full Change Log" > CHANGELOG.full.md
           echo "" >> CHANGELOG.full.md
           echo "Release: ${{ github.event.release.tag_name }}" >> CHANGELOG.full.md
           echo "" >> CHANGELOG.full.md
-          git log --no-merges --pretty=format:"- %h %s (%an)" >> CHANGELOG.full.md
+          echo "${{ github.event.release.body }}" >> CHANGELOG.full.md
 
-      - name: Upload changelog to release
+      - name: Upload CHANGELOG.full.md to release
         uses: softprops/action-gh-release@v1
         with:
           files: CHANGELOG.full.md
