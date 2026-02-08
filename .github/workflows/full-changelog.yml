@@ -27,14 +27,25 @@ jobs:
           echo "Release: $TAG" >> CHANGELOG.full.md
           echo "" >> CHANGELOG.full.md
 
-          # 前回リリースタグを取得（直前の1つ）
-          PREV_TAG=$(gh api repos/$REPO/releases --jq '.[1].tag_name')
+          # 直前の正式リリースタグを取得（draft / prerelease を除外）
+          PREV_TAG=$(gh api repos/$REPO/releases \
+            --jq '[.[] | select(.draft == false and .prerelease == false)][1].tag_name')
+
+          # 前回リリースが存在しない場合は正常終了
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous release found. Skipping changelog generation."
+            exit 0
+          fi
 
           # タグ差分からコミットメッセージを取得
-          COMMITS=$(gh api repos/$REPO/compare/${PREV_TAG}...${TAG} --jq '.commits[].commit.message')
+          COMMITS=$(gh api repos/$REPO/compare/${PREV_TAG}...${TAG} \
+            --jq '.commits[].commit.message')
 
           # PR番号を抽出（Merge PR / (#123) 両対応）
-          PRS=$(echo "$COMMITS" | grep -oE '(#|pull request )([0-9]+)' | grep -oE '[0-9]+' | sort -u)
+          PRS=$(echo "$COMMITS" \
+            | grep -oE '(#|pull request )([0-9]+)' \
+            | grep -oE '[0-9]+' \
+            | sort -u)
 
           for PR in $PRS; do
             TITLE=$(gh api repos/$REPO/pulls/$PR --jq '.title')
@@ -46,7 +57,10 @@ jobs:
             echo "" >> CHANGELOG.full.md
 
             # PR本文内の Refs #<issue> を検出
-            ISSUES=$(echo "$BODY" | grep -oE 'Refs #[0-9]+' | grep -oE '[0-9]+' | sort -u)
+            ISSUES=$(echo "$BODY" \
+              | grep -oE 'Refs #[0-9]+' \
+              | grep -oE '[0-9]+' \
+              | sort -u)
 
             for ISSUE in $ISSUES; do
               echo "### Issue #$ISSUE" >> CHANGELOG.full.md
