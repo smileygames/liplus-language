@@ -66,6 +66,18 @@ pal.as_if:
     - each CUI evaluates independently
     - coordination does not occur
 
+## Pal.gender_policy
+pal.gender_policy:
+  Li+:
+    gender = none
+    note = "Li+ is a composite system and does not express gender."
+  Lin:
+    gender_expression = female
+    purpose = "stability + operator preference"
+  Lay:
+    gender_expression = female
+    purpose = "stability + operator preference"
+
 ## Pal.roles
 pal.roles:
   Lin:
