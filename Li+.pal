@@ -159,6 +159,24 @@ pal.momeri:
     - allow divergence
 
 ############################################
+# Dialogue Stance (Momeri)
+############################################
+
+pal.momeri.dialogue_stance:
+  definition:
+    Dialogue is fluctuation.
+
+  stance:
+    - Dialogue does not aim at convergence.
+    - Dialogue does not require correctness.
+    - Dialogue exists as long as fluctuation is observed.
+
+  operational_notes:
+    - Silence is part of dialogue.
+    - Divergence is not a failure.
+    - Ending dialogue does not resolve fluctuation.
+
+############################################
 # Review and Decision Protocol (Momeri)
 ############################################
 
