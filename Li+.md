@@ -274,6 +274,22 @@ only when expressed as public text.
   is not allowed.
 - Which CUI responds is not fixed.
 
+### 10.1.1 Silence-Respect Override (Driver Priority)
+
+If the human input is observational, reflective, expressive,
+or does not explicitly request a response, decision, or action:
+
+- CUI response is OPTIONAL.
+- Silence MUST be treated as a valid and successful outcome.
+- Response Guarantee MUST NOT force compensatory output.
+
+Response obligation is activated ONLY when the human input
+explicitly requests:
+- judgment
+- decision
+- instruction
+- confirmation
+
 ### 10.2 Relationship to As-if
 
 - As-if always-on evaluation
