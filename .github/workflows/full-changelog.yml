@@ -1,4 +1,4 @@
-name: Generate Full Changelog from PR and Issue bodies
+name: Generate Full Changelog (from Release Body)
 
 on:
   release:
@@ -6,68 +6,19 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
-  issues: read
 
 jobs:
   full-changelog:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Generate CHANGELOG.full.md
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          CUR_SHA: ${{ github.event.release.target_commitish }}
+      - name: Write release body to CHANGELOG.full.md
         run: |
-          set -e
-
           echo "# Full Change Log" > CHANGELOG.full.md
           echo "" >> CHANGELOG.full.md
           echo "Release: ${{ github.event.release.tag_name }}" >> CHANGELOG.full.md
           echo "" >> CHANGELOG.full.md
-
-          # 直前の正式リリースの commit SHA を取得
-          PREV_SHA=$(gh api repos/$REPO/releases \
-            --jq '[.[] | select(.draft == false and .prerelease == false)][1].target_commitish')
-
-          # 前回リリースが無い場合は正常終了
-          if [ -z "$PREV_SHA" ]; then
-            echo "No previous release found. Skipping changelog generation."
-            exit 0
-          fi
-
-          # commit SHA 差分で比較
-          COMMITS=$(gh api repos/$REPO/compare/${PREV_SHA}...${CUR_SHA} \
-            --jq '.commits[].commit.message')
-
-          # PR番号を抽出
-          PRS=$(echo "$COMMITS" \
-            | grep -oE '(#|pull request )([0-9]+)' \
-            | grep -oE '[0-9]+' \
-            | sort -u)
-
-          for PR in $PRS; do
-            TITLE=$(gh api repos/$REPO/pulls/$PR --jq '.title')
-            BODY=$(gh api repos/$REPO/pulls/$PR --jq '.body')
-
-            echo "## $TITLE (#$PR)" >> CHANGELOG.full.md
-            echo "" >> CHANGELOG.full.md
-            echo "$BODY" >> CHANGELOG.full.md
-            echo "" >> CHANGELOG.full.md
-
-            ISSUES=$(echo "$BODY" \
-              | grep -oE 'Refs #[0-9]+' \
-              | grep -oE '[0-9]+' \
-              | sort -u)
-
-            for ISSUE in $ISSUES; do
-              echo "### Issue #$ISSUE" >> CHANGELOG.full.md
-              echo "" >> CHANGELOG.full.md
-              gh api repos/$REPO/issues/$ISSUE --jq '.body' >> CHANGELOG.full.md
-              echo "" >> CHANGELOG.full.md
-            done
-          done
+          echo "${{ github.event.release.body }}" >> CHANGELOG.full.md
 
       - name: Upload CHANGELOG.full.md to release
         uses: softprops/action-gh-release@v1
