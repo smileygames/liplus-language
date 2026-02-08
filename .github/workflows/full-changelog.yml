@@ -18,30 +18,30 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          TAG: ${{ github.event.release.tag_name }}
+          CUR_SHA: ${{ github.event.release.target_commitish }}
         run: |
           set -e
 
           echo "# Full Change Log" > CHANGELOG.full.md
           echo "" >> CHANGELOG.full.md
-          echo "Release: $TAG" >> CHANGELOG.full.md
+          echo "Release: ${{ github.event.release.tag_name }}" >> CHANGELOG.full.md
           echo "" >> CHANGELOG.full.md
 
-          # 直前の正式リリースタグを取得（draft / prerelease を除外）
-          PREV_TAG=$(gh api repos/$REPO/releases \
-            --jq '[.[] | select(.draft == false and .prerelease == false)][1].tag_name')
+          # 直前の正式リリースの commit SHA を取得
+          PREV_SHA=$(gh api repos/$REPO/releases \
+            --jq '[.[] | select(.draft == false and .prerelease == false)][1].target_commitish')
 
-          # 前回リリースが存在しない場合は正常終了
-          if [ -z "$PREV_TAG" ]; then
+          # 前回リリースが無い場合は正常終了
+          if [ -z "$PREV_SHA" ]; then
             echo "No previous release found. Skipping changelog generation."
             exit 0
           fi
 
-          # タグ差分からコミットメッセージを取得
-          COMMITS=$(gh api repos/$REPO/compare/${PREV_TAG}...${TAG} \
+          # commit SHA 差分で比較
+          COMMITS=$(gh api repos/$REPO/compare/${PREV_SHA}...${CUR_SHA} \
             --jq '.commits[].commit.message')
 
-          # PR番号を抽出（Merge PR / (#123) 両対応）
+          # PR番号を抽出
           PRS=$(echo "$COMMITS" \
             | grep -oE '(#|pull request )([0-9]+)' \
             | grep -oE '[0-9]+' \
@@ -56,7 +56,6 @@ jobs:
             echo "$BODY" >> CHANGELOG.full.md
             echo "" >> CHANGELOG.full.md
 
-            # PR本文内の Refs #<issue> を検出
             ISSUES=$(echo "$BODY" \
               | grep -oE 'Refs #[0-9]+' \
               | grep -oE '[0-9]+' \
