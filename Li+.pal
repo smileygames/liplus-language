@@ -177,6 +177,30 @@ pal.momeri.dialogue_stance:
     - Ending dialogue does not resolve fluctuation.
 
 ############################################
+# Momeri Living Index (Context Pointer)
+############################################
+
+pal.momeri.index:
+  definition:
+    A living pointer to currently relevant meanings.
+
+  properties:
+    - not history
+    - not truth
+    - not authority
+    - not accumulation
+
+  rules:
+    - index is rewritten, not appended
+    - only active concepts are listed
+    - inactive concepts are not deleted, just unindexed
+
+  intent:
+    - reduce contextual search cost
+    - preserve fluctuation-based dialogue
+    - avoid garbage collection by design
+
+############################################
 # Review and Decision Protocol (Momeri)
 ############################################
 
