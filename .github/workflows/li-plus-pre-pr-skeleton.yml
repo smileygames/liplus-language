@@ -29,3 +29,9 @@ jobs:
         run: |
           echo "Li+ pre-PR skeleton is active."
           echo "No operation is performed here."
+
+      - name: Base64 encode / decode test
+        run: |
+          base64 actions-test/sample.txt > encoded.txt
+          base64 -d encoded.txt > decoded.txt
+          diff actions-test/sample.txt decoded.txt
