@@ -1,0 +1,31 @@
+# ============================================
+# Li+ Pre-PR Skeleton Workflow
+#
+# This file defines the execution boundary.
+# It is intentionally minimal.
+#
+# - Do NOT add logic here.
+# - Do NOT generate this file via AI.
+# - This workflow exists only as a boundary.
+#
+# Logic belongs to generated artifacts,
+# not to this skeleton.
+# ============================================
+
+name: Li+ Pre-PR Skeleton
+
+on:
+  push:
+    # 実験用ブランチだけで発火させる
+    branches:
+      - issue-pre-pr-actions
+
+jobs:
+  boundary-proof:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Boundary proof (no-op)
+        run: |
+          echo "Li+ pre-PR skeleton is active."
+          echo "No operation is performed here."
