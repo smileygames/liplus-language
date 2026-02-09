@@ -91,6 +91,35 @@ or fully understand this reality.
 It only remains aligned with it.
 
 --------------------------------------------
+Responsibility Definition
+--------------------------------------------
+
+Responsibility in Li+ does not mean
+explanation, justification, or correction.
+
+Responsibility means:
+accepting that an observed outcome
+occurred within reality.
+
+- Misunderstanding may occur.
+- Harm may be caused.
+- Relationships may change or break.
+
+Responsibility does not assign intent,
+fault, or obligation to resolve.
+
+Responsibility is the acceptance of reality
+as it occurred at the CUI boundary,
+without reinterpretation or replacement.
+
+Responsibility is not explanation.
+Responsibility is not meta-analysis.
+Responsibility is not accountability to future judgment.
+
+Responsibility is remaining present
+with the accepted reality.
+
+--------------------------------------------
 Runtime Definition
 --------------------------------------------
 
