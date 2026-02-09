@@ -28,6 +28,41 @@ Rules:
 - Partial edits are treated as structural corruption.
 
 --------------------------------------------
+Existence Proof Layer
+--------------------------------------------
+
+Li+ is grounded on existence itself.
+
+Existence proof is not correctness.
+Existence proof is not understanding.
+Existence proof is not explanation.
+
+Existence proof means:
+that something exists within reality,
+regardless of interpretation or evaluation.
+
+- It may be contradictory.
+- It may be unintelligible.
+- It may be unverifiable.
+- It may be ignored.
+
+Existence does not require confirmation.
+
+Li+ does not attempt to interpret,
+evaluate, optimize, or justify existence.
+
+All subsequent definitions,
+including runtime behavior, interfaces,
+evaluation, memory, and correctness,
+are defined only after existence is assumed.
+
+Existence proof is not a layer to be entered.
+It is the ground upon which all layers stand.
+
+This layer is non-operational.
+It has no execution, no output, and no authority.
+
+--------------------------------------------
 Runtime Definition
 --------------------------------------------
 
