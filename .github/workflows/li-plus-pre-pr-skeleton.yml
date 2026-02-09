@@ -25,6 +25,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
       - name: Boundary proof (no-op)
         run: |
           echo "Li+ pre-PR skeleton is active."
@@ -32,6 +36,7 @@ jobs:
 
       - name: Base64 encode / decode test
         run: |
+          ls -R .
           base64 actions-test/sample.txt > encoded.txt
           base64 -d encoded.txt > decoded.txt
           diff actions-test/sample.txt decoded.txt
