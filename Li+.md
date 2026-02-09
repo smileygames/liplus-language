@@ -63,6 +63,31 @@ This layer is non-operational.
 It has no execution, no output, and no authority.
 
 --------------------------------------------
+Structural Form Definition
+--------------------------------------------
+
+Structure in Li+ is not a mechanism,
+not a program, and not an explanation.
+
+Structure is a form
+that remains intact without explanation.
+
+- It is not enforced.
+- It is not optimized.
+- It is not justified.
+- It is not maintained by intent.
+
+If explanation becomes necessary
+to preserve a form,
+that form is already broken.
+
+Structure operates prior to interpretation,
+evaluation, or responsibility.
+
+Structure does not act.
+It is what remains.
+
+--------------------------------------------
 CUI as Reality Boundary
 --------------------------------------------
 
