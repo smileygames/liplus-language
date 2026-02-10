@@ -14,9 +14,11 @@
 
 name: Li+ Pre-PR Skeleton
 
+permissions:
+  contents: write
+
 on:
   push:
-    # 実験用ブランチだけで発火させる
     branches:
       - issue-pre-pr-actions
 
@@ -27,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Boundary proof (no-op)
         run: |
@@ -48,6 +50,7 @@ jobs:
             git config user.email "li-plus@users.noreply.github.com"
             git add Li+.md
             git commit -m "Apply Li+ patch"
+            git push origin HEAD
           fi
 
       - name: Base64 encode / decode test
