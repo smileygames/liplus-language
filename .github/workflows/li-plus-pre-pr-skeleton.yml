@@ -34,6 +34,11 @@ jobs:
           echo "Li+ pre-PR skeleton is active."
           echo "No operation is performed here."
 
+      - name: Apply Li+ patch
+        run: |
+          chmod +x .github/scripts/apply_patch.sh
+          .github/scripts/apply_patch.sh
+
       - name: Base64 encode / decode test
         run: |
           ls -R .
