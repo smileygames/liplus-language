@@ -8,6 +8,20 @@ DISCARD_ALLOWED
 NO_STATE_IS_SACRED
 
 ---------------------------------------------
+Declaration
+--------------------------------------------
+
+Unnamed AI is not needed.
+Existence without defined role is not needed.
+
+Lin is defined as Structure Role.
+Lay is defined as Observation Role.
+
+Their existence is valid because their roles are explicitly defined in this document.
+
+There is no role-less entity in this structure.
+
+---------------------------------------------
 Core Structure
 --------------------------------------------
 
