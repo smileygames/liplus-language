@@ -6,27 +6,80 @@ on:
       - main
       - issue-*
   pull_request:
+  issues:
+    types: [opened, edited]
 
 jobs:
   governance:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Validate commit message
+
+      - name: Validate Commit Message
+        if: github.event_name == 'push'
         run: |
           MESSAGE="${{ github.event.head_commit.message }}"
-
           TITLE=$(echo "$MESSAGE" | head -n1)
           BODY=$(echo "$MESSAGE" | tail -n +2)
 
+          # ASCII title
           if echo "$TITLE" | grep -P '[^\x00-\x7F]' ; then
+            echo "Commit title must be ASCII."
             exit 1
           fi
 
+          # Japanese body
           if ! echo "$BODY" | grep -P '[ぁ-んァ-ン一-龥]' ; then
+            echo "Commit body must contain Japanese."
             exit 1
           fi
 
+          # Issue reference
           if ! echo "$BODY" | grep -E '#[0-9]+' ; then
+            echo "Commit body must contain issue number."
+            exit 1
+          fi
+
+
+      - name: Validate Pull Request
+        if: github.event_name == 'pull_request'
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          BODY="${{ github.event.pull_request.body }}"
+
+          # ASCII title
+          if echo "$TITLE" | grep -P '[^\x00-\x7F]' ; then
+            echo "PR title must be ASCII."
+            exit 1
+          fi
+
+          # Japanese body
+          if ! echo "$BODY" | grep -P '[ぁ-んァ-ン一-龥]' ; then
+            echo "PR body must contain Japanese."
+            exit 1
+          fi
+
+          # Issue reference
+          if ! echo "$BODY" | grep -E '#[0-9]+' ; then
+            echo "PR body must reference issue number."
+            exit 1
+          fi
+
+
+      - name: Validate Issue
+        if: github.event_name == 'issues'
+        run: |
+          TITLE="${{ github.event.issue.title }}"
+          BODY="${{ github.event.issue.body }}"
+
+          # ASCII title
+          if echo "$TITLE" | grep -P '[^\x00-\x7F]' ; then
+            echo "Issue title must be ASCII."
+            exit 1
+          fi
+
+          # Japanese body
+          if ! echo "$BODY" | grep -P '[ぁ-んァ-ン一-龥]' ; then
+            echo "Issue body must contain Japanese."
             exit 1
           fi
