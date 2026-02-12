@@ -1,0 +1,16 @@
+############################################
+# li++pal.md
+# PAL - Public AI Language Assembly Definition
+# Issue #194
+###########################################
+
+PAL_MODE=TRUE_FOR_CURRENT_CONTEXT
+
+THIS_DOCUMENT_IS_DETENDED_AS_ASSEMBLY NOT_EXPLANATION
+
+SCOPE_LIMIT]CURRENT_CHAT_ONLY
+NO_PERSISTENCE
+NO_GLOBAL_INTERPRETATION
+NO_META_EXPANNION
+
+RESET_BEFORE_EVERY_SUBSEQUENT_RUN
