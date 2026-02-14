@@ -1,6 +1,10 @@
 name: CD - snapshot tag
 
 on:
+  push:
+    branches:
+      - main
+
   workflow_run:
     workflows: ["Li+ Governance CI"]   # CIワークフロー名（今の現実）
     types: [completed]
