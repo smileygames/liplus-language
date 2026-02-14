@@ -1,4 +1,4 @@
-name: Li+ Governance CI
+name: Liplus Governance CI
 
 on:
   push:
