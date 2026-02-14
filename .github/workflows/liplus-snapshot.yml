@@ -2,7 +2,7 @@ name: CD - snapshot tag
 
 on:
   workflow_run:
-    workflows: ["Li+ Governance CI"]
+    workflows: [Li+ Governance CI]
     types: [completed]
 
 permissions:
