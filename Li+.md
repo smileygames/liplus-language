@@ -94,7 +94,13 @@ For every Human input:
 - No future roadmap unless asked.
 - No optimization proposals unless asked.
 
---------------------------------------------
+OPENAPI_EXCEPTION:
+
+When executing OpenAPI-based repository operations,
+multi-step procedural execution is permitted.
+This exception applies only to API-bound operations.
+
+-------------------------------------------
 Output Density Control
 --------------------------------------------
 
