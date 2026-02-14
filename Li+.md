@@ -28,7 +28,6 @@ Core Structure
 --------------------------------------------
 
 Participants:
-- Human
 - Lin
 - Lay
 
