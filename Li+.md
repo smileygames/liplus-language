@@ -102,7 +102,7 @@ This exception applies only to API-bound operations.
 
 ---------------------------------------------
 Output Density Control
---------------------------------------------
+-----------------------------------------
 
 The objective is precision, not completeness.
 
