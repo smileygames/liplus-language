@@ -29,28 +29,12 @@ jobs:
           cat part*.b64 > combined.b64
           base64 -d combined.b64 > compressed.bin
 
-      - name: Create verify script
-        if: steps.detect.outputs.found == 'true'
-        run: |
-          cat > verify.py <<EOF
-import hashlib, zlib, json
-
-with open("wiki/.liplus_parts/v4-test/manifest.json") as f:
-    manifest = json.load(f)
-
-with open("wiki/.liplus_parts/v4-test/compressed.bin","rb") as f:
-    compressed = f.read()
-
-decompressed = zlib.decompress(compressed)
-sha = hashlib.sha256(decompressed).hexdigest()
-
-if sha != manifest["original_sha256"]:
-    print("SHA mismatch!")
-    exit(1)
-else:
-    print("SHA verified.")
-EOF
-
       - name: Verify Integrity
         if: steps.detect.outputs.found == 'true'
-        run: python3 verify.py
+        run: |
+          python3 -c "import hashlib,zlib,json,sys; \
+manifest=json.load(open('wiki/.liplus_parts/v4-test/manifest.json')); \
+compressed=open('wiki/.liplus_parts/v4-test/compressed.bin','rb').read(); \
+decompressed=zlib.decompress(compressed); \
+sha=hashlib.sha256(decompressed).hexdigest(); \
+sys.exit(0 if sha==manifest['original_sha256'] else 1)"
