@@ -32,9 +32,21 @@ jobs:
       - name: Verify Integrity
         if: steps.detect.outputs.found == 'true'
         run: |
-          python3 -c "import hashlib,zlib,json,sys; \
-manifest=json.load(open('wiki/.liplus_parts/v4-test/manifest.json')); \
-compressed=open('wiki/.liplus_parts/v4-test/compressed.bin','rb').read(); \
-decompressed=zlib.decompress(compressed); \
-sha=hashlib.sha256(decompressed).hexdigest(); \
-sys.exit(0 if sha==manifest['original_sha256'] else 1)"
+          python3 <<EOF
+import hashlib
+import zlib
+import json
+import sys
+
+manifest = json.load(open("wiki/.liplus_parts/v4-test/manifest.json"))
+compressed = open("wiki/.liplus_parts/v4-test/compressed.bin","rb").read()
+decompressed = zlib.decompress(compressed)
+sha = hashlib.sha256(decompressed).hexdigest()
+
+if sha == manifest["original_sha256"]:
+    print("SHA verified.")
+    sys.exit(0)
+else:
+    print("SHA mismatch!")
+    sys.exit(1)
+EOF
