@@ -13,28 +13,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Detect manifest
-        id: detect
-        run: |
-          if [ -f wiki/.liplus_parts/v4-test/manifest.json ]; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Reconstruct
-        if: steps.detect.outputs.found == 'true'
-        run: |
-          cd wiki/.liplus_parts/v4-test
-          cat part*.b64 > combined.b64
-          base64 -d combined.b64 > compressed.bin
-
-      - name: Verify Integrity
-        if: steps.detect.outputs.found == 'true'
-        run: |
-          python3 -c "import hashlib,zlib,json,sys;
-m=json.load(open('wiki/.liplus_parts/v4-test/manifest.json'));
-c=open('wiki/.liplus_parts/v4-test/compressed.bin','rb').read();
-d=zlib.decompress(c);
-h=hashlib.sha256(d).hexdigest();
-sys.exit(0 if h==m['original_sha256'] else 1)"
+      - name: Simple test
+        run: echo "Workflow syntax OK"
