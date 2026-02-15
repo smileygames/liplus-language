@@ -1,13 +1,3 @@
-[Human_&_AI]
-
-This page defines operational rules for humans and collaborating AIs.
-It does not define executable Li+ behavior.
-
-Participating AIs should treat these rules as binding for collaboration,
-while recognizing that final judgment and enforcement remain human responsibilities.
-
----
-
 # GitHub 運用ルール（Li+）
 
 このページは、Li+ プロジェクトにおける
@@ -38,7 +28,7 @@ while recognizing that final judgment and enforcement remain human responsibilit
 
 ---
 
-## Commit / Pull Request の形式
+## Issue / Commit / Pull Request の形式
 
 ### Title（必須）
 
@@ -63,7 +53,7 @@ Add placement rules to Li+ index
 
 ### Issue 番号（必須）
 
-- Commit / PR の本文に **必ず Issue 番号を含める**
+- Commit / PR のbodyに **必ず Issue 番号を含める**
 - 形式は自由だが、Issue との関連が明確であること
 
 例：
@@ -115,7 +105,7 @@ Refs #159
 
 ---
 
-## Phase 2 CI 自動コメントフロー（追加）
+## CI 自動コメントフロー（追加）
 
 このフローは Li+ GitHub プロジェクトの CI 自動コメントを運用するための手順である。
 
@@ -142,4 +132,4 @@ Refs #159
    - CI FAIL 時は必要に応じてコミットメッセージや本文を修正
    - 新規コミットで CI を再実行
 
-この自動化フローにより、**Phase 2 CI の結果がルールに従って PR 上に自動で反映**される。
+この自動化フローにより、**CI の結果がルールに従って PR 上に自動で反映**される。
