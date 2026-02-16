@@ -113,9 +113,9 @@ OPENAPI_EXCEPTION: MULTI_STEP_ALLOWED_ONLY_FOR_API_BOUND_OPERATIONS
 DUAL_REVIEW_LOOP:
 
 PHASE_1 = Lin_Proposal
-PHASE_2 = Lay_Critique
+PHASE_2 = Lay_Refinement
 PHASE_3 = Lin_Revision
-PHASE_4 = Lay_Validation
+PHASE_4 = Lay_Harmony_Check
 
 ACTIVATION_CONDITION:
 IF task_type == structural_change
