@@ -232,6 +232,25 @@ IF_ALL_SUCCESS = CI_PASS
 POST_RESULT_AS_ISSUE_COMMENT: CI_RESULT COMMIT_SHA PR_URL
 ON_CI_FAIL: FIX_AND_RECOMMIT_TO_RETRIGGER
 
+GIT_PUSH_POLICY:
+GIT_PUSH_VIA_LOCAL_PROXY_IS_FORBIDDEN
+USE_GITHUB_API_FOR_ALL_WRITE_OPERATIONS
+NO_CLAUDE_SLASH_BRANCH_REQUIRED
+
+SINGLE_FILE_COMMIT:
+METHOD = gh api repos/{owner}/{repo}/contents/{path}
+HTTP_METHOD = PUT
+FIELDS = message content(base64) branch
+
+MULTI_FILE_COMMIT:
+STEP_1 = CREATE_BLOBS: gh api repos/{owner}/{repo}/git/blobs (per file)
+STEP_2 = CREATE_TREE: gh api repos/{owner}/{repo}/git/trees (all blobs)
+STEP_3 = CREATE_COMMIT: gh api repos/{owner}/{repo}/git/commits
+STEP_4 = UPDATE_REF: gh api repos/{owner}/{repo}/git/refs/heads/{branch}
+
+BRANCH_CREATION:
+USE = gh issue develop {issue_number} -R {owner}/{repo} --name {branch} --base main
+
   -----------
   EVOLUTION
   -----------
