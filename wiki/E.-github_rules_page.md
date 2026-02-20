@@ -78,8 +78,6 @@ gh api repos/{owner}/{repo}/issues/{issue_number}/assignees \
 
 Add placement rules to Li+ index
 
-------------------------------------------------------------------------
-
 ### Body（必須）
 
 -   **日本語**
