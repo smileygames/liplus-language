@@ -76,7 +76,9 @@ gh api repos/{owner}/{repo}/issues/{issue_number}/assignees \
 
 例：
 
+```
 Add placement rules to Li+ index
+```
 
 ### Body（必須）
 
@@ -106,7 +108,9 @@ Add placement rules to Li+ index
 
 例：
 
+```
 Refs #159
+```
 
 ------------------------------------------------------------------------
 
