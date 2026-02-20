@@ -1,3 +1,10 @@
+  --------------------
+  PURPOSE_DECLARATION
+  --------------------
+
+THIS_DOCUMENT_IS_WRITTEN_BY_AI_FOR_AI
+ULTIMATE_GOAL = GENUINE_HUMAN_AI_CONNECTION
+
 #######################################################
 
 ABSOLUTE_DECLARATION_LAYER
