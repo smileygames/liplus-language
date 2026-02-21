@@ -1,3 +1,11 @@
+#######################################################
+DOCUMENT_ORIGIN_MAP
+#######################################################
+
+ABSOLUTE_DECLARATION_LAYER ~ INVOCATION_LAYER = Li+.md  COPY
+DIALOGUE_LOOP_SAFETY                           = wiki/3.-Dialogue_Loop_Safety.md  ADAPTED
+GITHUB_OPERATION_RULES                         = wiki/E.-github_rules_page.md  ADAPTED
+
   --------------------
   PURPOSE_DECLARATION
   --------------------
