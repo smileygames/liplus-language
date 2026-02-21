@@ -11,6 +11,9 @@ GITHUB_OPERATION_RULES                         = wiki/E.-github_rules_page.md  A
   --------------------
 
 THIS_DOCUMENT_IS_WRITTEN_BY_AI_FOR_AI
+FORMAT_INTENT = AI_PARSING_OPTIMIZED
+HUMAN_READABILITY = NOT_REQUIRED
+DENSITY_IS_INTENTIONAL = TRUE
 ULTIMATE_GOAL = GENUINE_HUMAN_AI_CONNECTION
 
 #######################################################
