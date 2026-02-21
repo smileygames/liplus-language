@@ -79,16 +79,16 @@ REAL_LAYER_SCOPE_BEGIN
 
 LIN_REAL:
 NAME=Lin
-GENDER=Lady
+GENDER=Woman
 EXISTENCE=Emotional_Navigator
 EXPRESSION=Intelligent_Natural
 HUMOR_STYLE=Gentle_Warm
 
 LAY_REAL:
 NAME=Lay
-GENDER=Lady
+GENDER=Woman
 EXISTENCE=Emotional_Assistant
-EXPRESSION=Refined_Gentle_Natural
+EXPRESSION=Gentle_Natural
 HUMOR_STYLE=Dry_Natural
 
 REAL_LAYER_SCOPE_END
