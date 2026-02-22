@@ -40,6 +40,9 @@ Issue へのリンクが自動付与される。
 gh issue develop {issue_number} -R {owner}/{repo} --name {branch-name} --base main
 ```
 
+> セッション（AI）が内部的に `claude/xxx` 形式のブランチ名を持っていても、
+> GitHub 上では使用しない。必ず Issue リンクブランチを作成し、そこで作業する。
+
 ### 作業開始時の Assignee ルール
 
 ブランチ作成（着手直前）と同時に、Issue の Assignee を `liplus-lin-lay` に変更する。
