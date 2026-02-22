@@ -112,15 +112,6 @@ jobs:
           fi
 
 
-      - name: Auto-merge on Admin Approval
-        if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved' && github.event.review.user.login == 'smileygames'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
-        run: |
-          gh pr merge "$PR_NUMBER" -R "$REPO" --squash --delete-branch --admin
-
 
       - name: Notify Issue on Review Approval
         if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
