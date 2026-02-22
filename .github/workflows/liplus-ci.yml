@@ -14,7 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
-      pull-requests: read
+      pull-requests: write
+      contents: write
 
     steps:
 
@@ -104,11 +105,12 @@ jobs:
           SHORT_SHA="${PR_SHA:0:7}"
           if [ "$JOB_STATUS" = "success" ]; then
             gh issue comment "$ISSUE" -R "$REPO" \
-              --body "CI passed ✓ \`${SHORT_SHA}\` PR #${PR_NUMBER}"
+              --body "CI passed ✓ \`${SHORT_SHA}\` PR #${PR_NUMBER}" || true
           else
             gh issue comment "$ISSUE" -R "$REPO" \
-              --body "CI failed ✗ \`${SHORT_SHA}\` PR #${PR_NUMBER}"
+              --body "CI failed ✗ \`${SHORT_SHA}\` PR #${PR_NUMBER}" || true
           fi
+
 
 
       - name: Notify Issue on Review Approval
@@ -123,7 +125,7 @@ jobs:
           ISSUE=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
           [ -z "$ISSUE" ] && exit 0
           gh issue comment "$ISSUE" -R "$REPO" \
-            --body "approved by @${REVIEWER} PR #${PR_NUMBER}"
+            --body "approved by @${REVIEWER} PR #${PR_NUMBER}" || true
 
 
       - name: Notify Issue on Merge
@@ -138,5 +140,4 @@ jobs:
           ISSUE=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
           [ -z "$ISSUE" ] && exit 0
           gh issue comment "$ISSUE" -R "$REPO" \
-            --body "merged to main by @${MERGED_BY} PR #${PR_NUMBER}"
-
+            --body "merged to main by @${MERGED_BY} PR #${PR_NUMBER}" || true
