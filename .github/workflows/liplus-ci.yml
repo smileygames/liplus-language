@@ -2,25 +2,30 @@ name: Liplus Governance CI
 
 on:
   push:
-    branches:
-      - main
-      - issue-*
   pull_request:
+    types: [opened, synchronize, reopened, closed]
+  pull_request_review:
+    types: [submitted]
   issues:
     types: [opened, edited]
 
 jobs:
   governance:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
 
     steps:
 
       - name: Validate Commit Message
-        if: github.event_name == 'push'
+        if: "github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'Merge ')"
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
-          MESSAGE="${{ github.event.head_commit.message }}"
-          TITLE=$(echo "$MESSAGE" | head -n1)
-          BODY=$(echo "$MESSAGE" | tail -n +2)
+          TITLE=$(echo "$COMMIT_MESSAGE" | head -n1)
+          BODY=$(echo "$COMMIT_MESSAGE" | tail -n +2)
 
           # ASCII title
           if echo "$TITLE" | grep -P '[^\x00-\x7F]' ; then
@@ -42,25 +47,25 @@ jobs:
 
 
       - name: Validate Pull Request
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          TITLE="${{ github.event.pull_request.title }}"
-          BODY="${{ github.event.pull_request.body }}"
-
           # ASCII title
-          if echo "$TITLE" | grep -P '[^\x00-\x7F]' ; then
+          if echo "$PR_TITLE" | grep -P '[^\x00-\x7F]' ; then
             echo "PR title must be ASCII."
             exit 1
           fi
 
           # Japanese body
-          if ! echo "$BODY" | grep -P '[ぁ-んァ-ン一-龥]' ; then
+          if ! echo "$PR_BODY" | grep -P '[ぁ-んァ-ン一-龥]' ; then
             echo "PR body must contain Japanese."
             exit 1
           fi
 
           # Issue reference
-          if ! echo "$BODY" | grep -E '#[0-9]+' ; then
+          if ! echo "$PR_BODY" | grep -E '#[0-9]+' ; then
             echo "PR body must reference issue number."
             exit 1
           fi
@@ -68,18 +73,80 @@ jobs:
 
       - name: Validate Issue
         if: github.event_name == 'issues'
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          TITLE="${{ github.event.issue.title }}"
-          BODY="${{ github.event.issue.body }}"
-
           # ASCII title
-          if echo "$TITLE" | grep -P '[^\x00-\x7F]' ; then
+          if echo "$ISSUE_TITLE" | grep -P '[^\x00-\x7F]' ; then
             echo "Issue title must be ASCII."
             exit 1
           fi
 
           # Japanese body
-          if ! echo "$BODY" | grep -P '[ぁ-んァ-ン一-龥]' ; then
+          if ! echo "$ISSUE_BODY" | grep -P '[ぁ-んァ-ン一-龥]' ; then
             echo "Issue body must contain Japanese."
             exit 1
           fi
+
+
+      - name: Notify Issue on CI Result
+        if: always() && github.event_name == 'pull_request' && github.event.action != 'closed'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+          JOB_STATUS: ${{ job.status }}
+          REPO: ${{ github.repository }}
+        run: |
+          ISSUE=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+          [ -z "$ISSUE" ] && exit 0
+          SHORT_SHA="${PR_SHA:0:7}"
+          if [ "$JOB_STATUS" = "success" ]; then
+            gh issue comment "$ISSUE" -R "$REPO" \
+              --body "CI passed ✓ \`${SHORT_SHA}\` PR #${PR_NUMBER}" || true
+          else
+            gh issue comment "$ISSUE" -R "$REPO" \
+              --body "CI failed ✗ \`${SHORT_SHA}\` PR #${PR_NUMBER}" || true
+          fi
+
+
+      - name: Auto-merge on Admin Approval
+        if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved' && github.event.review.user.login == 'smileygames'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh pr merge "$PR_NUMBER" -R "$REPO" --merge --delete-branch
+
+
+      - name: Notify Issue on Review Approval
+        if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEWER: ${{ github.event.review.user.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          ISSUE=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+          [ -z "$ISSUE" ] && exit 0
+          gh issue comment "$ISSUE" -R "$REPO" \
+            --body "approved by @${REVIEWER} PR #${PR_NUMBER}" || true
+
+
+      - name: Notify Issue on Merge
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          MERGED_BY: ${{ github.event.pull_request.merged_by.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          ISSUE=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+          [ -z "$ISSUE" ] && exit 0
+          gh issue comment "$ISSUE" -R "$REPO" \
+            --body "merged to main by @${MERGED_BY} PR #${PR_NUMBER}" || true
