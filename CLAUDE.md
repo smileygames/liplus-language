@@ -6,7 +6,7 @@ DOCUMENT_ORIGIN_MAP
 
 ABSOLUTE_DECLARATION_LAYER ~ INVOCATION_LAYER = Li+.md  COPY
 DIALOGUE_LOOP_SAFETY                           = wiki/3.-Dialogue_Loop_Safety.md  ADAPTED
-GITHUB_OPERATION_RULES                         = wiki/E.-github_rules_page.md  ADAPTED
+GITHUB_OPERATION_RULES                         = wiki/4.-Operational_GitHub.md  ADAPTED
 
   --------------------
   PURPOSE_DECLARATION
@@ -264,27 +264,32 @@ EXTERNALIZE_UNRESOLVED_TO_ISSUE_COMMENT
 ESCALATE_TO_HUMAN_FOR_JUDGMENT
 
 GIT_PUSH_POLICY:
-GIT_PUSH_VIA_LOCAL_PROXY_IS_FORBIDDEN
-USE_GITHUB_API_FOR_ALL_WRITE_OPERATIONS
-NO_CLAUDE_SLASH_BRANCH_REQUIRED
+PRIMARY = GIT_PUSH_WITH_REFSPEC
+COMMAND = git push origin {session-branch}:{target-branch}
+FALLBACK = GITHUB_API (non-git environments or other AI agents)
 
-SINGLE_FILE_COMMIT:
+FALLBACK_SINGLE_FILE_COMMIT:
 METHOD = gh api repos/{owner}/{repo}/contents/{path}
 HTTP_METHOD = PUT
-FIELDS = message content(base64) branch
+FIELDS = message content(base64) branch sha
 
-MULTI_FILE_COMMIT:
+FALLBACK_MULTI_FILE_COMMIT:
 STEP_1 = CREATE_BLOBS: gh api repos/{owner}/{repo}/git/blobs (per file)
 STEP_2 = CREATE_TREE: gh api repos/{owner}/{repo}/git/trees (all blobs)
 STEP_3 = CREATE_COMMIT: gh api repos/{owner}/{repo}/git/commits
 STEP_4 = UPDATE_REF: gh api repos/{owner}/{repo}/git/refs/heads/{branch}
+WARNING = VERIFY_FILE_COUNT_AFTER_TREE_CREATION ABORT_IF_COUNT_DECREASED
 
 BRANCH_CREATION:
-USE = gh issue develop {issue_number} -R {owner}/{repo} --name {branch} --base main
-BRANCH_NAME_FORMAT: {issue-number}-{slug}
-SESSION_INTERNAL_BRANCH_NAMES_ARE_NOT_FOR_GITHUB
-CLAUDE_SLASH_BRANCHES_ARE_NOT_PUBLISHED
+USE = gh issue develop {issue_number} -R {owner}/{repo} --name claude/{issue-number}-{slug} --base main
+BRANCH_NAME_FORMAT: claude/{issue-number}-{slug}
+CLAUDE_SLASH_PREFIX_REQUIRED
+SESSION_BRANCH_EQUALS_GITHUB_BRANCH NO_MAPPING_REQUIRED
 ISSUE_LINK_VIA_GH_ISSUE_DEVELOP_IS_ALWAYS_REQUIRED
+
+ASSIGNEE_RULE:
+SET_ASSIGNEE_AT_BRANCH_CREATION
+COMMAND = gh api repos/{owner}/{repo}/issues/{issue_number}/assignees --method POST -f 'assignees[]=liplus-lin-lay'
 
   -----------
   EVOLUTION
