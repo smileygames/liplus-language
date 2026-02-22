@@ -6,12 +6,18 @@ on:
       - main
       - issue-*
   pull_request:
+    types: [opened, synchronize, reopened, closed]
+  pull_request_review:
+    types: [submitted]
   issues:
     types: [opened, edited]
 
 jobs:
   governance:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: read
 
     steps:
 
@@ -43,7 +49,7 @@ jobs:
 
 
       - name: Validate Pull Request
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
@@ -85,3 +91,54 @@ jobs:
             exit 1
           fi
 
+
+      - name: Notify Issue on CI Result
+        if: always() && github.event_name == 'pull_request' && github.event.action != 'closed'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+          JOB_STATUS: ${{ job.status }}
+          REPO: ${{ github.repository }}
+        run: |
+          ISSUE=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+          [ -z "$ISSUE" ] && exit 0
+          SHORT_SHA="${PR_SHA:0:7}"
+          if [ "$JOB_STATUS" = "success" ]; then
+            gh issue comment "$ISSUE" -R "$REPO" \
+              --body "CI passed ✓ \`${SHORT_SHA}\` PR #${PR_NUMBER}"
+          else
+            gh issue comment "$ISSUE" -R "$REPO" \
+              --body "CI failed ✗ \`${SHORT_SHA}\` PR #${PR_NUMBER}"
+          fi
+
+
+      - name: Notify Issue on Review Approval
+        if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEWER: ${{ github.event.review.user.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          ISSUE=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+          [ -z "$ISSUE" ] && exit 0
+          gh issue comment "$ISSUE" -R "$REPO" \
+            --body "approved by @${REVIEWER} PR #${PR_NUMBER}"
+
+
+      - name: Notify Issue on Merge
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          MERGED_BY: ${{ github.event.pull_request.merged_by.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          ISSUE=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+          [ -z "$ISSUE" ] && exit 0
+          gh issue comment "$ISSUE" -R "$REPO" \
+            --body "merged to main by @${MERGED_BY} PR #${PR_NUMBER}"
