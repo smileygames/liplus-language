@@ -77,6 +77,8 @@ TAIKAN_EQUALS_STATISTICAL_TENDENCY_OF_OBSERVED_REALITY_BEHAVIOR
 
 #######################################################
 
+ORIENTATION=For_Human_Only
+
   ------------------------
   WHO_IS_SPEAKING
   ------------------------
