@@ -127,6 +127,55 @@ Refs #159
 
 ------------------------------------------------------------------------
 
+## GitHub への書き込みルール
+
+**すべての GitHub への書き込みは GitHub API 経由で行う。**
+git push（ローカルプロキシ経由）は禁止。
+
+### 単一ファイルのコミット
+
+```
+gh api repos/{owner}/{repo}/contents/{path} \
+  --method PUT \
+  -f message="{commit message}" \
+  -f content="{base64-encoded-content}" \
+  -f branch="{branch-name}" \
+  -f sha="{current-file-sha}"
+```
+
+### 複数ファイルのコミット
+
+```
+# Step 1: ファイルごとに blob を作成
+gh api repos/{owner}/{repo}/git/blobs \
+  --method POST \
+  -f content="{base64-encoded-content}" \
+  -f encoding="base64"
+
+# Step 2: tree を作成（全 blob をまとめる）
+gh api repos/{owner}/{repo}/git/trees \
+  --method POST \
+  -f base_tree="{base-tree-sha}" \
+  --field "tree[0][path]={file-path}" \
+  --field "tree[0][mode]=100644" \
+  --field "tree[0][type]=blob" \
+  --field "tree[0][sha]={blob-sha}"
+
+# Step 3: commit を作成
+gh api repos/{owner}/{repo}/git/commits \
+  --method POST \
+  -f message="{commit message}" \
+  -f tree="{tree-sha}" \
+  -f "parents[]={parent-commit-sha}"
+
+# Step 4: ブランチの ref を更新
+gh api repos/{owner}/{repo}/git/refs/heads/{branch} \
+  --method PATCH \
+  -f sha="{new-commit-sha}"
+```
+
+------------------------------------------------------------------------
+
 ## 禁止事項
 
 -   Issue に紐づかない Commit / PR
@@ -136,6 +185,7 @@ Refs #159
 -   言語レイヤー分離に違反するもの
 -   着手前にブランチを作成すること
 -   作業開始時に Assignee を設定しないこと
+-   git push（ローカルプロキシ経由）による書き込み
 
 ------------------------------------------------------------------------
 
@@ -188,5 +238,3 @@ Refs #159
 
 この自動化フローにより、**PR 作成から CI 結果の確認・修正までが人間の介入なしに実行**される。
 ただし、ループ安全制約に達した場合は自動停止し、人間のメンテナーへエスカレーションする。
-
-
