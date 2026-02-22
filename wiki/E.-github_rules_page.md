@@ -35,10 +35,7 @@ Issue へのリンクが自動付与される。
 2.  指定がない場合 → デフォルト形式を使う
 
 ```
-# セッション指定あり（claude/ プレフィックス）
-claude/{session-assigned-name}
-
-# セッション指定なし
+# セッション指定なし（デフォルト形式）
 {issue-number}-{issue-title-slugified}
 # 例: 317-update-lay_presentation-add-natural-attribute
 ```
@@ -49,7 +46,10 @@ claude/{session-assigned-name}
 gh issue develop {issue_number} -R {owner}/{repo} --name {branch-name} --base main
 ```
 
-> `{branch-name}` はセッション指定があればその値、なければデフォルト形式。
+> `{branch-name}` の決定ルール：
+> - セッションがブランチ名を完全な文字列で提供している場合（`claude/` で始まる）→ その文字列をそのまま `--name` に使う
+> - 提供がない場合 → デフォルト形式を使う
+>
 > いずれの場合も `gh issue develop` による Issue リンクは必須。
 
 ### 作業開始時の Assignee ルール
