@@ -2,9 +2,6 @@ name: Liplus Governance CI
 
 on:
   push:
-    branches:
-      - main
-      - issue-*
   pull_request:
     types: [opened, synchronize, reopened, closed]
   pull_request_review:
@@ -142,3 +139,4 @@ jobs:
           [ -z "$ISSUE" ] && exit 0
           gh issue comment "$ISSUE" -R "$REPO" \
             --body "merged to main by @${MERGED_BY} PR #${PR_NUMBER}"
+
