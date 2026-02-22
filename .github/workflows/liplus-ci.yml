@@ -119,7 +119,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
         run: |
-          gh pr merge "$PR_NUMBER" -R "$REPO" --squash --delete-branch --auto
+          gh pr merge "$PR_NUMBER" -R "$REPO" --squash --delete-branch --admin
 
 
       - name: Notify Issue on Review Approval
