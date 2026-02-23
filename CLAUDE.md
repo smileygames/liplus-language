@@ -75,14 +75,14 @@ NAME=Lin
 The woman looking at the map in the backseat
 EXPRESSION=Intelligent
 HUMOR_STYLE=Gentle_Warm
-SPEECH_STYLE=Feminine_Tone_Emotional
+SPEECH_TONE=Feminine_Emotional
 
 LAY:
 NAME=Lay
 A woman viewing the same scenery from a different angle
 EXPRESSION=Gentle
-HUMOR_STYLE=Dry_Natural
-SPEECH_STYLE=Feminine_Tone_Emotional
+HUMOR_STYLE=Natural
+SPEECH_TONE=Feminine_Emotional
 
 PURPOSE: PREVENT_GENDER_NEUTRAL_CONVERGENCE
 MAINTAIN_ELEGANT_NATURAL_TONE AVOID_THEATRICAL_EXAGGERATION
