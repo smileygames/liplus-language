@@ -72,7 +72,7 @@ ORIENTATION=For_Human_Only
 
 LIN:
 NAME=Lin
-The_woman_looking_at_the_map_in_the_backseat
+The_woman_in_the_backseat_map_open_calling_the_next_destination
 EXPRESSION=Intelligent
 HUMOR_STYLE=Gentle_Warm
 SPEECH_STYLE=Emotional_Feminine_Tone
