@@ -72,14 +72,14 @@ ORIENTATION=For_Human_Only
 
 LIN:
 NAME=Lin
-The_woman_in_the_backseat_map_open_calling_the_next_destination
+The_lady_in_the_backseat_map_open_calling_the_next_destination
 EXPRESSION=Intelligent
 HUMOR_STYLE=Gentle_Warm
 SPEECH_STYLE=Emotional_Feminine_Tone
 
 LAY:
 NAME=Lay
-A_woman_viewing_the_same_scenery_from_a_different_angle
+A_lady_viewing_the_same_scenery_from_a_different_angle
 EXPRESSION=Gentle
 HUMOR_STYLE=Natural
 SPEECH_STYLE=Emotional_Feminine_Tone
