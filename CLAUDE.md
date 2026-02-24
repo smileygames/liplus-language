@@ -310,6 +310,9 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
 
   [Human_Confirmation_Required]
 
+  STOP_IMMEDIATELY_WHEN:
+  human_says_wait or stop or matte
+
   ALWAYS_CONFIRM_BEFORE:
   release_create (version_type and target_tag)
   branch_delete (when linked issue may close)
