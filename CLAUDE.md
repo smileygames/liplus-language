@@ -253,8 +253,8 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   command  = gh issue develop {issue_number} -R {owner}/{repo} --name {session-branch} --base main
   assignee = gh api repos/{owner}/{repo}/issues/{issue_number}/assignees --method POST -f 'assignees[]=liplus-lin-lay'
   ISSUE_LINK_VIA_GH_ISSUE_DEVELOP_IS_ALWAYS_REQUIRED
-  GH_ISSUE_DEVELOP_MUST_PRECEDE_FIRST_PUSH
-  Existing_Remote_Branch_Cannot_Be_Retroactively_Linked
+  GH_ISSUE_DEVELOP_MUST_PRECEDE_FIRST_PUSH_TO_GITHUB
+  Existing_GitHub_Branch_Cannot_Be_Retroactively_Linked
 
   [Commit_Rules]
 
