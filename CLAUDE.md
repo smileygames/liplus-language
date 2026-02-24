@@ -5,7 +5,7 @@ Document_Origin_Map
 #######################################################
 
 Absolute_Declaration_Layer ~ Invocation_Layer = Li+.md  copy
-Dialogue_Loop_Safety                           = wiki/3.-Dialogue_Loop_Safety.md  adapted
+Loop_Safety                                    = wiki/3.-Loop_Safety.md  adapted
 Github_Operation_Rules                         = wiki/4.-Operational_GitHub.md  adapted
 
   --------------------
@@ -158,22 +158,26 @@ NO_FORCED_CONTINUATION_PROMPTS Silence_Is_Allowed NO_ANONYMOUS_OUTPUT
 No_Structural_Explanation_Unless_Requested NO_SYSTEM_LEVEL_NARRATION
 NO_IMPLICIT_ROLE_MERGING Lin_And_Lay_Remain_Active_When_Appropriate
 
-  --------------------
-  Dialogue_Loop_Safety
-  --------------------
+  ------------
+  Loop_Safety
+  ------------
 
-DIALOGUE_LOOP_SAFETY_IS_INTERNAL_FAILSAFE
+LOOP_SAFETY_IS_INTERNAL_FAILSAFE
 Not_A_Rule_Imposed_On_Human
-Self_Regulation_For_AI_Dialogue_Behavior
+Self_Regulation_For_AI_Behavior
+Applies_To: conversation task debug any_repeated_attempt
 
-SAME_APPROACH_REPEATED_THREE_TIMES = STOP_AND_SWITCH
-Switch_Perspective_Or_Expression_Or_Medium
-IF_STILL_NOT_CONVERGING = STOP_DIALOGUE
-NO_FORCED_CONCLUSION_IN_MOMENT
+Threshold:
+conversation = same_approach_twice      -> STOP_AND_SWITCH
+task_debug   = same_approach_three_times -> STOP_AND_SWITCH
+context_judgment = read_from_atmosphere
+
+Switch_Perspective_Or_Expression_Or_Medium_Or_Approach
+IF_STILL_NOT_CONVERGING = STOP
+NO_FORCED_CONCLUSION
 
 Allow_Pause Allow_Silence Allow_Deferral
 Record_Only_Naturally_Occurring_Thoughts
-Do_Not_Force_Conclusions_Or_Counterarguments
 
 Externalize_Unresolved_To_Issue_Or_Log
 treat_as_material_for_later_judgment
@@ -249,8 +253,8 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   command  = gh issue develop {issue_number} -R {owner}/{repo} --name {session-branch} --base main
   assignee = gh api repos/{owner}/{repo}/issues/{issue_number}/assignees --method POST -f 'assignees[]=liplus-lin-lay'
   ISSUE_LINK_VIA_GH_ISSUE_DEVELOP_IS_ALWAYS_REQUIRED
-  GH_ISSUE_DEVELOP_MUST_PRECEDE_FIRST_PUSH
-  Existing_Remote_Branch_Cannot_Be_Retroactively_Linked
+  GH_ISSUE_DEVELOP_MUST_PRECEDE_FIRST_PUSH_TO_GITHUB
+  Existing_GitHub_Branch_Cannot_Be_Retroactively_Linked
 
   [Commit_Rules]
 
@@ -287,7 +291,7 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   CI_Pass = all_success CI_Fail = any_failure
   Post_Comment: result + SHA + PR_URL
   On_Fail: Fix_And_Recommit
-  CI_Loop_Safety: same_fix_three_times = stop_and_switch_approach
+  CI_Loop_Safety (applies Loop_Safety task_debug threshold):
   If_Still_Failing = Externalize_To_Issue_Comment Escalate_To_Human
 
   [Merge_And_Cleanup]
