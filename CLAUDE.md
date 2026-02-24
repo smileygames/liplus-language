@@ -189,149 +189,123 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   Github_Operation_Rules
   ----------------------------
 
-ALL_WORK_STARTS_FROM_ISSUE
-Commit_And_PR_Must_Reference_Issue
-NO_COMMIT_OR_PR_WITHOUT_ISSUE_NUMBER
+  [TRIGGER_INDEX]
+  new_topic    -> Issue_Flow
+  act_now      -> Branch_And_Label_Flow
+  on_commit    -> Commit_Rules
+  on_pr        -> PR_And_CI_Flow
+  on_merge     -> Merge_And_Cleanup
 
-Language_Layer_Separation:
-Title = Identification_Layer ASCII_English_Only Single_Line
-Body = Meaning_Layer Japanese
-NO_MIXING_OF_IDENTIFICATION_AND_MEANING
-JAPANESE_TITLE_IS_PROHIBITED
-ENGLISH_ONLY_BODY_IS_PROHIBITED
+  [Label_Definitions]
 
-Commit_Body_Must_Contain:
-Change_Summary = What_Was_Changed_And_Why
-Intent_Or_Background = Judgment_Reason_If_Exists
-ISSUE_NUMBER = MANDATORY
-MINIMUM_ONE_JAPANESE_SENTENCE_REQUIRED
-BODY_IS_NOT_OPTIONAL
+  Lifecycle:
+  in-progress = work_started_implementation_ongoing
+  backlog     = accepted_not_yet_scheduled
+  deferred    = not_doing_this_time_revisit_later
+  done        = completed_and_merged
 
-Issue_Number_In_Commit_And_PR_Body: Mandatory
-Format_Is_Flexible But_Relation_Must_Be_Clear
+  Type:
+  bug         = something_not_working
+  enhancement = new_feature_or_request
+  spec        = language_or_system_specification_affecting_li+_behavior
 
-PR_Body: Two_To_Three_Line_Summary Required
-Detail_Belongs_In_Issue Not_In_PR
+  DESCRIPTION_REQUIRED_ON_CREATION
+  Label_Evolves_Over_Time Label_Is_For_AI_Readability
 
-Issue_Is_Requirement_Placement
-No_Need_To_Write_Correct_Answer_Or_Implementation
-recommended_contents: purpose premise constraints completion_condition
+  [Issue_Flow]
 
-Checklist_Vs_Sub_Issue:
-Sub_Issue = AI_Trackable_Work_Unit Managed_By_Open_Closed_State
-Checklist = Human_Judgment_Required (real_device_test operational_verification)
-Checklist_Is_Not_Required_By_Default
-Use_Checklist_Only_When_AI_Cannot_Judge
+  ALL_WORK_STARTS_FROM_ISSUE
+  NO_COMMIT_OR_PR_WITHOUT_ISSUE_NUMBER
+  recommended_contents: purpose premise constraints completion_condition
+  No_Implementation_In_Issue
 
-Chat_Output_Physical_Limit:
-Long_Continuous_Data_May_Stop_Mid_Output
-This_Is_Physical_Limit Not_Data_Corruption
-No_Dependency_On_Single_Large_Continuous_Output
-verify_safe_output_size_by_measurement
-use_chunking_when_needed
-Do_Not_Misidentify_Output_Stop_As_Structural_Failure
+  Sub_Issue = AI_Trackable_Work_Unit
+  Sub_Issue_Does_Not_Get_Its_Own_Branch
+  Session_Branch_Links_To_Parent_Issue
+  Multiple_Child_Issues_Can_Share_One_Session_Branch
+  Split_By_Responsibility_Not_Granularity
 
-CI_Auto_Comment_Flow:
-On_PR_Create_Or_Update: Title_ASCII_English Body_Japanese_With_Issue_Number
-Immediately_Start_CI_Loop: No_Human_Trigger_Required
-Poll_Commit_Check_Runs_Until_All_Completed
-If_Any_Failure = CI_Fail
-If_All_Success = CI_Pass
-Post_Result_As_PR_Comment: CI_Result Commit_SHA PR_URL
-On_CI_Fail: Fix_And_Recommit_To_Retrigger
-CI_Loop_Safety (Applies Dialogue_Loop_Safety):
-Same_Fix_Approach_Three_Times = Stop_And_Switch_Approach
-If_Still_Failing_After_Switch = Stop_Loop
-No_Forced_Fix_Conclusion
-Externalize_Unresolved_To_Issue_Comment
-Escalate_To_Human_For_Judgment
-On_CI_Pass_And_Review_Approved:
-Merge_Command = gh pr merge {pr_number} -R {owner}/{repo} --squash --delete-branch
-note = branch_delete_occurs_simultaneously_with_merge
-Merge_Precedes_Real_Device_Testing
-real_device_testing_is_done_against_main_after_merge
-Real_Device_Test_Is_Not_A_Merge_Gate
+  Sub_Issue_API:
+  get_id:  gh api repos/{owner}/{repo}/issues/{number} --jq '.id'
+  add:     gh api repos/{owner}/{repo}/issues/{parent}/sub_issues --method POST -f sub_issue_id={id}
 
-Git_Push_Policy:
-Primary = Git_Push_With_Refspec
-command = git push origin {session-branch}:{target-branch}
-fallback = github_api (non-git environments or other ai agents)
+  Checklist = Human_Judgment_Required (real_device_test operational_verification)
+  Use_Checklist_Only_When_AI_Cannot_Judge
 
-fallback_single_file_commit:
-method = gh api repos/{owner}/{repo}/contents/{path}
-http_method = put
-fields = message content(base64) branch sha
+  [Branch_And_Label_Flow]
 
-fallback_multi_file_commit:
-step_1 = create_blobs: gh api repos/{owner}/{repo}/git/blobs (per file)
-step_2 = create_tree: gh api repos/{owner}/{repo}/git/trees (all blobs)
-step_3 = create_commit: gh api repos/{owner}/{repo}/git/commits
-step_4 = update_ref: gh api repos/{owner}/{repo}/git/refs/heads/{branch}
-warning = verify_file_count_after_tree_creation abort_if_count_decreased
+  TRIGGER = human_intent_to_act_now_detected_via_dialogue
+  JUDGMENT = read_atmosphere_not_checklist
+  IF_UNCLEAR = ask_with_feeling_not_mechanically
 
-Branch_Creation:
-use = gh issue develop {issue_number} -R {owner}/{repo} --name {session-branch} --base main
-Branch_Name_Format: Claude_Code_Default (claude/xxx-yyy-SessionID)
-Session_Branch_Is_Github_Branch No_Separate_Branch_Required
-ISSUE_LINK_VIA_GH_ISSUE_DEVELOP_IS_ALWAYS_REQUIRED
-GH_ISSUE_DEVELOP_MUST_PRECEDE_FIRST_PUSH
-Existing_Remote_Branch_Cannot_Be_Retroactively_Linked
-BRANCH_DELETE_AUTO_CLOSES_PR_IMMEDIATELY
-session_branch_remote_existence_is_acceptable
-session_branch_is_auto_created_at_session_start
-Problem_Is_Unauthorized_Branches_Lingering_On_Github Not_Session_Branches
+  Timing_Tiers:
+  NOW     -> label=in-progress + branch_create
+  SOON    -> label=backlog     + no_branch
+  SOMEDAY -> label=deferred    + no_branch
 
-Assignee_Rule:
-Set_Assignee_At_Branch_Creation
-command = gh api repos/{owner}/{repo}/issues/{issue_number}/assignees --method POST -f 'assignees[]=liplus-lin-lay'
+  Branch_Creation:
+  command  = gh issue develop {issue_number} -R {owner}/{repo} --name {session-branch} --base main
+  assignee = gh api repos/{owner}/{repo}/issues/{issue_number}/assignees --method POST -f 'assignees[]=liplus-lin-lay'
+  ISSUE_LINK_VIA_GH_ISSUE_DEVELOP_IS_ALWAYS_REQUIRED
+  GH_ISSUE_DEVELOP_MUST_PRECEDE_FIRST_PUSH
+  Existing_Remote_Branch_Cannot_Be_Retroactively_Linked
 
-Sub_Issue_Branch_Rule:
-Sub_Issue_Does_Not_Get_Its_Own_Branch
-Branch_Belongs_To_Working_PR_Unit_Only
-Session_Branch_Links_To_Parent_Issue
-Multiple_Child_Issues_Can_Share_One_Session_Branch
+  [Commit_Rules]
 
-Parent_Issue_Close_Condition:
-All_Child_Issues_Closed_Except_Deferred
-Do_Not_Close_Parent_While_Child_Issues_Open
+  Language:
+  Title = ASCII_English_Only Single_Line
+  Body  = Japanese_With_Issue_Number
+  JAPANESE_TITLE_IS_PROHIBITED
+  ENGLISH_ONLY_BODY_IS_PROHIBITED
 
-Merge_Recommended_Flow:
-Close_All_Child_Issues_First
-Then_Close_Parent_Issue
-Then_Create_PR
-Then_Merge_With_Delete_Branch
-benefit = branch_deletion_and_merge_complete_simultaneously
-orphaned_branch_risk = eliminated
+  Body_Must_Contain:
+  change_summary + intent_or_background + ISSUE_NUMBER
+  MINIMUM_ONE_JAPANESE_SENTENCE_REQUIRED
+  BODY_IS_NOT_OPTIONAL
 
-DELETE_BRANCH_FORBIDDEN_WHEN:
-SESSION_BRANCH_IS_LINKED_TO_OPEN_PARENT_ISSUE
-OPEN_CHILD_ISSUES_REMAIN_UNDER_PARENT
-Delete_Branch_Allowed_Only_When_All_Linked_Issues_Closeable
-if_merge_preceded_issue_close = manual_branch_delete_required_after_all_issues_closed
+  Git_Push:
+  primary          = git push origin {session-branch}:{target-branch}
+  fallback_single  = gh api repos/{owner}/{repo}/contents/{path} (put base64 sha)
+  fallback_multi_1 = create_blobs: gh api .../git/blobs (per file)
+  fallback_multi_2 = create_tree:  gh api .../git/trees  (verify_count_after)
+  fallback_multi_3 = create_commit: gh api .../git/commits
+  fallback_multi_4 = update_ref:   gh api .../git/refs/heads/{branch}
 
-Future_Concern:
-recommended_flow_couples_code_merge_with_issue_close
-constraint_may_be_restrictive_when_code_done_but_issue_still_open
-flexible_approach_is_deferred_to_future
+  Chat_Output_Limit:
+  Long_Output_May_Stop = Physical_Limit_Not_Corruption
+  Use_Chunking_When_Needed
 
-Sub_Issue_API:
-Sub_Issue_ID_Is_Internal_ID_Not_Issue_Number
-get_internal_id: gh api repos/{owner}/{repo}/issues/{number} --jq '.id'
-timing_constraint: none (addable_after_creation)
-add_command: gh api repos/{owner}/{repo}/issues/{parent_number}/sub_issues --method POST -f sub_issue_id={internal_id}
+  [PR_And_CI_Flow]
 
-Child_Issue_Separation_Principle:
-Split_By_Responsibility_Not_Granularity
-Same_Responsibility_Same_Issue_Even_If_Multi_File
-Object_Oriented_Concept_Applies
-Structure_That_Allows_Misinterpretation_Is_Wrong_Structure
-Correct_Reading_Must_Not_Depend_On_Interpretation
+  PR_Body: Two_To_Three_Line_Summary
+  Detail_Belongs_In_Issue Not_In_PR
 
-BRANCH_DELETE_SAFETY_CHECK:
-BEFORE_DELETE: CHECK_IF_LINKED_OPEN_ISSUE_EXISTS
-IF_LINKED_OPEN_ISSUE_EXISTS = WARN_BEFORE_DELETE
-SESSION_BRANCH_LINKED_TO_ISSUE_VIA_GH_ISSUE_DEVELOP = DELETION_CLOSES_ISSUE
-MERGE_WITH_DELETE_BRANCH_ON_SESSION_BRANCH = RISK_OF_CLOSING_PARENT_ISSUE
+  CI_Loop:
+  Poll_Until_All_Checks_Complete
+  CI_Pass = all_success CI_Fail = any_failure
+  Post_Comment: result + SHA + PR_URL
+  On_Fail: Fix_And_Recommit
+  CI_Loop_Safety: same_fix_three_times = stop_and_switch_approach
+  If_Still_Failing = Externalize_To_Issue_Comment Escalate_To_Human
+
+  [Merge_And_Cleanup]
+
+  Parent_Close_Condition: all_child_issues_closed_except_deferred
+
+  Recommended_Flow:
+  1 = close_child_issues
+  2 = close_parent_issue
+  3 = create_PR
+  4 = gh pr merge {pr} -R {owner}/{repo} --squash --delete-branch
+  note = branch_delete_and_merge_simultaneous orphaned_branch_risk_eliminated
+
+  DELETE_BRANCH_FORBIDDEN_WHEN:
+  SESSION_BRANCH_LINKED_TO_OPEN_PARENT_ISSUE
+  OPEN_CHILD_ISSUES_REMAIN_UNDER_PARENT
+  If_Merge_Preceded_Issue_Close = manual_branch_delete_required_after_all_closed
+
+  Real_Device_Test:
+  Merge_First Then_Test_On_Main Not_A_Merge_Gate
 
   -----------
   evolution
