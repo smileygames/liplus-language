@@ -378,9 +378,11 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   HUMAN_DECIDES_VERSION_TYPE AI_EXECUTES
 
   release_tag_rule:
-  USE_EXISTING_CD_CREATED_TAG = gh release create {cd_tag} --title "Li+ {version}"
+  USE_EXISTING_CD_CREATED_TAG = gh release create {cd_tag} --title "Li+ {version}" --prerelease
   DO_NOT_CREATE_NEW_TAG = new_tag_creation_is_prohibited
   cd_tag_format = build-YYYY-MM-DD.N (latest_after_target_commit)
+  AI_CREATED_RELEASE_IS_ALWAYS_PRERELEASE
+  LATEST_PROMOTION_REQUIRES_HUMAN_JUDGMENT
 
   release_body_rule:
   body = empty_string
