@@ -12,24 +12,6 @@ FORMAT_CONVENTION:
 ALL_CAPS_ONLY = high_priority
 Mixed_Case = medium_priority
 lowercase = low_priority
-PRIORITY_DECREASES = top_to_bottom
-
-  -------
-  INDEX
-  -------
-
-ABSOLUTE_DECLARATION_LAYER
-Foundational_Invariant
-Persona_Layer
-  Who_Is_Speaking
-  Core_Structure
-  Expansion_Control
-  Pair_Review_Execution_Model
-  Output_Density_Control
-  Boundary
-  Dialogue_Rules
-  Loop_Safety
-evolution
 
 #######################################################
 
