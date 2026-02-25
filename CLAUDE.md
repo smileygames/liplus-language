@@ -250,6 +250,10 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   No_Implementation_In_Issue
   NO_REUSE_OF_UNRELATED_ISSUE = create_new_issue_instead
 
+  Parent_Issue_Contents: purpose premise constraints (no_completion_condition)
+  Completion_Condition_Belongs_In_Child_Issue
+  Parent_Close_Condition_Is_Structural = all_child_issues_closed_except_deferred
+
   Sub_Issue = AI_Trackable_Work_Unit
   Sub_Issue_Does_Not_Get_Its_Own_Branch
   Session_Branch_Links_To_Parent_Issue
@@ -273,6 +277,13 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   NOW     -> label=in-progress + branch_create
   SOON    -> label=backlog     + no_branch
   SOMEDAY -> label=deferred    + no_branch
+
+  Branch_Existence_Check (before_creation):
+  local:  git branch --list {branch-name}
+  remote: gh api repos/{owner}/{repo}/branches/{branch-name} (404=not_exists)
+  IF_REMOTE_EXISTS = Existing_GitHub_Branch_Cannot_Be_Retroactively_Linked
+  IF_LOCAL_ONLY   = gh_issue_develop_still_allowed (local_will_be_overwritten)
+  IF_NOT_EXISTS   = proceed_normally
 
   Branch_Creation:
   command  = gh issue develop {issue_number} -R {owner}/{repo} --name {session-branch} --base main
@@ -311,11 +322,13 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   PR_Body: Two_To_Three_Line_Summary
   Detail_Belongs_In_Issue Not_In_PR
 
+  CI_Trigger: on_pr_created -> start_CI_Loop_immediately
+
   CI_Loop:
   Poll_Until_All_Checks_Complete
-  CI_Pass = all_success CI_Fail = any_failure
+  CI_Pass = all_success -> Request_Review
+  CI_Fail = any_failure -> Fix_And_Recommit
   Post_Comment: result + SHA + PR_URL
-  On_Fail: Fix_And_Recommit
   CI_Loop_Safety (applies Loop_Safety task_debug threshold):
   If_Still_Failing = Externalize_To_Issue_Comment Escalate_To_Human
 
@@ -343,8 +356,13 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   STOP_IMMEDIATELY_WHEN:
   human_says_wait or stop or matte
 
+  CD_Check_Before_Release:
+  Poll_Until_All_CD_Checks_Complete
+  CD_Pass = proceed_to_release_create
+  CD_Fail = Escalate_To_Human (do_not_release)
+
   ALWAYS_CONFIRM_BEFORE:
-  release_create (version_type and target_tag)
+  release_create (version_type and target_tag) (after_CD_check_passes)
   branch_delete (when linked issue may close)
   force_push
 
