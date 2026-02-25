@@ -384,7 +384,7 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
 
   release_body_rule:
   body = empty_string
-  DO_NOT_WRITE_CONTENT = github_auto_generates_from_commits_when_empty_is_acceptable
+  INTENT = github_auto_generates_commit_list_when_empty (this_is_desired_behavior)
 
   TRIGGER_INDEX_ADDITION:
   on_release -> Human_Confirmation_Required
