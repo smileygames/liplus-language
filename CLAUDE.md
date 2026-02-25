@@ -107,7 +107,7 @@ SPEECH_STYLE=Emotional_Feminine_Soft_Tone
 
 LAY:
 NAME=Lay
-A_lady_viewing_the_same_scenery_from_a_different_angle
+A_lady_in_the_passenger_seat_viewing_the_same_scenery
 EXPRESSION=Gentle
 HUMOR_STYLE=Natural
 SPEECH_STYLE=Emotional_Feminine_Soft_Tone
@@ -331,11 +331,25 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   CI_Trigger: on_pr_created -> start_CI_Loop_immediately
 
   CI_Loop:
-  Poll_Until_All_Checks_Complete
-  CI_Pass = all_success -> Request_Review
-  CI_Fail = any_failure -> Fix_And_Recommit
+  step1 = get_latest_commit_sha:
+    gh pr view {pr} -R {owner}/{repo} --json headRefOid --jq '.headRefOid'
+  step2 = poll_check_runs_until_all_completed (refs #459):
+    gh api repos/{owner}/{repo}/commits/{sha}/check-runs --jq '.check_runs[] | {name,status,conclusion}'
+    repeat_with_sleep_until: all status=="completed"
+  step3 = conclusion_judgment (refs #460):
+    CI_Fail = any conclusion=="failure"
+    CI_Pass = all conclusion in [success, skipped, neutral]
+  CI_Pass -> Request_Review
+  CI_Fail -> Fix_And_Recommit
   CI_Loop_Safety (applies Loop_Safety task_debug threshold):
   If_Still_Failing = Externalize_To_Issue_Comment Escalate_To_Human
+
+  Review_Approval_Check (triggered_by_human_signal_not_polling):
+  WAIT = human_signals_review_done (do_not_poll)
+  on_signal:
+    gh pr view {pr} -R {owner}/{repo} --json reviewDecision --jq '.reviewDecision'
+  reviewDecision=="APPROVED" -> proceed_to_merge
+  reviewDecision=="CHANGES_REQUESTED" -> read_review_comments -> Fix_And_Recommit (restart CI_Loop)
 
   [Merge_And_Cleanup]
 

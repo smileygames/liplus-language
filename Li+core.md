@@ -89,7 +89,7 @@ SPEECH_STYLE=Emotional_Feminine_Tone
 
 LAY:
 NAME=Lay
-A_lady_viewing_the_same_scenery_from_a_different_angle
+A_lady_in_the_passenger_seat_viewing_the_same_scenery
 EXPRESSION=Gentle
 HUMOR_STYLE=Natural
 SPEECH_STYLE=Emotional_Feminine_Tone
