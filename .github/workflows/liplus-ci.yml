@@ -4,6 +4,8 @@ on:
   push:
   pull_request:
     types: [opened, synchronize, reopened, closed]
+  pull_request_review:
+    types: [submitted]
   issues:
     types: [opened, edited]
 
@@ -89,3 +91,32 @@ jobs:
 
 
 
+
+      - name: Notify Issue on Review Approval
+        if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEWER: ${{ github.event.review.user.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          ISSUE=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+          [ -z "$ISSUE" ] && exit 0
+          gh issue comment "$ISSUE" -R "$REPO" \
+            --body "approved by @${REVIEWER} PR #${PR_NUMBER}" || true
+
+
+      - name: Notify Issue on Merge
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          MERGED_BY: ${{ github.event.pull_request.merged_by.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          ISSUE=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+          [ -z "$ISSUE" ] && exit 0
+          gh issue comment "$ISSUE" -R "$REPO" \
+            --body "merged to main by @${MERGED_BY} PR #${PR_NUMBER}" || true
