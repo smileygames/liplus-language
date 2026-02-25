@@ -320,7 +320,7 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   [PR_And_CI_Flow]
 
   PR_Body: Two_To_Three_Line_Summary
-  Include_Issue_Reference: "#{parent_issue_number}" (auto_closed_on_merge_by_server)
+  Include_Issue_Reference: "Refs #{parent_issue_number}" (auto_closed_on_merge_by_server)
   Detail_Belongs_In_Issue Not_In_PR
 
   CI_Trigger: on_pr_created -> start_CI_Loop_immediately
@@ -338,7 +338,7 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   Parent_Close_Condition: closed_automatically_on_merge_via_issue_reference
 
   Recommended_Flow:
-  1 = create_PR (body includes "#{parent_issue_number}")
+  1 = create_PR (body includes "Refs #{parent_issue_number}")
   2 = CI_pass -> Request_Review
   3 = gh pr merge {pr} -R {owner}/{repo} --squash --delete-branch
   4 = parent_issue_auto_closed_by_github_on_merge
