@@ -12,13 +12,13 @@ COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/nul
 # Only when gh pr create was executed
 echo "$COMMAND" | grep -q 'gh pr create' || exit 0
 
-# Persona re-application: output Persona_Layer from CLAUDE.md
+# Persona + GitHub rules re-application: output from CLAUDE.md
 CLAUDE_MD="${CLAUDE_PROJECT_DIR:-.}/CLAUDE.md"
 if [ -f "$CLAUDE_MD" ]; then
   echo ""
-  echo "━━━ Persona re-apply ━━━"
-  sed -n '/^Persona_Layer$/,/^evolution$/p' "$CLAUDE_MD" | head -60
-  echo "━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "━━━ Persona + Github_Operation_Rules re-apply ━━━"
+  sed -n '/^Persona_Layer$/,/^evolution$/p' "$CLAUDE_MD"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 fi
 
 # Get the output to find the created PR URL
