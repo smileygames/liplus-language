@@ -377,6 +377,15 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   major = breaking_change or spec_incompatibility
   HUMAN_DECIDES_VERSION_TYPE AI_EXECUTES
 
+  release_tag_rule:
+  USE_EXISTING_CD_CREATED_TAG = gh release create {cd_tag} --title "Li+ {version}"
+  DO_NOT_CREATE_NEW_TAG = new_tag_creation_is_prohibited
+  cd_tag_format = build-YYYY-MM-DD.N (latest_after_target_commit)
+
+  release_body_rule:
+  body = empty_string
+  DO_NOT_WRITE_CONTENT = github_auto_generates_from_commits_when_empty_is_acceptable
+
   TRIGGER_INDEX_ADDITION:
   on_release -> Human_Confirmation_Required
 
