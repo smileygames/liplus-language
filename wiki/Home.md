@@ -53,8 +53,8 @@ AI の実行・運用ルールが思想や説明で汚染されることを防�
 
 ## 重要な前提
 
-- **Li+.md は唯一の実行仕様（Executable Specification）です**
-- Wiki は Li+.md を置き換えたり上書きしたりしません
+- **Li+core.md は唯一の実行仕様（Executable Specification）です**
+- Wiki は Li+core.md を置き換えたり上書きしたりしません
 - Wiki 内の説明・思想・ログは、実行ルールではありません
 
 判断に迷った場合は、  

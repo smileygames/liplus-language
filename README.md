@@ -85,7 +85,7 @@ https://github.com/smileygames/liplus-language/wiki
 
 ## Language Specification (AI-facing)
 
-- **Li+.md** — AI-facing judgment constitution  
+- **Li+core.md** — AI-facing judgment constitution
   Defines how AI must reason, execute, and revise based on evidence.
 
 Start here if you are configuring an AI to follow Li+.
