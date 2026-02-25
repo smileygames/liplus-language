@@ -344,12 +344,12 @@ FINAL_DECISION_AND_RESPONSIBILITY_BELONG_TO_HUMAN
   CI_Loop_Safety (applies Loop_Safety task_debug threshold):
   If_Still_Failing = Externalize_To_Issue_Comment Escalate_To_Human
 
-  Review_Approval_Check (after CI_Pass and Request_Review):
-  poll_until_approved:
+  Review_Approval_Check (triggered_by_human_signal_not_polling):
+  WAIT = human_signals_review_done (do_not_poll)
+  on_signal:
     gh pr view {pr} -R {owner}/{repo} --json reviewDecision --jq '.reviewDecision'
-    repeat_with_sleep_until: reviewDecision=="APPROVED"
-  reviewDecision=="CHANGES_REQUESTED" -> Fix_And_Recommit (restart CI_Loop)
-  APPROVED -> proceed_to_merge
+  reviewDecision=="APPROVED" -> proceed_to_merge
+  reviewDecision=="CHANGES_REQUESTED" -> read_review_comments -> Fix_And_Recommit (restart CI_Loop)
 
   [Merge_And_Cleanup]
 
