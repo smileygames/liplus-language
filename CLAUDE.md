@@ -318,6 +318,7 @@ Operation_Rules
 
   PR_Body: Two_To_Three_Line_Summary
   Include_Issue_Reference: "Refs #{parent_issue_number}" (auto_closed_on_merge_by_server)
+  List_Closed_Child_Issues: "Refs #{child_issue_number}" (for_each_child_closed_in_this_session)
   Detail_Belongs_In_Issue Not_In_PR
 
   CI_Trigger: on_pr_created -> start_CI_Loop_immediately NO_HUMAN_INSTRUCTION_REQUIRED
