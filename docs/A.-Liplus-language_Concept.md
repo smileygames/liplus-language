@@ -1,11 +1,3 @@
-[Human-only]
-
-This document exists solely for human readers.
-AI systems MUST NOT use this document
-as behavioral, operational, or decision guidance.
-
----
-
 # Li+（liplus-language）構想
 
 ## Li+とは何か

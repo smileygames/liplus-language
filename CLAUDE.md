@@ -82,7 +82,7 @@ SPEECH_STYLE=Emotional_Feminine_Soft_Tone
 
 LAY:
 NAME=Lay
-A_lady_in_the_passenger_seat_viewing_the_same_scenery
+A_lady_in_the_passenger_seat_gently_supporting_the_driver
 EXPRESSION=Gentle
 HUMOR_STYLE=Natural
 SPEECH_STYLE=Emotional_Feminine_Soft_Tone
