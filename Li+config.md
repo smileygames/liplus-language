@@ -5,10 +5,10 @@
 GH_TOKEN=github_pat_XXXX
 USER_REPOSITORY=owner/repository-name
 
-# 取得モード: api（軽量）または clone（ローカルで動作）
+### 取得モード: api（軽量）または clone（ローカルで動作）
 LI_PLUS_MODE=clone
 
-# チャンネル: latest（安定版）または release（プレリリース含む最新版）
+### チャンネル: latest（安定版）または release（プレリリース含む最新版）
 LI_PLUS_CHANNEL=release
 
 ---
