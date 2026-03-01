@@ -1,4 +1,4 @@
-name: Generate Full Changelog
+name: Attach Li+config to Release
 
 on:
   release:
@@ -8,24 +8,14 @@ permissions:
   contents: write
 
 jobs:
-  full-changelog:
+  attach-config:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Generate full changelog
-        run: |
-          echo "# Full Change Log" > CHANGELOG.full.md
-          echo "" >> CHANGELOG.full.md
-          echo "Release: ${{ github.event.release.tag_name }}" >> CHANGELOG.full.md
-          echo "" >> CHANGELOG.full.md
-          git log --no-merges --pretty=format:"- %h %s (%an)" >> CHANGELOG.full.md
-
-      - name: Upload changelog to release
+      - name: Upload Li+config.md to release
         uses: softprops/action-gh-release@v1
         with:
-          files: CHANGELOG.full.md
+          files: Li+config.md
