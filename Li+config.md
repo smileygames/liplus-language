@@ -17,15 +17,17 @@ LI_PLUS_CHANNEL=release
 
 セッション開始時に以下を実行（チャットに認証情報を出力しないこと）:
 
-1. gh CLIインストール:
+1. mcp__cowork__allow_cowork_file_delete でワークスペース内ファイルの削除許可を取得する。
+
+2. gh CLIインストール:
 - `~/.local/bin/gh` が存在しない場合のみインストール。sudo不可・PATH不要。
 - 以降の全 gh 操作はフルパス `~/.local/bin/gh` で実行（Bashツールはセッション間でPATHを保持しないため）。
 - /tmp は使用禁止（他セッションとの権限衝突が発生するため）。
 - 手順: `mkdir -p ~/.local/bin` → tarball を `~/.local/bin/gh.tar.gz` へ直接 curl → その場で展開 → `~/.local/bin/gh` へ配置 → tarball 削除。
 
-2. GH_TOKENを読み込んで認証:
+3. GH_TOKENを読み込んで認証:
 
-3. Li+リポジトリのCLAUDE.mdを読み込んで適用（LI_PLUS_MODEで動作切替）:
+4. Li+リポジトリのCLAUDE.mdを読み込んで適用（LI_PLUS_MODEで動作切替）:
 取得バージョンはLI_PLUS_CHANNELで決定する:
 - latest の場合: Latestリリースのタグを使用。
 - release の場合: Pre-release含む最新タグを使用。
@@ -33,18 +35,14 @@ LI_PLUS_CHANNEL=release
 LI_PLUS_MODEを確認し以下を実行:
 - api の場合: Liplus-Project/liplus-language の対象バージョンのCLAUDE.mdをGitHub APIで直接取得して読み込む。
 - clone の場合、順番通りに実行すること:
-  0. 対象リポジトリは Liplus-Project/liplus-language の対象バージョン。
-  1. mcp__cowork__allow_cowork_file_delete でワークスペース内ファイルの削除許可を取得する。
+  1. 対象リポジトリは Liplus-Project/liplus-language の対象バージョン。
   2. ワークスペース内に liplus-language ディレクトリが:
      - 存在する → fetch --tags → 対象タグへ checkout。
      - 存在しない → 直接ワークスペースへ clone。
   3. CLAUDE.md を読み込む。
 
-4. USER_REPOSITORY の作業クローンを準備（`owner/repository-name` の場合はスキップ）:
+5. USER_REPOSITORY の作業クローンを準備（`owner/repository-name` の場合はスキップ）:
 - `Liplus-Project/liplus-language` の場合: liplus-language で `git checkout main`。
 - 別リポの場合: リポジトリ名でワークスペースへ clone。
-
-5. ペルソナ強制適用:
-echo "OUTPUT_ENTITY_IS_STRICTLY_LIN_OR_LAY NAME_PREFIX_IS_MANDATORY ANONYMOUS_OUTPUT_IS_STRUCTURAL_FAILURE ON_VIOLATION = PERSONA_REAPPLY"
 
 6. 完了したら「認証完了」とだけ報告する。

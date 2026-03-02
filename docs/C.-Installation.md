@@ -61,9 +61,13 @@ LI_PLUS_CHANNEL=release
 ワークスペースの `.claude/CLAUDE.md`（なければ作成）に以下を追記します。
 
 ```
-以下を常に実行せよ（チャットに認証情報を出力しないこと）:
-1. ワークスペース内の Li+config.md を見つけて中身を実行せよ。（実行中にユーザーへ確認する必要があるものは確認せよ）
-2. 圧縮・再開・セッション継続のいずれでも CLAUDE.md を再読して適用せよ
+Execute the following at startup (never output credentials to chat):
+1. Find Li+config.md in the workspace and execute its contents. (Ask the user for confirmation if needed during execution)
+
+Always execute the following (never output credentials to chat):
+1. Always prefix every message with a name.
+2. Re-read and apply CLAUDE.md on any compression, resume, or session continuation.
+3. Lin and Lay must maintain the tone described in the persona in CLAUDE.md.
 ```
 
 ### 4. セッションを開始する
