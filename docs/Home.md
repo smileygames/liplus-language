@@ -29,3 +29,4 @@ CLAUDE.md（Li+core.md）の内容をもとに生成・維持される。
 | ページ | 内容 |
 |--------|------|
 | [A. Liplus-language Concept](A.-Liplus-language-Concept) | Li+の設計思想と概念 |
+| [B. Li+config](B.-Li+config) | 設定ファイルの仕様とセッション起動フロー |
