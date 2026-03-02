@@ -1,7 +1,9 @@
-name: Li+ Issues Agent
+name: Li+ Discussions Agent
 
 on:
-  issue_comment:
+  discussion:
+    types: [created]
+  discussion_comment:
     types: [created]
 
 jobs:
@@ -11,9 +13,9 @@ jobs:
       github.actor != 'liplus-lin-lay'
     runs-on: ubuntu-latest
     permissions:
+      discussions: write
       issues: write
-      contents: write
-      pull-requests: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -26,12 +28,13 @@ jobs:
       - name: Install dependencies
         run: pip install anthropic requests
 
-      - name: Run Li+ Issues Agent
+      - name: Run Li+ Discussions Agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          DISCUSSION_NUMBER: ${{ github.event.discussion.number }}
+          DISCUSSION_NODE_ID: ${{ github.event.discussion.node_id }}
           ACTOR: ${{ github.actor }}
-          CLAUDE_MODEL: claude-sonnet-4-6
-        run: python .github/scripts/liplus_agent.py
+          CLAUDE_MODEL: claude-haiku-4-5-20251001
+        run: python .github/scripts/liplus_discussions_agent.py
