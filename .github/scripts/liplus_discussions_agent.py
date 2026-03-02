@@ -53,6 +53,13 @@ def get_discussion() -> dict:
                   body
                   isMinimized
                   author { login }
+                  replies(first: 50) {
+                    nodes {
+                      body
+                      isMinimized
+                      author { login }
+                    }
+                  }
                 }
               }
             }
@@ -139,6 +146,13 @@ for comment in discussion["comments"]["nodes"]:
     login = (comment.get("author") or {}).get("login", "")
     role = "assistant" if login in BOT_LOGINS else "user"
     raw.append((role, comment["body"]))
+    # Flatten replies directly after the comment
+    for reply in comment.get("replies", {}).get("nodes", []):
+        if reply.get("isMinimized"):
+            continue
+        reply_login = (reply.get("author") or {}).get("login", "")
+        reply_role = "assistant" if reply_login in BOT_LOGINS else "user"
+        raw.append((reply_role, reply["body"]))
 
 merged = []
 for role, content in raw:
