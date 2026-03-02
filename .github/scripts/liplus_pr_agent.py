@@ -116,6 +116,16 @@ def get_review_comments() -> list:
     return gh_get(f"/repos/{OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}/comments")
 
 
+def get_pr_diff() -> str:
+    """Get changed files with their diffs (patch)."""
+    files = gh_get(f"/repos/{OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}/files")
+    parts = []
+    for f in files:
+        patch = f.get("patch", "(binary or too large)")
+        parts.append(f"### {f['filename']} ({f['status']})\n```diff\n{patch}\n```")
+    return "\n\n".join(parts) if parts else "(no changed files)"
+
+
 def merge_pr(pr: dict) -> bool:
     try:
         gh_put(
@@ -187,12 +197,14 @@ timeline_comments = get_pr_comments()
 reviews = get_pr_reviews()
 # Gather inline review comments
 inline_comments = get_review_comments()
+# Gather diff
+pr_diff = get_pr_diff()
 
 # Build conversation history from timeline
 messages = []
 
 # Initial context as first user message
-context_parts = [f"PR #{PR_NUMBER}: {pr_title}\n\n{pr_body}"]
+context_parts = [f"PR #{PR_NUMBER}: {pr_title}\n\n{pr_body}\n\n## Changed Files (Diff)\n{pr_diff}"]
 
 # Add reviews to context
 for review in reviews:
