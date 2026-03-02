@@ -165,17 +165,31 @@ def get_pr_head_ref() -> str:
     return pr_data["head"]["ref"]
 
 
-def apply_fixes_and_push(fixes: list[tuple[str, str]], commit_msg: str) -> bool:
-    """Write files, commit, and push to the PR branch."""
+def apply_fixes_and_push(patches: list[tuple[str, str, str]], commit_msg: str) -> bool:
+    """Apply old→new replacements to files, commit, and push to the PR branch.
+    patches: list of (filepath, old_text, new_text)
+    """
     try:
         branch = get_pr_head_ref()
-        # Ensure we're on the PR branch
         subprocess.run(["git", "checkout", branch], check=True, capture_output=True)
-        for path, content in fixes:
-            os.makedirs(os.path.dirname(path) if os.path.dirname(path) else ".", exist_ok=True)
+        changed_files = set()
+        for path, old_text, new_text in patches:
+            if not os.path.exists(path):
+                print(f"File not found: {path}")
+                continue
+            with open(path, "r", encoding="utf-8") as f:
+                original = f.read()
+            if old_text not in original:
+                print(f"old_text not found in {path}, skipping patch.")
+                continue
+            patched = original.replace(old_text, new_text, 1)
             with open(path, "w", encoding="utf-8") as f:
-                f.write(content)
+                f.write(patched)
             subprocess.run(["git", "add", path], check=True, capture_output=True)
+            changed_files.add(path)
+        if not changed_files:
+            print("No files were patched.")
+            return False
         subprocess.run(
             ["git", "commit", "-m", commit_msg],
             check=True, capture_output=True,
@@ -184,23 +198,39 @@ def apply_fixes_and_push(fixes: list[tuple[str, str]], commit_msg: str) -> bool:
             ["git", "push", "origin", branch],
             check=True, capture_output=True,
         )
-        print(f"Pushed fix commit to {branch}.")
+        print(f"Pushed fix commit to {branch}: {changed_files}")
         return True
     except subprocess.CalledProcessError as e:
         print(f"Git operation failed: {e.stderr.decode() if e.stderr else e}")
         return False
 
 
-def parse_fixes(reply: str) -> tuple[list[tuple[str, str]], str]:
-    """Extract ```fix:path blocks from Claude's reply. Returns (fixes, cleaned_reply)."""
-    fixes = []
-    pattern = re.compile(r"```fix:([^\n]+)\n([\s\S]*?)```", re.MULTILINE)
-    for m in pattern.finditer(reply):
-        path = m.group(1).strip()
-        content = m.group(2)
-        fixes.append((path, content))
-    cleaned = pattern.sub("", reply).strip()
-    return fixes, cleaned
+def parse_fixes(reply: str) -> tuple[list[tuple[str, str, str]], str]:
+    """Extract fix blocks from Claude's reply.
+
+    Expected format:
+        ```fix:path/to/file.py
+        <<<
+        old text
+        ===
+        new text
+        >>>
+        ```
+
+    Returns (patches, cleaned_reply) where patches = [(path, old, new), ...]
+    """
+    patches = []
+    block_pattern = re.compile(r"```fix:([^\n]+)\n([\s\S]*?)```", re.MULTILINE)
+    hunk_pattern = re.compile(r"<<<\n([\s\S]*?)\n===\n([\s\S]*?)\n>>>", re.MULTILINE)
+    for block in block_pattern.finditer(reply):
+        path = block.group(1).strip()
+        body = block.group(2)
+        for hunk in hunk_pattern.finditer(body):
+            old_text = hunk.group(1)
+            new_text = hunk.group(2)
+            patches.append((path, old_text, new_text))
+    cleaned = block_pattern.sub("", reply).strip()
+    return patches, cleaned
 
 
 def merge_pr(pr: dict) -> bool:
@@ -246,14 +276,20 @@ SCOPE:
 
   On_Changes_Requested:
     - レビューコメントとdiffを読んで修正内容を判断する
-    - 修正できる場合は以下の形式でファイルの完全な内容を出力する:
+    - 修正できる場合は変更箇所のみ以下の形式で出力する（ファイル全体は不要）:
       ```fix:path/to/file.py
-      [ファイルの完全な内容]
+      <<<
+      変更前のコード（完全一致する文字列）
+      ===
+      変更後のコード
+      >>>
       ```
-    - 複数ファイルある場合はブロックを複数並べる
+    - 同じファイルに複数箇所ある場合は<<<===>>>を複数並べる
+    - 別ファイルなら```fix:path```ブロックを複数並べる
     - fixブロックの後に簡潔な説明を添える
     - スクリプトが自動でファイルを書き換えてcommit・pushする
-    - git コマンドを自分で実行しようとしてはいけない
+    - git / shell コマンドを自分で実行しようとしてはいけない
+    - ファイル全体を出力してはいけない（変更箇所だけ）
 
   On_Comment:
     - コメントの内容に対してPRコメントで自然に応答する
@@ -371,7 +407,7 @@ if REVIEW_STATE == "approved":
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 response = client.messages.create(
     model=CLAUDE_MODEL,
-    max_tokens=1024,
+    max_tokens=4096,
     system=system_prompt,
     messages=messages,
 )
