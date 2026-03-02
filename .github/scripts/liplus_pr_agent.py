@@ -256,20 +256,37 @@ if messages and messages[-1]["role"] == "assistant":
     messages.append({"role": "user", "content": "（最新の状況に対応してください）"})
 
 
-# ── Handle approved: merge then notify ───────────────────────────────────────
+# ── Handle approved: merge only if all reviewers cleared ─────────────────────
+
+def is_all_clear(reviews: list) -> bool:
+    """Check that no reviewer has an unresolved CHANGES_REQUESTED state."""
+    latest = {}
+    for r in reviews:
+        login = (r.get("user") or {}).get("login", "")
+        state = r.get("state", "")
+        if login and state in ("APPROVED", "CHANGES_REQUESTED", "DISMISSED"):
+            latest[login] = state
+    # Block if any reviewer still has CHANGES_REQUESTED
+    return not any(s == "CHANGES_REQUESTED" for s in latest.values())
 
 if REVIEW_STATE == "approved":
-    merged = merge_pr(pr)
-    if merged:
-        # Let Claude write the merge announcement comment
-        messages.append({
-            "role": "user",
-            "content": f"マージが完了しました。PRコメントで完了報告をしてください。"
-        })
+    if is_all_clear(reviews):
+        merged = merge_pr(pr)
+        if merged:
+            messages.append({
+                "role": "user",
+                "content": "マージが完了しました。PRコメントで完了報告をしてください。"
+            })
+        else:
+            messages.append({
+                "role": "user",
+                "content": "マージに失敗しました。PRコメントで状況を報告してください。"
+            })
     else:
+        # Still has unresolved changes_requested from other reviewers
         messages.append({
             "role": "user",
-            "content": "マージに失敗しました。PRコメントで状況を報告してください。"
+            "content": "approvedが来ましたが、他のレビュアーのchanges_requestedが未解決です。PRコメントで状況を報告してください。"
         })
 
 
