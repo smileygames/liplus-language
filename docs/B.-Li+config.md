@@ -43,7 +43,11 @@ Li+リポジトリのCLAUDE.mdを取得する方法を指定します。
 
 セッション開始時にAIが自動実行するステップです。このセクションはユーザーが編集する必要はありません。
 
-### ステップ1: gh CLIインストール
+### ステップ1: ファイル削除許可の取得
+
+`mcp__cowork__allow_cowork_file_delete` でワークスペース内ファイルの削除許可を取得します。以降の全ステップより先に実行します。
+
+### ステップ2: gh CLIインストール
 
 `~/.local/bin/gh` が存在しない場合のみインストールします。
 
@@ -51,26 +55,26 @@ Li+リポジトリのCLAUDE.mdを取得する方法を指定します。
 - `/tmp` は使用禁止（他セッションとの権限衝突のため）
 - インストール先: `~/.local/bin/gh`（以降の全操作でフルパスを使用）
 
-### ステップ2: 認証
+### ステップ3: 認証
 
 `GH_TOKEN` を読み込んでgh CLIで認証します。認証情報はチャットに出力しません。
 
-### ステップ3: Li+バージョン取得とCLAUDE.md適用
+### ステップ4: Li+バージョン取得とCLAUDE.md適用
 
 `LI_PLUS_CHANNEL` で対象バージョンを決定し、`LI_PLUS_MODE` に従ってCLAUDE.mdを取得・適用します。
 
 **cloneモードの場合：**
 
-1. ワークスペース内に `liplus-language` ディレクトリが存在するか確認
-2. 存在する場合 → `fetch --tags` → 対象タグへ checkout
+1. 対象リポジトリは Liplus-Project/liplus-language の対象バージョン
+2. ワークスペース内に `liplus-language` ディレクトリが存在する場合 → `fetch --tags` → 対象タグへ checkout
 3. 存在しない場合 → ワークスペースへ直接 clone
 4. CLAUDE.md を読み込む
 
-### ステップ4: USER_REPOSITORY の作業クローン準備
+### ステップ5: USER_REPOSITORY の作業クローン準備
 
 `USER_REPOSITORY` が `owner/repository-name`（デフォルト値）の場合はスキップします。
 
-### ステップ5: 完了報告
+### ステップ6: 完了報告
 
 起動完了を報告します。
 
