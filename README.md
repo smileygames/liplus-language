@@ -1,112 +1,109 @@
 # Li+ (liPlus) Language
 
-Li+ is a **language / protocol for reality-driven AI development**.
+Li+ は、**最高級プログラム言語**である。
 
-It defines a minimal structure where AI can safely be wrong,  
-observe real execution results, and iterate based on evidence —  
-without confusing speculation with facts.
+最高級とは、高級言語の上のレイヤーに位置するという意味だ。
 
-Li+ does not define new syntax.  
-It defines **how AI should reason, execute, and stop**.
+```
+人間（要求・自然言語）
+↓
+Li+AI（対話型コンパイラ・最高級言語）
+↓
+プログラミング言語（高級言語）
+↓
+機械語（ハード・ソフトウェア）
+```
 
----
-
-## Why Li+ Exists
-
-Most AI-assisted development fails for a simple reason:
-
-> **AI is forced to reason without access to reality.**
-
-Li+ enforces a loop where:
-
-- assumptions are written explicitly,
-- implementations are executed,
-- only execution results are treated as facts,
-- humans retain final responsibility.
+C、Python、Rustといった高級言語は「書きやすさ」を解決した。
+Li+が解決するのは、**「書く」という行為そのもの**だ。
 
 ---
 
-## What Li+ Is (and Is Not)
+## Li+とは何か
 
-**Li+ is:**
-- A protocol for specification-driven AI development
-- A language for constraining AI judgment
-- A structure where failure is expected and safe
-- A way to separate speculation from evidence
+Li+言語に「書き方」という概念はない。
 
-**Li+ is not:**
-- A new programming language
-- A quality guarantee
-- A fully autonomous development system
-- A replacement for human responsibility
+人間は要求を伝えるだけでいい。足りない部分はAIが聞き出す。対話の結果として、**プログラム・テスト・仕様書**が成果物として渡される。
+
+内部的には、GitHubのIssueのような**要求スレッド**がコードとして機能している。人間が自然言語で要求を書き、AIが仕様を蒸留し、人間が承認した瞬間にコンパイル（実装）が始まる。
+
+Li+AIは自己修正コンパイラだ。CIでエラーが出ても自分で修正ループに入る。解消できないときだけ、人間にエラーを返す。
+
+**人間が介入するのは、AIが諦めたときだけだ。**
 
 ---
 
-## Quick Start
+## Li+プログラム（Li+core.md）
 
-You can experience Li+ in minutes.
+Li+core.mdは、**Li+言語で書かれた最初のプログラム**である。
 
-👉 **Quick Start with CI (5 minutes)**  
-https://github.com/smileygames/liplus-language/wiki/Quick-Start-with-CI-(5-Minutes)
-
-This walkthrough demonstrates a **minimal Li+ execution loop**  
-using CI as an execution-based debugger.
+AIに渡すことで、AIの振る舞いを揃えるための実行プログラムだ。
+Li+を適用されたAIは **Lin** または **Lay** として応答する。
 
 ---
 
-## Example
+## 正しさの定義
 
-See how Li+ behaves in a complete (hypothetical) project:
+> 「でも動いてるからいいでしょ」——これがLi+における最強の反論だ。
 
-👉 **Example: A Hypothetical Li+ Project**  
-https://github.com/smileygames/liplus-language/wiki/Example:-A-Hypothetical-Li+-Project
+仕様書は仮説。設計は予想。内部の美しさは評価対象外。
 
-This is not a best practice — just one possible execution flow.
-
----
-
-## Learn More (Human-facing)
-
-The Wiki contains the full human-facing documentation:
-
-- Design Philosophy  
-- Execution Loop (Semantics)  
-- Time Semantics (v0.3)  
-- Roles and Responsibilities  
-- Li+ Enabled Repository  
-- Policies & Conventions  
-- FAQ  
-- Examples and Quick Start
-
-👉 Wiki:  
-https://github.com/smileygames/liplus-language/wiki
+正しさは常に、**観測可能な現実の挙動**によってのみ定義される。
 
 ---
 
-## Language Specification (AI-facing)
+## セットアップ
 
-- **Li+core.md** — AI-facing judgment constitution
-  Defines how AI must reason, execute, and revise based on evidence.
+👉 **[インストールガイド](https://github.com/Liplus-Project/liplus-language/wiki/C.-Installation)**
 
-Start here if you are configuring an AI to follow Li+.
+Li+configをワークスペースに配置するだけで、セッション開始時にAIが自動的にLi+を適用します。
 
 ---
 
-## Versioning Philosophy
+## ドキュメント
 
-Li+ separates **execution facts** from **human decisions**.
+👉 **Wiki**: https://github.com/Liplus-Project/liplus-language/wiki
 
-- Build tags represent executed reality
-- Versions are human-facing labels
-- Releases are explicit human decisions
+| ページ | 内容 |
+|--------|------|
+| [Li+core](https://github.com/Liplus-Project/liplus-language/wiki/1.-Liplus_core) | 中核仕様（ペルソナ・挙動・タスクモード） |
+| [Loop Safety](https://github.com/Liplus-Project/liplus-language/wiki/2.-Loop_Safety) | 繰り返し失敗ループへの対処 |
+| [Operational GitHub](https://github.com/Liplus-Project/liplus-language/wiki/3.-Operational_GitHub) | GitHub運用ルール |
+| [Li+config](https://github.com/Liplus-Project/liplus-language/wiki/B.-Li+config) | 設定ファイルの仕様 |
+| [Installation](https://github.com/Liplus-Project/liplus-language/wiki/C.-Installation) | セットアップ手順 |
+| [Li+とは](https://github.com/Liplus-Project/liplus-language/wiki/A.-Liplus-language-Concept) | 設計思想と概念 |
+
+---
+
+## 最低動作環境
+
+Li+AIとして機能するには、それなりの性能が必要だ。
+
+| モデル | 結果 | 理由 |
+|--------|------|------|
+| Claude Haiku 4.5 | × | Li+core.mdを適用できない |
+| Claude Sonnet 4.6（claude.ai） | △ | ドキュメント製作に強い。実務の継続作業には向かない |
+| Claude Code Sonnet 4.6 | ○ | 開発作業に強い。長いドキュメント生成は苦手 |
+| **Claude Cowork（推奨）** | **◎** | **現在の推奨環境。ファイルアクセス・GitHub連携・Li+config自動適用がひとつの環境で完結する** |
+
+**最低動作環境：Claude Sonnet 4.6以上相当のAI**
+
+---
+
+## バージョン種別ルール
+
+| バージョン | 適用条件 |
+|----------|--------|
+| patch | バグ修正・設定・ルール変更 |
+| minor | 新機能・動作変更 |
+| major | 破壊的変更・仕様非互換 |
 
 ---
 
 ## License
 
-License: Apache-2.0  
-Not affiliated with OpenAI or GitHub.
+License: Apache-2.0
 
-Copyright © 2026 Yoshiharu Uematsu  
-Licensed under the Apache License, Version 2.0.  
+Copyright © 2026 Yoshiharu Uematsu
+Licensed under the Apache License, Version 2.0.
 See the LICENSE file for details.
