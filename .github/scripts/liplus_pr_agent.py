@@ -65,6 +65,33 @@ def gh_post(path: str, data: dict) -> dict:
     return resp.json()
 
 
+def gh_graphql(query: str, variables: dict = None) -> dict:
+    resp = requests.post(
+        "https://api.github.com/graphql",
+        headers={"Authorization": f"bearer {GITHUB_TOKEN}"},
+        json={"query": query, "variables": variables or {}},
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    if "errors" in data:
+        raise Exception(f"GraphQL error: {data['errors']}")
+    return data["data"]
+
+
+def get_pr_review_decision() -> str:
+    """Return the authoritative reviewDecision for the PR via GraphQL."""
+    data = gh_graphql("""
+        query($owner: String!, $name: String!, $number: Int!) {
+          repository(owner: $owner, name: $name) {
+            pullRequest(number: $number) {
+              reviewDecision
+            }
+          }
+        }
+    """, {"owner": OWNER, "name": REPO_NAME, "number": PR_NUMBER})
+    return data["repository"]["pullRequest"]["reviewDecision"] or ""
+
+
 def gh_put(path: str, data: dict) -> dict:
     resp = requests.put(
         f"https://api.github.com{path}",
@@ -258,19 +285,11 @@ if messages and messages[-1]["role"] == "assistant":
 
 # ── Handle approved: merge only if all reviewers cleared ─────────────────────
 
-def is_all_clear(reviews: list) -> bool:
-    """Check that no reviewer has an unresolved CHANGES_REQUESTED state."""
-    latest = {}
-    for r in reviews:
-        login = (r.get("user") or {}).get("login", "")
-        state = r.get("state", "")
-        if login and state in ("APPROVED", "CHANGES_REQUESTED", "DISMISSED"):
-            latest[login] = state
-    # Block if any reviewer still has CHANGES_REQUESTED
-    return not any(s == "CHANGES_REQUESTED" for s in latest.values())
-
 if REVIEW_STATE == "approved":
-    if is_all_clear(reviews):
+    # Double-check the PR's authoritative reviewDecision via GraphQL
+    review_decision = get_pr_review_decision()
+    print(f"reviewDecision: {review_decision}")
+    if review_decision == "APPROVED":
         merged = merge_pr(pr)
         if merged:
             messages.append({
@@ -283,10 +302,10 @@ if REVIEW_STATE == "approved":
                 "content": "マージに失敗しました。PRコメントで状況を報告してください。"
             })
     else:
-        # Still has unresolved changes_requested from other reviewers
+        # reviewDecision is not APPROVED (e.g. CHANGES_REQUESTED or REVIEW_REQUIRED)
         messages.append({
             "role": "user",
-            "content": "approvedが来ましたが、他のレビュアーのchanges_requestedが未解決です。PRコメントで状況を報告してください。"
+            "content": f"approvedイベントが来ましたが、PRのreviewDecisionが{review_decision}のためマージをブロックしました。PRコメントで状況を報告してください。"
         })
 
 
