@@ -25,11 +25,13 @@ jobs:
       - name: Configure git and checkout PR branch
         env:
           PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          GH_TOKEN: ${{ github.token }}
+          PAT: ${{ secrets.GH_TOKEN }}
+          DEFAULT_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          TOKEN="${PAT:-$DEFAULT_TOKEN}"
+          git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.git"
           if [ -n "$PR_HEAD_REF" ]; then
             git checkout "$PR_HEAD_REF"
           fi

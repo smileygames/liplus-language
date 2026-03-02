@@ -382,7 +382,9 @@ if REVIEW_STATE == "approved":
     # Double-check the PR's authoritative reviewDecision via GraphQL
     review_decision = get_pr_review_decision()
     print(f"reviewDecision: {review_decision}")
-    if review_decision == "APPROVED":
+    # null means no required reviews configured → trust the event state
+    # CHANGES_REQUESTED means another reviewer blocked → don't merge
+    if review_decision in ("APPROVED", ""):
         merged = merge_pr(pr)
         if merged:
             messages.append({
@@ -395,7 +397,7 @@ if REVIEW_STATE == "approved":
                 "content": "マージに失敗しました。PRコメントで状況を報告してください。"
             })
     else:
-        # reviewDecision is not APPROVED (e.g. CHANGES_REQUESTED or REVIEW_REQUIRED)
+        # reviewDecision is CHANGES_REQUESTED or REVIEW_REQUIRED → block
         messages.append({
             "role": "user",
             "content": f"approvedイベントが来ましたが、PRのreviewDecisionが{review_decision}のためマージをブロックしました。PRコメントで状況を報告してください。"
