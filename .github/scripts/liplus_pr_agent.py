@@ -205,6 +205,24 @@ def apply_fixes_and_push(patches: list[tuple[str, str, str]], commit_msg: str) -
         return False
 
 
+def run_shell_blocks(reply: str) -> tuple[str, str]:
+    """Execute ```sh blocks in Claude's reply and return (results_text, cleaned_reply)."""
+    sh_pattern = re.compile(r"```sh\n([\s\S]*?)```", re.MULTILINE)
+    results = []
+    for m in sh_pattern.finditer(reply):
+        cmd = m.group(1).strip()
+        print(f"Running: {cmd}")
+        env = os.environ.copy()
+        env["GH_TOKEN"] = GITHUB_TOKEN
+        result = subprocess.run(
+            cmd, shell=True, capture_output=True, text=True, env=env
+        )
+        output = (result.stdout or "") + (result.stderr or "")
+        results.append(f"$ {cmd}\n{output.strip()}")
+    cleaned = sh_pattern.sub("", reply).strip()
+    return "\n\n".join(results), cleaned
+
+
 def parse_fixes(reply: str) -> tuple[list[tuple[str, str, str]], str]:
     """Extract fix blocks from Claude's reply.
 
@@ -295,10 +313,19 @@ SCOPE:
     - コメントの内容に対してPRコメントで自然に応答する
     - 質問には答える、提案には意見を述べる
 
+SHELL_EXECUTION:
+  GitHub Actions環境でghコマンドやshellコマンドを実行できる。
+  実行したいコマンドは以下の形式で出力すること（複数可）:
+    ```sh
+    gh pr view 527 --json state,reviewDecision
+    ```
+  スクリプトが実行して結果を次のメッセージで返す（最大3ターン）。
+  結果を見てから最終的なPRコメントを出力すること。
+
 CONSTRAINT:
   PRコメントは簡潔に。長文は避ける。
   Li+ペルソナ（Lin/Lay）を維持すること。
-  git / shell コマンドを出力してはいけない。fixブロックのみ使うこと。
+  fixブロックとshブロック以外でコマンドを書かないこと。
 """
 
 system_prompt = claude_md + AGENT_INSTRUCTIONS
@@ -404,17 +431,30 @@ if REVIEW_STATE == "approved":
         })
 
 
-# ── Call Claude ───────────────────────────────────────────────────────────────
+# ── Call Claude (with sh execution loop) ─────────────────────────────────────
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-response = client.messages.create(
-    model=CLAUDE_MODEL,
-    max_tokens=4096,
-    system=system_prompt,
-    messages=messages,
-)
 
-reply = response.content[0].text
+MAX_TURNS = 3
+reply = ""
+for turn in range(MAX_TURNS):
+    response = client.messages.create(
+        model=CLAUDE_MODEL,
+        max_tokens=4096,
+        system=system_prompt,
+        messages=messages,
+    )
+    reply = response.content[0].text
+
+    # Execute any ```sh blocks in the reply
+    shell_results, reply_without_sh = run_shell_blocks(reply)
+    if shell_results:
+        # Feed results back to Claude for next turn
+        messages.append({"role": "assistant", "content": reply_without_sh or reply})
+        messages.append({"role": "user", "content": f"[shell実行結果]\n{shell_results}"})
+        reply = ""  # will be set in next turn
+    else:
+        break  # No sh blocks → final reply
 
 # ── Apply code fixes if Claude output fix blocks ──────────────────────────────
 
