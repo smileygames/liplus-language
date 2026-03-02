@@ -1,35 +1,31 @@
 name: CD - snapshot tag
 
 on:
-  workflow_run:
-    workflows: ["Liplus Governance CI"]
-    types: [completed]
+  pull_request:
+    types: [closed]
     branches: [main]
 
 permissions:
   contents: write
 
 concurrency:
-  group: cd-snapshot-${{ github.event.workflow_run.head_branch }}
+  group: cd-snapshot-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
 jobs:
   tag:
-    if: >
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'main'
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the exact commit that CI tested
+      - name: Checkout merged commit
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
 
       - name: Create build tag (JST date + sequence)
         env:
-          TARGET_SHA: ${{ github.event.workflow_run.head_sha }}
+          TARGET_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: |
           set -euo pipefail
 
