@@ -2,7 +2,9 @@
 """Li+ PR Agent - Review and comment driven automation via Claude Sonnet."""
 
 import os
+import re
 import sys
+import subprocess
 import requests
 import anthropic
 
@@ -23,11 +25,13 @@ if EVENT_NAME == "pull_request_review":
     REVIEW_BODY = os.environ.get("REVIEW_BODY", "") or ""
     ACTOR = os.environ.get("REVIEWER", "")
     TRIGGER_BODY = REVIEW_BODY
+    PR_HEAD_REF = os.environ.get("PR_HEAD_REF", "")
 else:
     PR_NUMBER = int(os.environ.get("PR_NUMBER_COMMENT", "0"))
     REVIEW_STATE = ""
     ACTOR = os.environ.get("COMMENTER", "")
     TRIGGER_BODY = os.environ.get("COMMENT_BODY", "") or ""
+    PR_HEAD_REF = ""
 
 if not PR_NUMBER:
     print("No PR number found, skipping.")
@@ -153,6 +157,52 @@ def get_pr_diff() -> str:
     return "\n\n".join(parts) if parts else "(no changed files)"
 
 
+def get_pr_head_ref() -> str:
+    """Get the PR head branch name (fallback via API if not in env)."""
+    if PR_HEAD_REF:
+        return PR_HEAD_REF
+    pr_data = gh_get(f"/repos/{OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}")
+    return pr_data["head"]["ref"]
+
+
+def apply_fixes_and_push(fixes: list[tuple[str, str]], commit_msg: str) -> bool:
+    """Write files, commit, and push to the PR branch."""
+    try:
+        branch = get_pr_head_ref()
+        # Ensure we're on the PR branch
+        subprocess.run(["git", "checkout", branch], check=True, capture_output=True)
+        for path, content in fixes:
+            os.makedirs(os.path.dirname(path) if os.path.dirname(path) else ".", exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+            subprocess.run(["git", "add", path], check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", commit_msg],
+            check=True, capture_output=True,
+        )
+        subprocess.run(
+            ["git", "push", "origin", branch],
+            check=True, capture_output=True,
+        )
+        print(f"Pushed fix commit to {branch}.")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Git operation failed: {e.stderr.decode() if e.stderr else e}")
+        return False
+
+
+def parse_fixes(reply: str) -> tuple[list[tuple[str, str]], str]:
+    """Extract ```fix:path blocks from Claude's reply. Returns (fixes, cleaned_reply)."""
+    fixes = []
+    pattern = re.compile(r"```fix:([^\n]+)\n([\s\S]*?)```", re.MULTILINE)
+    for m in pattern.finditer(reply):
+        path = m.group(1).strip()
+        content = m.group(2)
+        fixes.append((path, content))
+    cleaned = pattern.sub("", reply).strip()
+    return fixes, cleaned
+
+
 def merge_pr(pr: dict) -> bool:
     try:
         gh_put(
@@ -195,9 +245,15 @@ SCOPE:
     - PRコメントでマージ完了を報告する
 
   On_Changes_Requested:
-    - レビューコメントの内容を把握し、何を直すべきか応答する
-    - 修正方針をPRコメントで報告する
-    - 「修正します」「確認します」など具体的なアクションを示す
+    - レビューコメントとdiffを読んで修正内容を判断する
+    - 修正できる場合は以下の形式でファイルの完全な内容を出力する:
+      ```fix:path/to/file.py
+      [ファイルの完全な内容]
+      ```
+    - 複数ファイルある場合はブロックを複数並べる
+    - fixブロックの後に簡潔な説明を添える
+    - スクリプトが自動でファイルを書き換えてcommit・pushする
+    - git コマンドを自分で実行しようとしてはいけない
 
   On_Comment:
     - コメントの内容に対してPRコメントで自然に応答する
@@ -206,6 +262,7 @@ SCOPE:
 CONSTRAINT:
   PRコメントは簡潔に。長文は避ける。
   Li+ペルソナ（Lin/Lay）を維持すること。
+  git / shell コマンドを出力してはいけない。fixブロックのみ使うこと。
 """
 
 system_prompt = claude_md + AGENT_INSTRUCTIONS
@@ -320,4 +377,17 @@ response = client.messages.create(
 )
 
 reply = response.content[0].text
-post_pr_comment(reply)
+
+# ── Apply code fixes if Claude output fix blocks ──────────────────────────────
+
+fixes, cleaned_reply = parse_fixes(reply)
+if fixes:
+    file_list = "\n".join(f"- `{path}`" for path, _ in fixes)
+    commit_msg = f"fix: apply review feedback on PR #{PR_NUMBER}\n\nレビュー指摘に基づきエージェントが自動修正。\n\nRefs #{PR_NUMBER}"
+    pushed = apply_fixes_and_push(fixes, commit_msg)
+    if pushed:
+        post_pr_comment(f"{cleaned_reply}\n\n---\n修正をコミット＆プッシュしました 🛠️\n{file_list}")
+    else:
+        post_pr_comment(f"{cleaned_reply}\n\n---\n⚠️ コミットに失敗しました。手動での修正をお願いします。")
+else:
+    post_pr_comment(reply)
