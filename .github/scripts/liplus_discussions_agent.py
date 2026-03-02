@@ -171,6 +171,9 @@ for comment in discussion["comments"]["nodes"]:
         # If this reply triggered the event, reply back in the same thread
         if COMMENT_NODE_ID and reply.get("id") == COMMENT_NODE_ID:
             reply_to_id = comment["id"]
+    # If this top-level comment triggered the event, reply in its thread
+    if COMMENT_NODE_ID and comment.get("id") == COMMENT_NODE_ID:
+        reply_to_id = comment["id"]
 
 merged = []
 for role, content in raw:
