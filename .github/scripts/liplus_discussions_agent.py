@@ -103,7 +103,7 @@ def get_issues() -> str:
     resp.raise_for_status()
     issues = resp.json()
     if not issues:
-        return "（現在オープンなissueはありません）"
+        return ""
     return "\n".join(f"#{i['number']} {i['title']}" for i in issues if "pull_request" not in i)
 
 
