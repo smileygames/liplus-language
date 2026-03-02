@@ -392,6 +392,11 @@ Operation_Rules
   major = breaking_change or spec_incompatibility
   HUMAN_DECIDES_VERSION_TYPE AI_EXECUTES
 
+  version_base_rule:
+  BASE_ON_MOST_RECENT_RELEASE = includes_prereleases
+  NOT_LATEST_STABLE_ONLY
+  USE: gh release list --limit 1 (includes prereleases)
+
   release_tag_rule:
   USE_EXISTING_CD_CREATED_TAG = gh release create {cd_tag} --title "Li+ {version}" --prerelease
   DO_NOT_CREATE_NEW_TAG = new_tag_creation_is_prohibited
