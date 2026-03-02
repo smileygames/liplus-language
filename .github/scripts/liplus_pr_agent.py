@@ -251,6 +251,29 @@ def parse_fixes(reply: str) -> tuple[list[tuple[str, str, str]], str]:
     return patches, cleaned
 
 
+def all_ci_passed(head_sha: str) -> bool:
+    """Check current check-run state on head_sha.
+    Returns True if all relevant checks have completed successfully."""
+    passing = {"success", "skipped", "neutral"}
+    exclude_names = {"pr-agent"}  # avoid self-reference (job name in workflow)
+    data = gh_get(f"/repos/{OWNER}/{REPO_NAME}/commits/{head_sha}/check-runs")
+    runs = [r for r in data.get("check_runs", []) if r["name"] not in exclude_names]
+    if not runs:
+        print(f"No relevant check runs found for {head_sha}.")
+        return False
+    incomplete = [r for r in runs if r["status"] != "completed"]
+    if incomplete:
+        print(f"CI not yet completed: {[r['name'] for r in incomplete]}")
+        return False
+    failed = [r for r in runs if r["conclusion"] not in passing]
+    if failed:
+        names = [f"{r['name']}({r['conclusion']})" for r in failed]
+        print(f"CI failed: {names}")
+        return False
+    print("All CI checks passed.")
+    return True
+
+
 def merge_pr(pr: dict) -> bool:
     try:
         gh_put(
@@ -412,17 +435,25 @@ if REVIEW_STATE == "approved":
     # null means no required reviews configured → trust the event state
     # CHANGES_REQUESTED means another reviewer blocked → don't merge
     if review_decision in ("APPROVED", ""):
-        merged = merge_pr(pr)
-        if merged:
+        head_sha = pr["head"]["sha"]
+        print(f"Checking CI on {head_sha}...")
+        if not all_ci_passed(head_sha):
             messages.append({
                 "role": "user",
-                "content": "マージが完了しました。PRコメントで完了報告をしてください。"
+                "content": "CIチェックが未完了または失敗しています。マージをブロックしました。PRコメントで状況を報告してください。"
             })
         else:
-            messages.append({
-                "role": "user",
-                "content": "マージに失敗しました。PRコメントで状況を報告してください。"
-            })
+            merged = merge_pr(pr)
+            if merged:
+                messages.append({
+                    "role": "user",
+                    "content": "マージが完了しました。PRコメントで完了報告をしてください。"
+                })
+            else:
+                messages.append({
+                    "role": "user",
+                    "content": "マージに失敗しました。PRコメントで状況を報告してください。"
+                })
     else:
         # reviewDecision is CHANGES_REQUESTED or REVIEW_REQUIRED → block
         messages.append({
