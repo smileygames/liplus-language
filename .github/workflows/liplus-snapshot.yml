@@ -1,29 +1,45 @@
 name: CD - snapshot tag
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Commit SHA to tag'
+        required: true
 
 permissions:
   contents: write
 
 concurrency:
-  group: cd-snapshot-${{ github.sha }}
+  group: cd-snapshot-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: false
 
 jobs:
   tag:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
+      - name: Resolve target SHA
+        id: resolve
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "sha=${{ inputs.sha }}" >> $GITHUB_OUTPUT
+          else
+            echo "sha=${{ github.event.pull_request.merge_commit_sha }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout merged commit
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ steps.resolve.outputs.sha }}
           fetch-depth: 0
 
       - name: Create build tag (JST date + sequence)
         env:
-          TARGET_SHA: ${{ github.sha }}
+          TARGET_SHA: ${{ steps.resolve.outputs.sha }}
         run: |
           set -euo pipefail
 
