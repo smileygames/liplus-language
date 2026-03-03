@@ -1,39 +1,26 @@
 name: CD - snapshot tag
 
 on:
-  workflow_run:
-    workflows: ["Liplus Governance CI"]
-    types: [completed]
+  pull_request:
+    types: [closed]
     branches: [main]
-  workflow_dispatch:
-    inputs:
-      sha:
-        description: 'Commit SHA to tag'
-        required: true
 
 permissions:
   contents: write
 
 concurrency:
-  group: cd-snapshot-${{ github.event.workflow_run.id || github.run_id }}
+  group: cd-snapshot-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
 jobs:
   tag:
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push')
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Resolve target SHA
         id: resolve
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "sha=${{ inputs.sha }}" >> $GITHUB_OUTPUT
-          else
-            echo "sha=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
-          fi
+          echo "sha=${{ github.event.pull_request.merge_commit_sha }}" >> $GITHUB_OUTPUT
 
       - name: Checkout merged commit
         uses: actions/checkout@v4
