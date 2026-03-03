@@ -295,6 +295,7 @@ def merge_pr(pr: dict) -> bool:
             {
                 "merge_method": "squash",
                 "commit_title": pr["title"],
+                "commit_message": pr.get("body") or "",
             },
         )
         print(f"PR #{PR_NUMBER} merged.")
