@@ -17,43 +17,6 @@ CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6")
 
 BOT_LOGINS = {"github-actions[bot]", "liplus-lin-lay"}
 
-# ── Determine PR number and trigger context ───────────────────────────────────
-
-WORKFLOW_HEAD_SHA = os.environ.get("WORKFLOW_HEAD_SHA", "")
-
-if EVENT_NAME == "pull_request_review":
-    PR_NUMBER = int(os.environ.get("PR_NUMBER_REVIEW", "0"))
-    REVIEW_STATE = os.environ.get("REVIEW_STATE", "").lower()
-    REVIEW_BODY = os.environ.get("REVIEW_BODY", "") or ""
-    ACTOR = os.environ.get("REVIEWER", "")
-    TRIGGER_BODY = REVIEW_BODY
-    PR_HEAD_REF = os.environ.get("PR_HEAD_REF", "")
-elif EVENT_NAME == "workflow_run":
-    # CI completed: resolve PR number from head SHA later (after helpers are defined)
-    PR_NUMBER = 0
-    REVIEW_STATE = ""
-    ACTOR = ""
-    TRIGGER_BODY = ""
-    PR_HEAD_REF = os.environ.get("WORKFLOW_HEAD_BRANCH", "")
-else:
-    PR_NUMBER = int(os.environ.get("PR_NUMBER_COMMENT", "0"))
-    REVIEW_STATE = ""
-    ACTOR = os.environ.get("COMMENTER", "")
-    TRIGGER_BODY = os.environ.get("COMMENT_BODY", "") or ""
-    PR_HEAD_REF = ""
-
-if EVENT_NAME != "workflow_run":
-    if not PR_NUMBER:
-        print("No PR number found, skipping.")
-        sys.exit(0)
-    if ACTOR in BOT_LOGINS:
-        print(f"Skipping: triggered by bot ({ACTOR})")
-        sys.exit(0)
-    _pr_state = gh_get(f"/repos/{OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}")
-    if _pr_state.get("state") == "closed":
-        print(f"PR #{PR_NUMBER} is closed, skipping.")
-        sys.exit(0)
-
 
 # ── REST API helpers ──────────────────────────────────────────────────────────
 
@@ -93,6 +56,44 @@ def gh_graphql(query: str, variables: dict = None) -> dict:
     if "errors" in data:
         raise Exception(f"GraphQL error: {data['errors']}")
     return data["data"]
+
+
+# ── Determine PR number and trigger context ───────────────────────────────────
+
+WORKFLOW_HEAD_SHA = os.environ.get("WORKFLOW_HEAD_SHA", "")
+
+if EVENT_NAME == "pull_request_review":
+    PR_NUMBER = int(os.environ.get("PR_NUMBER_REVIEW", "0"))
+    REVIEW_STATE = os.environ.get("REVIEW_STATE", "").lower()
+    REVIEW_BODY = os.environ.get("REVIEW_BODY", "") or ""
+    ACTOR = os.environ.get("REVIEWER", "")
+    TRIGGER_BODY = REVIEW_BODY
+    PR_HEAD_REF = os.environ.get("PR_HEAD_REF", "")
+elif EVENT_NAME == "workflow_run":
+    # CI completed: resolve PR number from head SHA later (after helpers are defined)
+    PR_NUMBER = 0
+    REVIEW_STATE = ""
+    ACTOR = ""
+    TRIGGER_BODY = ""
+    PR_HEAD_REF = os.environ.get("WORKFLOW_HEAD_BRANCH", "")
+else:
+    PR_NUMBER = int(os.environ.get("PR_NUMBER_COMMENT", "0"))
+    REVIEW_STATE = ""
+    ACTOR = os.environ.get("COMMENTER", "")
+    TRIGGER_BODY = os.environ.get("COMMENT_BODY", "") or ""
+    PR_HEAD_REF = ""
+
+if EVENT_NAME != "workflow_run":
+    if not PR_NUMBER:
+        print("No PR number found, skipping.")
+        sys.exit(0)
+    if ACTOR in BOT_LOGINS:
+        print(f"Skipping: triggered by bot ({ACTOR})")
+        sys.exit(0)
+    _pr_state = gh_get(f"/repos/{OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}")
+    if _pr_state.get("state") == "closed":
+        print(f"PR #{PR_NUMBER} is closed, skipping.")
+        sys.exit(0)
 
 
 def get_pr_review_decision() -> str:
