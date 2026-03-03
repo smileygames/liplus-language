@@ -105,30 +105,6 @@ def get_pr_review_decision() -> str:
     return data["repository"]["pullRequest"]["reviewDecision"] or ""
 
 
-def gh_put(path: str, data: dict) -> dict:
-    resp = requests.put(
-        f"https://api.github.com{path}",
-        headers={
-            "Authorization": f"Bearer {GITHUB_TOKEN}",
-            "Accept": "application/vnd.github+json",
-        },
-        json=data,
-    )
-    resp.raise_for_status()
-    return resp.json()
-
-
-def gh_delete(path: str) -> None:
-    resp = requests.delete(
-        f"https://api.github.com{path}",
-        headers={
-            "Authorization": f"Bearer {GITHUB_TOKEN}",
-            "Accept": "application/vnd.github+json",
-        },
-    )
-    if resp.status_code not in (204, 422):
-        resp.raise_for_status()
-
 
 # ── PR operations ─────────────────────────────────────────────────────────────
 
@@ -277,38 +253,6 @@ def all_ci_passed(head_sha: str) -> bool:
     return bool(runs) and all(r["status"] == "completed" and r["conclusion"] in passing for r in runs)
 
 
-def dispatch_cd_snapshot(sha: str) -> None:
-    try:
-        gh_post(
-            f"/repos/{OWNER}/{REPO_NAME}/actions/workflows/liplus-snapshot.yml/dispatches",
-            {"ref": "main", "inputs": {"sha": sha}},
-        )
-        print(f"Dispatched CD snapshot for SHA {sha}")
-    except Exception as e:
-        print(f"Failed to dispatch CD snapshot: {e}")
-
-
-def merge_pr(pr: dict) -> bool:
-    try:
-        result = gh_put(
-            f"/repos/{OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}/merge",
-            {
-                "merge_method": "squash",
-                "commit_title": pr["title"],
-            },
-        )
-        print(f"PR #{PR_NUMBER} merged.")
-        merge_sha = result.get("sha", "")
-        if merge_sha:
-            dispatch_cd_snapshot(merge_sha)
-        branch = pr["head"]["ref"]
-        gh_delete(f"/repos/{OWNER}/{REPO_NAME}/git/refs/heads/{branch}")
-        print(f"Branch {branch} deleted.")
-        return True
-    except Exception as e:
-        print(f"Merge failed: {e}")
-        return False
-
 
 # ── System prompt ─────────────────────────────────────────────────────────────
 
@@ -329,8 +273,8 @@ SCOPE:
   Role = Respond to PR reviews and comments. Communicate via PR comments.
 
   On_Approved:
-    - このエージェントはマージを実行する（スクリプト側で処理）
-    - PRコメントでマージ完了を報告する
+    - PRコメントで承認を確認する
+    - マージはGitHub auto-mergeが自動処理するため不要
 
   On_Changes_Requested:
     - レビューコメントとdiffを読んで修正内容を判断する
@@ -370,29 +314,6 @@ CONSTRAINT:
 
 system_prompt = claude_md + AGENT_INSTRUCTIONS
 
-
-# ── workflow_run: resolve PR and check both conditions ────────────────────────
-
-if EVENT_NAME == "workflow_run":
-    PR_NUMBER = find_pr_by_sha(WORKFLOW_HEAD_SHA)
-    if not PR_NUMBER:
-        print(f"No open PR found for SHA {WORKFLOW_HEAD_SHA}, skipping.")
-        sys.exit(0)
-    pr = get_pr()
-    review_decision = get_pr_review_decision()
-    print(f"workflow_run: PR #{PR_NUMBER}, reviewDecision={review_decision}")
-    if review_decision not in ("APPROVED", ""):
-        print("Review not approved, skipping merge.")
-        sys.exit(0)
-    if not all_ci_passed(WORKFLOW_HEAD_SHA):
-        print("CI not fully passed, skipping merge.")
-        sys.exit(0)
-    merged = merge_pr(pr)
-    if merged:
-        post_pr_comment("CI・レビューともに通過しました。マージしました 🎉")
-    else:
-        post_pr_comment("マージに失敗しました。手動での確認をお願いします。")
-    sys.exit(0)
 
 
 # ── Build conversation context ────────────────────────────────────────────────
@@ -467,39 +388,22 @@ if messages and messages[-1]["role"] == "assistant":
     messages.append({"role": "user", "content": "（最新の状況に対応してください）"})
 
 
-# ── Handle approved: merge only if all reviewers cleared ─────────────────────
+# ── Handle approved ───────────────────────────────────────────────────────────
 
 if REVIEW_STATE == "approved":
     # Double-check the PR's authoritative reviewDecision via GraphQL
     review_decision = get_pr_review_decision()
     print(f"reviewDecision: {review_decision}")
-    # null means no required reviews configured → trust the event state
-    # CHANGES_REQUESTED means another reviewer blocked → don't merge
     if review_decision in ("APPROVED", ""):
-        head_sha = pr["head"]["sha"]
-        print(f"Checking CI on {head_sha}...")
-        if not all_ci_passed(head_sha):
-            messages.append({
-                "role": "user",
-                "content": "CIチェックが未完了または失敗しています。マージをブロックしました。PRコメントで状況を報告してください。"
-            })
-        else:
-            merged = merge_pr(pr)
-            if merged:
-                messages.append({
-                    "role": "user",
-                    "content": "マージが完了しました。PRコメントで完了報告をしてください。"
-                })
-            else:
-                messages.append({
-                    "role": "user",
-                    "content": "マージに失敗しました。PRコメントで状況を報告してください。"
-                })
-    else:
-        # reviewDecision is CHANGES_REQUESTED or REVIEW_REQUIRED → block
         messages.append({
             "role": "user",
-            "content": f"approvedイベントが来ましたが、PRのreviewDecisionが{review_decision}のためマージをブロックしました。PRコメントで状況を報告してください。"
+            "content": "承認されました。GitHub auto-mergeが処理します。PRコメントで報告してください。"
+        })
+    else:
+        # reviewDecision is CHANGES_REQUESTED or REVIEW_REQUIRED → inform
+        messages.append({
+            "role": "user",
+            "content": f"approvedイベントが来ましたが、PRのreviewDecisionが{review_decision}です。PRコメントで状況を報告してください。"
         })
 
 

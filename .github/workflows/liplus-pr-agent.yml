@@ -5,16 +5,12 @@ on:
     types: [submitted]
   issue_comment:
     types: [created]
-  workflow_run:
-    workflows: ["Liplus Governance CI"]
-    types: [completed]
 
 jobs:
   pr-agent:
     if: |
       github.event_name == 'pull_request_review' ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request != null) ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request')
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request != null)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -65,7 +61,4 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body }}
           COMMENTER: ${{ github.event.comment.user.login }}
           CLAUDE_MODEL: claude-sonnet-4-6
-          # workflow_run (CI completed)
-          WORKFLOW_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-          WORKFLOW_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: python .github/scripts/liplus_pr_agent.py

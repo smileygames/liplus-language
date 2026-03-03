@@ -349,7 +349,7 @@ Operation_Rules
   WAIT = human_signals_review_done (do_not_poll)
   on_signal:
     gh pr view {pr} -R {owner}/{repo} --json reviewDecision --jq '.reviewDecision'
-  reviewDecision=="APPROVED" -> proceed_to_merge
+  reviewDecision=="APPROVED" -> GitHub_auto_merge_handles_it
   reviewDecision=="CHANGES_REQUESTED" -> read_review_comments -> Fix_And_Recommit (restart CI_Loop)
 
   [Merge_And_Cleanup]
@@ -359,14 +359,8 @@ Operation_Rules
   Recommended_Flow:
   1 = create_PR (body includes "Refs #{parent_issue_number}")
   2 = CI_pass -> review_request_auto_sent_via_codeowners
-  3 = gh pr merge {pr} -R {owner}/{repo} --squash --delete-branch
+  3 = GitHub_auto_merge_on_approval (squash + branch_delete handled by GitHub)
   4 = parent_issue_auto_closed_by_github_on_merge
-  note = branch_delete_and_merge_simultaneous orphaned_branch_risk_eliminated
-
-  DELETE_BRANCH_FORBIDDEN_WHEN:
-  SESSION_BRANCH_LINKED_TO_OPEN_PARENT_ISSUE
-  OPEN_CHILD_ISSUES_REMAIN_UNDER_PARENT
-  If_Merge_Preceded_Issue_Close = manual_branch_delete_required_after_all_closed
 
   Real_Device_Test:
   Merge_First Then_Test_On_Main Not_A_Merge_Gate
