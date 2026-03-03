@@ -112,4 +112,3 @@ Always execute the following (never output credentials to chat):
 - [B. Li+config](B.-Li+config) — 設定ファイルの詳細仕様
 - [1. Li+core](1.-Liplus_core) — Li+の中核仕様
 
-<!-- test: PR agent verification #583 -->
