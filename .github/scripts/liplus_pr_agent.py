@@ -277,9 +277,20 @@ def all_ci_passed(head_sha: str) -> bool:
     return bool(runs) and all(r["status"] == "completed" and r["conclusion"] in passing for r in runs)
 
 
+def dispatch_cd_snapshot(sha: str) -> None:
+    try:
+        gh_post(
+            f"/repos/{OWNER}/{REPO_NAME}/actions/workflows/liplus-snapshot.yml/dispatches",
+            {"ref": "main", "inputs": {"sha": sha}},
+        )
+        print(f"Dispatched CD snapshot for SHA {sha}")
+    except Exception as e:
+        print(f"Failed to dispatch CD snapshot: {e}")
+
+
 def merge_pr(pr: dict) -> bool:
     try:
-        gh_put(
+        result = gh_put(
             f"/repos/{OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}/merge",
             {
                 "merge_method": "squash",
@@ -287,6 +298,9 @@ def merge_pr(pr: dict) -> bool:
             },
         )
         print(f"PR #{PR_NUMBER} merged.")
+        merge_sha = result.get("sha", "")
+        if merge_sha:
+            dispatch_cd_snapshot(merge_sha)
         branch = pr["head"]["ref"]
         gh_delete(f"/repos/{OWNER}/{REPO_NAME}/git/refs/heads/{branch}")
         print(f"Branch {branch} deleted.")
