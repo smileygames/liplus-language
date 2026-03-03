@@ -34,7 +34,8 @@ jobs:
           TOKEN="${PAT:-$DEFAULT_TOKEN}"
           git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.git"
           if [ -n "$PR_HEAD_REF" ]; then
-            git checkout "$PR_HEAD_REF"
+            git fetch origin "$PR_HEAD_REF" 2>/dev/null || true
+            git checkout "$PR_HEAD_REF" 2>/dev/null || echo "Branch $PR_HEAD_REF not found (PR may be merged)"
           fi
 
       - uses: actions/setup-python@v5

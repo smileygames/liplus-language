@@ -49,6 +49,10 @@ if EVENT_NAME != "workflow_run":
     if ACTOR in BOT_LOGINS:
         print(f"Skipping: triggered by bot ({ACTOR})")
         sys.exit(0)
+    _pr_state = gh_get(f"/repos/{OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}")
+    if _pr_state.get("state") == "closed":
+        print(f"PR #{PR_NUMBER} is closed, skipping.")
+        sys.exit(0)
 
 
 # ── REST API helpers ──────────────────────────────────────────────────────────
