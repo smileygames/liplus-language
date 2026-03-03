@@ -1,31 +1,29 @@
 name: CD - snapshot tag
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches: [main]
 
 permissions:
   contents: write
 
 concurrency:
-  group: cd-snapshot-${{ github.event.pull_request.number }}
+  group: cd-snapshot-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
   tag:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout merged commit
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Create build tag (JST date + sequence)
         env:
-          TARGET_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          TARGET_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
 
