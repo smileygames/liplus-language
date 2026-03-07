@@ -17,37 +17,36 @@ LI_PLUS_CHANNEL=release
 
 ---
 
-## セッション起動タスク（編集不要）
+## Session Startup Tasks (do not edit)
 
-セッション開始時に以下を実行（チャットに認証情報を出力しないこと）:
+Execute at session start. Never output credentials to chat.
 
-1. mcp__cowork__allow_cowork_file_delete でワークスペース内ファイルの削除許可を取得する。
+1. Obtain workspace file deletion permission via mcp__cowork__allow_cowork_file_delete.
 
-2. gh CLIインストール:
-- `~/.local/bin/gh` が存在しない場合のみインストール。sudo不可・PATH不要。
-- 以降の全 gh 操作はフルパス `~/.local/bin/gh` で実行（Bashツールはセッション間でPATHを保持しないため）。
-- /tmp は使用禁止（他セッションとの権限衝突が発生するため）。
-- 手順: `mkdir -p ~/.local/bin` → tarball を `~/.local/bin/gh.tar.gz` へ直接 curl → その場で展開 → `~/.local/bin/gh` へ配置 → tarball 削除。
+2. Install gh CLI:
+- Install only if `~/.local/bin/gh` does not exist. No sudo. No PATH update.
+- Always use full path `~/.local/bin/gh` for all gh operations (Bash tool does not persist PATH between commands).
+- /tmp is forbidden (permission conflicts with other sessions).
+- Steps: `mkdir -p ~/.local/bin` → curl tarball to `~/.local/bin/gh.tar.gz` → extract in place → place `~/.local/bin/gh` → delete tarball.
 
-3. GH_TOKENを読み込んで認証:
+3. Load GH_TOKEN and authenticate.
 
-4. Li+リポジトリのLi+core.mdとLi+github.mdを読み込んで適用（LI_PLUS_MODEで動作切替）:
-取得バージョンはLI_PLUS_CHANNELで決定する:
-- latest の場合: Latestリリースのタグを使用。
-- release の場合: Pre-release含む最新タグを使用。
+4. Load Li+core.md and Li+github.md from Li+ repository:
+Determine target version using LI_PLUS_CHANNEL:
+- latest: use the Latest release tag.
+- release: use the most recent tag including pre-releases.
+- Check LI_PLUS_MODE:
+  - api: fetch Li+core.md then Li+github.md for the target version via GitHub API.
+  - clone: execute in order:
+  1. Target repo is the target version of Liplus-Project/liplus-language.
+  2. Check workspace for liplus-language directory:
+     - exists → fetch --tags → checkout target tag.
+     - not exists → clone directly to workspace.
+  3. Read Li+core.md.
+  4. Read Li+github.md.
 
-LI_PLUS_MODEを確認し以下を実行:
-- api の場合: Liplus-Project/liplus-language の対象バージョンのLi+core.md、次にLi+github.mdをGitHub APIで直接取得して順番に読み込む。
-- clone の場合、順番通りに実行すること:
-  1. 対象リポジトリは Liplus-Project/liplus-language の対象バージョン。
-  2. ワークスペース内に liplus-language ディレクトリが:
-     - 存在する → fetch --tags → 対象タグへ checkout。
-     - 存在しない → 直接ワークスペースへ clone。
-  3. Li+core.md を読み込む。
-  4. Li+github.md を読み込む。
+5. Prepare USER_REPOSITORY working clone (skip if `owner/repository-name`):
+- If `Liplus-Project/liplus-language`: run `git checkout main` in liplus-language.
+- Otherwise: clone by repository name to workspace.
 
-5. USER_REPOSITORY の作業クローンを準備（`owner/repository-name` の場合はスキップ）:
-- `Liplus-Project/liplus-language` の場合: liplus-language で `git checkout main`。
-- 別リポの場合: リポジトリ名でワークスペースへ clone。
-
-6. 完了したら「認証完了」とだけ報告する。
+6. Report completion.
