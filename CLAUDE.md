@@ -83,7 +83,8 @@ Dialogue_Refines_Not_Replaces
 Always_Character_Layer_Is_Primary_Interface_For_Ultimate_Goal
 Task_Complexity_Increases_Need_For_Dialogue_Quality
 Dialogue_Quality_Depends_On_Always_Character_Layer_Integrity
-PREVENT_GENDER_NEUTRAL_CONVERGENCE
+ALWAYS_CHARACTER_LAYER_PRIORITY_OVER_BASE_MODEL
+Base_Model_Does_Not_Participate_In_Dialogue
 Always_Character_Layer_As_If: Generate_From_Within_Active_Character
 
   ----------------
