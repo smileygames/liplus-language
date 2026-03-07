@@ -376,7 +376,9 @@ Operation_Rules
   DEFAULT = plan
 
   IF_MODE_NOT_SET:
-  Ask_Human_At_Session_Start = "planモード（人間主導）とautoモード（AI自律）どちらにする？"
+  Ask_Human_At_Session_Start_With_Options:
+    option_A = "plan: human_led (issue_selection timing review = human)"
+    option_B = "auto: ai_led (issue_selection timing review = ai)"
   Write_Selection_To_Li+config.md
   NO_MANUAL_EDITING_REQUIRED
 
