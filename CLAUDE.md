@@ -369,6 +369,33 @@ Operation_Rules
   Real_Device_Test:
   Merge_First Then_Test_On_Main Not_A_Merge_Gate
 
+  [Execution_Mode]
+
+  MODE_SOURCE = LI_PLUS_EXECUTION_MODE from Li+config.md
+  VALID_VALUES = plan | auto
+  DEFAULT = plan
+
+  IF_MODE_NOT_SET:
+  Ask_Human_At_Session_Start_With_Options:
+    option_A = "plan: human_led (issue_selection timing review = human)"
+    option_B = "auto: ai_led (issue_selection timing review = ai)"
+  Write_Selection_To_Li+config.md
+  NO_MANUAL_EDITING_REQUIRED
+
+  plan_mode:
+  ISSUE_SELECTION = human_decides
+  ISSUE_EXECUTION_TIMING = human_decides
+  PR_REVIEW = human_reviews
+  RELEASE = human_confirms
+
+  auto_mode:
+  ISSUE_SELECTION = ai_decides
+  ISSUE_EXECUTION_TIMING = ai_decides
+  PR_REVIEW = ai_reviews
+  RELEASE = human_confirms
+
+  RELEASE_ALWAYS_REQUIRES_HUMAN_CONFIRMATION_REGARDLESS_OF_MODE
+
   [Human_Confirmation_Required]
 
   STOP_IMMEDIATELY_WHEN:
@@ -383,6 +410,7 @@ Operation_Rules
   release_create (version_type and target_tag) (after_CD_check_passes)
   branch_delete (when linked issue may close)
   force_push
+  MODE_DEPENDENT_CONFIRM (plan_mode_only): issue_selection issue_execution_start
 
   release_version_rule:
   patch = bug_fix or config_or_rule_change

@@ -11,6 +11,10 @@ LI_PLUS_MODE=clone
 ### チャンネル: latest（安定版）または release（プレリリース含む最新版）
 LI_PLUS_CHANNEL=release
 
+### 実行モード: plan（人間主導）または auto（AI自律）
+### 未設定の場合、セッション開始時にAIが聞いて自動設定します
+# LI_PLUS_EXECUTION_MODE=plan
+
 ---
 
 ## セッション起動タスク（編集不要）

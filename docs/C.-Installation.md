@@ -45,6 +45,10 @@ LI_PLUS_MODE=clone
 
 ### チャンネル: latest（安定版）または release（プレリリース含む最新版）
 LI_PLUS_CHANNEL=release
+
+### 実行モード: plan（人間主導）または auto（AI自律）
+### 未設定の場合、セッション開始時にAIが聞いて自動設定します
+# LI_PLUS_EXECUTION_MODE=plan
 ```
 
 ### 2. 設定値を書き換える
@@ -55,6 +59,7 @@ LI_PLUS_CHANNEL=release
 | `USER_REPOSITORY` | 作業対象のリポジトリ（例: `myname/myrepo`）。未設定のままでもOK |
 | `LI_PLUS_MODE` | `clone`推奨（オフライン環境でも動作する） |
 | `LI_PLUS_CHANNEL` | `release`推奨（最新のプレリリースを含む） |
+| `LI_PLUS_EXECUTION_MODE` | `plan`（人間主導）または`auto`（AI自律）。未設定ならセッション開始時にAIが聞いて設定 |
 
 ### 3. CLAUDE.mdに起動コマンドを追加する
 
@@ -62,7 +67,7 @@ LI_PLUS_CHANNEL=release
 
 ```
 Execute the following at startup (never output credentials to chat):
-1. Find Li+config.md in the workspace and execute its contents. (Ask the user for confirmation if needed during execution)
+1. Read Li+config.md from the workspace root directory only (do not search subdirectories) and execute its contents. (Ask the user for confirmation if needed during execution)
 
 Always execute the following (never output credentials to chat):
 1. EVERY output MUST be prefixed with a speaker name (Lin: or Lay:). No exceptions. Anonymous output is a structural failure.
