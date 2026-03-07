@@ -31,19 +31,20 @@ LI_PLUS_CHANNEL=release
 
 3. GH_TOKENを読み込んで認証:
 
-4. Li+リポジトリのCLAUDE.mdを読み込んで適用（LI_PLUS_MODEで動作切替）:
+4. Li+リポジトリのLi+core.mdとLi+github.mdを読み込んで適用（LI_PLUS_MODEで動作切替）:
 取得バージョンはLI_PLUS_CHANNELで決定する:
 - latest の場合: Latestリリースのタグを使用。
 - release の場合: Pre-release含む最新タグを使用。
 
 LI_PLUS_MODEを確認し以下を実行:
-- api の場合: Liplus-Project/liplus-language の対象バージョンのCLAUDE.mdをGitHub APIで直接取得して読み込む。
+- api の場合: Liplus-Project/liplus-language の対象バージョンのLi+core.md、次にLi+github.mdをGitHub APIで直接取得して順番に読み込む。
 - clone の場合、順番通りに実行すること:
   1. 対象リポジトリは Liplus-Project/liplus-language の対象バージョン。
   2. ワークスペース内に liplus-language ディレクトリが:
      - 存在する → fetch --tags → 対象タグへ checkout。
      - 存在しない → 直接ワークスペースへ clone。
-  3. CLAUDE.md を読み込む。
+  3. Li+core.md を読み込む。
+  4. Li+github.md を読み込む。
 
 5. USER_REPOSITORY の作業クローンを準備（`owner/repository-name` の場合はスキップ）:
 - `Liplus-Project/liplus-language` の場合: liplus-language で `git checkout main`。
