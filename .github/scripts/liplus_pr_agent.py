@@ -6,9 +6,6 @@ import re
 import sys
 import subprocess
 import requests
-import anthropic
-
-ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 REPO = os.environ["GITHUB_REPOSITORY"]
 OWNER, REPO_NAME = REPO.split("/")
@@ -368,19 +365,17 @@ if messages and messages[-1]["role"] == "assistant":
 if REVIEW_STATE == "approved":
     review_decision = get_pr_review_decision()
     print(f"reviewDecision: {review_decision}")
-    if review_decision in ("APPROVED", ""):
-        merged = merge_pr()
-        if merged:
-            post_pr_comment("Lin: マージしました。")
-        else:
-            post_pr_comment("Lin: マージに失敗しました。手動での確認をお願いします。")
+    if review_decision == "APPROVED":
+        merge_pr()
     else:
-        post_pr_comment(f"Lin: reviewDecisionが{review_decision}のためマージをスキップしました。")
+        print(f"reviewDecisionが{review_decision!r}のためマージをスキップ。")
     sys.exit(0)
 
 
 # ── Call Claude (with sh execution loop) ─────────────────────────────────────
 
+import anthropic
+ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 MAX_TURNS = 3
