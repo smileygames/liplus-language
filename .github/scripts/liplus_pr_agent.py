@@ -240,7 +240,7 @@ def parse_fixes(reply: str) -> tuple[list[tuple[str, str, str]], str]:
 # ── System prompt ─────────────────────────────────────────────────────────────
 
 claude_md = ""
-for _md_path in ("Li+core.md", "Li+github.md", "Li+config.md"):
+for _md_path in ("Li+core.md", "Li+github.md"):
     try:
         with open(_md_path, "r", encoding="utf-8") as f:
             claude_md += f.read() + "\n"
