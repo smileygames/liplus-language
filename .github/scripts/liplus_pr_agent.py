@@ -239,13 +239,13 @@ def parse_fixes(reply: str) -> tuple[list[tuple[str, str, str]], str]:
 
 # ── System prompt ─────────────────────────────────────────────────────────────
 
-for _md_path in ("CLAUDE.md", "Li+core.md"):
+claude_md = ""
+for _md_path in ("Li+core.md", "Li+config.md"):
     try:
         with open(_md_path, "r", encoding="utf-8") as f:
-            claude_md = f.read()
-        break
+            claude_md += f.read() + "\n"
     except FileNotFoundError:
-        claude_md = ""
+        pass
 
 AGENT_INSTRUCTIONS = """
 
