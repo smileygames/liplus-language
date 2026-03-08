@@ -22,12 +22,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GH_TOKEN || github.token }}
+          token: ${{ secrets.AI_PAT || github.token }}
 
       - name: Configure git and checkout PR branch
         env:
           PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          PAT: ${{ secrets.GH_TOKEN || github.token }}
+          PAT: ${{ secrets.AI_PAT || github.token }}
         run: |
           git config user.name "liplus-lin-lay"
           git config user.email "liplus-lin-lay@users.noreply.github.com"
@@ -47,7 +47,7 @@ jobs:
       - name: Run PR agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+          GITHUB_TOKEN: ${{ secrets.AI_PAT || github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
           # pull_request_review
