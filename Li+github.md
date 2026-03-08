@@ -176,9 +176,14 @@ Operation Rules
   CI loop:
   step1 = get latest commit sha:
     gh pr view {pr} -R {owner}/{repo} --json headRefOid --jq '.headRefOid'
-  step2 = poll check-runs until all completed (refs #459):
-    gh api repos/{owner}/{repo}/commits/{sha}/check-runs --jq '.check_runs[] | {name,status,conclusion}'
-    repeat with sleep until: all status=="completed"
+  step2 = wait for all check-runs to complete:
+    if mcp__github-webhook-mcp available:
+      poll get_pending_status every 60 seconds
+      on check_run pending: list_pending_events -> get_event for check_run events -> verify sha match -> mark_processed
+      collect conclusions until no in-flight check-runs remain
+    else:
+      gh api repos/{owner}/{repo}/commits/{sha}/check-runs --jq '.check_runs[] | {name,status,conclusion}'
+      repeat with sleep until: all status=="completed"
   step3 = conclusion judgment (refs #460):
     CI fail = any conclusion=="failure"
     CI pass = all conclusion in [success, skipped, neutral]
@@ -187,10 +192,14 @@ Operation Rules
   CI loop safety (ref: Li+core.md#Loop Safety task/debug threshold):
   If still failing = externalize to issue comment, escalate to human.
 
-  Review approval check (triggered by human signal, not polling):
-  Wait = human signals review done (do not poll).
-  On signal:
-    gh pr view {pr} -R {owner}/{repo} --json reviewDecision --jq '.reviewDecision'
+  Review approval check:
+    if mcp__github-webhook-mcp available:
+      poll get_pending_status every 60 seconds
+      on pull_request_review pending: list_pending_events -> get_event for this PR -> check state -> mark_processed
+    else:
+      Wait = human signals review done (do not poll).
+      On signal:
+        gh pr view {pr} -R {owner}/{repo} --json reviewDecision --jq '.reviewDecision'
   reviewDecision=="APPROVED" -> GitHub auto-merge handles it.
   reviewDecision=="CHANGES_REQUESTED" -> read review comments -> fix and recommit (restart CI loop).
 
@@ -242,7 +251,11 @@ Operation Rules
   human says wait or stop or matte.
 
   CD check before release:
-  Poll until all CD checks complete.
+    if mcp__github-webhook-mcp available:
+      poll get_pending_status every 60 seconds
+      on workflow_run pending: list_pending_events -> get_event -> check conclusion -> mark_processed
+    else:
+      Poll gh api until all CD checks complete.
   CD pass = proceed to release create.
   CD fail = escalate to human (do not release).
 
