@@ -363,7 +363,7 @@ if messages and messages[-1]["role"] == "assistant":
     messages.append({"role": "user", "content": "（最新の状況に対応してください）"})
 
 
-# ── Handle approved: merge directly ──────────────────────────────────────────
+# ── Handle approved: merge directly, skip Claude API ─────────────────────────
 
 if REVIEW_STATE == "approved":
     review_decision = get_pr_review_decision()
@@ -371,20 +371,12 @@ if REVIEW_STATE == "approved":
     if review_decision in ("APPROVED", ""):
         merged = merge_pr()
         if merged:
-            messages.append({
-                "role": "user",
-                "content": "承認されました。マージが完了しました。PRコメントで報告してください。"
-            })
+            post_pr_comment("Lin: マージしました。")
         else:
-            messages.append({
-                "role": "user",
-                "content": "承認されましたがマージに失敗しました。PRコメントで状況を報告してください。"
-            })
+            post_pr_comment("Lin: マージに失敗しました。手動での確認をお願いします。")
     else:
-        messages.append({
-            "role": "user",
-            "content": f"approvedイベントが来ましたが、PRのreviewDecisionが{review_decision}です。PRコメントで状況を報告してください。"
-        })
+        post_pr_comment(f"Lin: reviewDecisionが{review_decision}のためマージをスキップしました。")
+    sys.exit(0)
 
 
 # ── Call Claude (with sh execution loop) ─────────────────────────────────────
