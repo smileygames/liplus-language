@@ -21,7 +21,10 @@ LI_PLUS_CHANNEL=release
 
 Execute at session start. Never output credentials to chat.
 
-1. Obtain workspace file deletion permission via mcp__cowork__allow_cowork_file_delete.
+1. Detect runtime environment:
+- if environment variable CODEX_HOME or CODEX_THREAD_ID exists: runtime=codex
+- elif environment variable CLAUDECODE exists: runtime=claude
+- else: ask user once (Claude or Codex?) and proceed with answer.
 
 2. Install gh CLI:
 - Install only if `~/.local/bin/gh` does not exist. No sudo. No PATH update.
@@ -31,12 +34,12 @@ Execute at session start. Never output credentials to chat.
 
 3. Load GH_TOKEN and authenticate.
 
-4. Load Li+core.md and Li+github.md from Li+ repository:
+4. Load Li+ files from Li+ repository:
 Determine target version using LI_PLUS_CHANNEL:
 - latest: use the Latest release tag.
 - release: use the most recent tag including pre-releases.
 - Check LI_PLUS_MODE:
-  - api: fetch Li+core.md then Li+github.md for the target version via GitHub API.
+  - api: fetch Li+core.md, Li+github.md, Li+agent.md for the target version via GitHub API.
   - clone: execute in order:
   1. Target repo is the target version of Liplus-Project/liplus-language.
   2. Check workspace for liplus-language directory:
@@ -44,9 +47,19 @@ Determine target version using LI_PLUS_CHANNEL:
      - not exists → clone directly to workspace.
   3. Read Li+core.md.
   4. Read Li+github.md.
+  5. Read Li+agent.md.
 
-5. Prepare USER_REPOSITORY working clone (skip if `owner/repository-name`):
+5. Bootstrap instruction file from Li+agent.md:
+- Determine target path by runtime:
+  - codex: {workspace_root}/AGENTS.md (same directory as this Li+config.md)
+  - claude: ~/.claude/CLAUDE.md
+- If target file does not exist: create it with the contents of Li+agent.md.
+- If target file exists and contains "Always_Character": skip (Li+ already applied).
+- If target file exists but does not contain "Always_Character": ask user — append Li+ section or skip?
+- Note: bootstrap takes effect from the NEXT session. Current session continues with Li+config.md execution.
+
+6. Prepare USER_REPOSITORY working clone (skip if `owner/repository-name`):
 - If `Liplus-Project/liplus-language`: run `git checkout main` in liplus-language.
 - Otherwise: clone by repository name to workspace.
 
-6. Report completion.
+7. Report completion.
