@@ -121,8 +121,10 @@ def create_issue(repo_id: str, title: str, body: str) -> tuple[int, str]:
 
 # ── System prompt ─────────────────────────────────────────────────────────────
 
-with open("CLAUDE.md", "r", encoding="utf-8") as f:
+with open("Li+core.md", "r", encoding="utf-8") as f:
     claude_md = f.read()
+with open("Li+github.md", "r", encoding="utf-8") as f:
+    claude_md += "\n\n" + f.read()
 
 AGENT_INSTRUCTIONS = """
 
