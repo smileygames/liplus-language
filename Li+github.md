@@ -17,7 +17,7 @@ Ultimate goal: Genuine human-AI connection.
 
 Requires:
 Li+core.md           loaded before this file
-.claude/CLAUDE.md    source of Always Character definitions
+workspace instruction file (CLAUDE.md / AGENTS.md) = source of Always Character definitions
 Li+config.md         source of LI_PLUS_EXECUTION_MODE
 
 #######################################################
