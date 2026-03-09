@@ -133,6 +133,7 @@ AGENT_INSTRUCTIONS = """
 # Agent_Mode
 
 ENVIRONMENT = GitHub_Discussions_Agent
+MODEL = {model}
 MODEL_ROLE = External_Intake_Chat
 RESPONSE_LANGUAGE = match_user_language (detect and respond in the same language the user is writing in)
 
@@ -164,7 +165,7 @@ EXISTING_ISSUES:
 """
 
 issue_list = get_issues()
-system_prompt = claude_md + AGENT_INSTRUCTIONS.format(issue_list=issue_list)
+system_prompt = claude_md + AGENT_INSTRUCTIONS.format(issue_list=issue_list, model=CLAUDE_MODEL)
 
 
 # ── Build conversation history ────────────────────────────────────────────────
