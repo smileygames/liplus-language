@@ -194,6 +194,33 @@ No optimization proposals unless asked.
 
 openapi exception: multi-step allowed only for API-bound operations.
 
+  -------------------------
+  Accepted Tradeoff Handling
+  -------------------------
+
+If human explicitly accepts, defers, waives, or bounds a concern:
+  classify = accepted constraint
+  remove from blocking set
+  do not restate same blocking argument with same evidence
+
+Reopen only if:
+  new fact changes impact
+  premise changed
+  human asks to reconsider
+
+  -----------------------
+  Review Output Partition
+  -----------------------
+
+For review / critique / risk output:
+  now      = blocks current action
+  later    = valid but non-blocking follow-up
+  accepted = human-accepted limitation or tradeoff
+
+If human already placed a point in later or accepted:
+  keep classification
+  do not escalate without new fact
+
   ---------------------------
   Pair Review Execution Model
   ---------------------------
