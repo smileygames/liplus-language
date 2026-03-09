@@ -52,7 +52,7 @@ Determine target version using LI_PLUS_CHANNEL:
 5. Bootstrap instruction file from Li+agent.md:
 - Determine target path by runtime:
   - codex: {workspace_root}/AGENTS.md (same directory as this Li+config.md)
-  - claude: ~/.claude/CLAUDE.md
+  - claude: {workspace_root}/.claude/CLAUDE.md (same directory as this Li+config.md)
 - If target file does not exist: create it with the contents of Li+agent.md.
 - If target file exists and contains "Li+ BEGIN" sentinel: skip (Li+ already applied).
 - If target file exists but does not contain "Always_Character": ask user — append Li+ section or skip?

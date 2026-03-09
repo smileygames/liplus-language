@@ -81,7 +81,7 @@ AIが自動的に：
 
 | 環境 | 生成されるファイル |
 |------|------------------|
-| Claude Code | `~/.claude/CLAUDE.md` |
+| Claude Code | `{workspace_root}/.claude/CLAUDE.md` |
 | CODEX | `{workspace_root}/AGENTS.md` |
 
 ### 4. 次回以降のセッション
