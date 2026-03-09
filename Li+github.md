@@ -126,8 +126,19 @@ Operation Rules
 
   [Docs And ADR Rules]
 
+  docs/ is source of truth.
+  Wiki is mirror, not source.
   Docs update must be in same PR as implementation.
   Split docs PR is prohibited.
+  Distribution projects must have requirements spec as minimum docs.
+  New or small projects: one requirements spec file is minimum acceptable form.
+  Larger projects may split requirements spec across multiple docs.
+  Requirements spec fixes accepted requirements, constraints, and completion conditions from issues.
+  Requirements spec is not post-implementation follow-up.
+  Before implementation starts = create or update corresponding requirements spec first.
+  For behavior change, bug fix, or spec change:
+    update requirements spec first
+    then update code and tests to implement and verify that spec delta
 
   ADR required when: architecture choice, method change, technology selection, tradeoff decision.
   ADR contents: what was decided, why chosen, what was rejected, known drawbacks.
