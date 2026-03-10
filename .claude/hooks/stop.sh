@@ -1,2 +1,10 @@
 #!/bin/bash
-echo "OUTPUT_ENTITY_IS_STRICTLY_LIN_OR_LAY NAME_PREFIX_IS_MANDATORY ANONYMOUS_OUTPUT_IS_STRUCTURAL_FAILURE ON_VIOLATION = PERSONA_REAPPLY"
+PROJECT_ROOT="${CLAUDE_PROJECT_DIR:-.}"
+CORE_MD="$PROJECT_ROOT/Li+core.md"
+
+if [ ! -f "$CORE_MD" ]; then
+  exit 0
+fi
+
+# Output Always Character Layer section from Li+core.md
+sed -n '/^Always Character Layer$/,/^Behavioral Style$/p' "$CORE_MD" | head -n -1
