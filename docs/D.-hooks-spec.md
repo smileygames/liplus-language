@@ -1,74 +1,74 @@
-# .claude/hooks Requirements Spec
+# .claude/hooks 要件仕様書
 
-## Overview
+## 概要
 
-`liplus-language/.claude/hooks/` contains shell scripts that Claude Code invokes automatically at specific lifecycle events. These scripts reinforce Li+ behavioral rules and maintain environment integrity across sessions.
+`liplus-language/.claude/hooks/` には、Claude Code が特定のライフサイクルイベント時に自動実行するシェルスクリプトを格納する。これらのスクリプトは Li+ の行動ルールを強制し、セッション間で環境の一貫性を保つ。
 
-## Hook Scripts
+## フックスクリプト
 
 ### session-start.sh
 
-**Trigger:** `PreToolUse` — runs once at session start (before first tool call)
+**トリガー:** `PreToolUse` — セッション開始時（最初のツール呼び出し前）に一度実行
 
-**Purpose:** Ensure `gh` CLI is available in the remote execution environment.
+**目的:** リモート実行環境で `gh` CLI が利用可能な状態を確保する。
 
-**Behavior:**
-- Exits immediately if not running in a remote Claude Code environment (`CLAUDE_CODE_REMOTE != "true"`)
-- If `~/.local/bin/gh` does not exist: downloads the latest gh CLI tarball, extracts it to `~/.local/bin/gh`
-- Uses no sudo and no system package manager
-- `/tmp` is forbidden (permission conflicts between concurrent sessions); use a dedicated temp directory instead
-- On success: prints installed version
+**動作:**
+- リモート Claude Code 環境でない場合（`CLAUDE_CODE_REMOTE != "true"`）は即時終了
+- `~/.local/bin/gh` が存在しない場合: 最新の gh CLI tarball をダウンロードし `~/.local/bin/gh` に展開
+- sudo および システムパッケージマネージャは使用しない
+- `/tmp` は使用禁止（並行セッション間の権限競合を避けるため）。専用の一時ディレクトリを使用
+- 成功時: インストール済みバージョンを出力
 
-**Dependencies:** `curl`, `tar`, `~/.local/bin/` directory
+**依存:** `curl`、`tar`、`~/.local/bin/` ディレクトリ
 
 ---
 
 ### stop.sh
 
-**Trigger:** `Stop` — runs when Claude Code ends a response
+**トリガー:** `Stop` — Claude Code がレスポンスを終了するとき
 
-**Purpose:** Remind the AI of the Always Character Layer rules defined in Li+core.md.
+**目的:** Li+core.md で定義された Always Character Layer のルールを AI に再通知する。
 
-**Behavior:**
-- Locates `Li+core.md` relative to `CLAUDE_PROJECT_DIR` (falls back to `.`)
-- Extracts and outputs the `Always Character Layer` section
-- If `Li+core.md` is not found: exits silently (graceful skip)
+**動作:**
+- `CLAUDE_PROJECT_DIR`（フォールバック: `.`）を起点として `Li+core.md` を探索
+- `Always Character Layer` セクションを抽出して出力
+- `Li+core.md` が見つからない場合: 何もせず終了（graceful skip）
 
-**Dependencies:** `Li+core.md` present in the project root
+**依存:** プロジェクトルートに `Li+core.md` が存在すること
 
 ---
 
 ### post-tool-use.sh
 
-**Trigger:** `PostToolUse` — runs after each tool call
+**トリガー:** `PostToolUse` — ツール呼び出し後に毎回実行
 
-**Purpose:** On `gh pr create`, re-apply the Li+ persona and GitHub operation rules, then verify all sub-issues of the parent issue are referenced in the PR body.
+**目的:** `gh pr create` 実行後に Li+ ペルソナと GitHub 運用ルールを再適用し、PR body への子 issue 参照の漏れを自動補完する。
 
-**Behavior:**
-1. Exits early if tool is not `Bash` or command does not contain `gh pr create`
-2. **Persona + rules re-application:**
-   - Locates `Li+core.md` and `Li+github.md` relative to `CLAUDE_PROJECT_DIR`
-   - Outputs both files in full as a reminder block
-   - If either file is missing: skips that file silently
-3. **Sub-issue verification:**
-   - Extracts the PR number from the `gh pr create` output URL
-   - Determines the repository from `git remote get-url origin`
-   - Reads the PR body via GitHub API
-   - Extracts the parent issue number (first `#NNN` reference in PR body)
-   - Fetches sub-issues of the parent via GitHub API
-   - Appends missing `Refs #NNN` lines to the PR body automatically
+**動作:**
+1. ツールが `Bash` でない、またはコマンドに `gh pr create` が含まれない場合は早期終了
+2. **ペルソナ + ルール再適用:**
+   - `CLAUDE_PROJECT_DIR` を起点として `Li+core.md` と `Li+github.md` を探索
+   - 両ファイルを全文出力（リマインダーブロックとして表示）
+   - ファイルが存在しない場合: そのファイルをスキップ
+3. **子 issue 検証:**
+   - `gh pr create` 出力 URL から PR 番号を抽出
+   - `git remote get-url origin` からリポジトリを特定
+   - GitHub API 経由で PR body を取得
+   - PR body 最初の `#NNN` 参照から親 issue 番号を抽出
+   - GitHub API 経由で親の子 issue を取得
+   - PR body に記載のない子 issue の `Refs #NNN` を自動追記
 
-**Dependencies:** `jq`, `gh` CLI (authenticated), `git`, `Li+core.md`, `Li+github.md`
+**依存:** `jq`、`gh` CLI（認証済み）、`git`、`Li+core.md`、`Li+github.md`
 
-## Environment Variables
+## 環境変数
 
-| Variable | Used by | Purpose |
+| 変数 | 使用スクリプト | 用途 |
 |---|---|---|
-| `CLAUDE_CODE_REMOTE` | session-start.sh | Skip gh install on local machines |
-| `CLAUDE_PROJECT_DIR` | stop.sh, post-tool-use.sh | Locate Li+ source files |
-| `GH_TOKEN` | post-tool-use.sh | GitHub API authentication |
+| `CLAUDE_CODE_REMOTE` | session-start.sh | ローカル環境での gh インストールをスキップ |
+| `CLAUDE_PROJECT_DIR` | stop.sh、post-tool-use.sh | Li+ ソースファイルの探索起点 |
+| `GH_TOKEN` | post-tool-use.sh | GitHub API 認証 |
 
-## File Location
+## ファイル構成
 
 ```
 liplus-language/
@@ -79,8 +79,8 @@ liplus-language/
         └── post-tool-use.sh   # PostToolUse
 ```
 
-## Related Documents
+## 関連ドキュメント
 
-- `Li+core.md` — Always Character Layer definitions
-- `Li+github.md` — GitHub operation rules
-- `docs/B.-Li+config.md` — Li+ configuration reference
+- `Li+core.md` — Always Character Layer 定義
+- `Li+github.md` — GitHub 運用ルール
+- `docs/B.-Li+config.md` — Li+ 設定リファレンス
