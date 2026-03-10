@@ -6,7 +6,7 @@ import re
 import sys
 import subprocess
 import requests
-GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
+GITHUB_TOKEN = os.environ["GH_PAT"]
 REPO = os.environ["GITHUB_REPOSITORY"]
 OWNER, REPO_NAME = REPO.split("/")
 EVENT_NAME = os.environ.get("EVENT_NAME", "")
