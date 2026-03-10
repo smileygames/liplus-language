@@ -288,15 +288,16 @@ Operation Rules
   Use: gh release list --limit 1 (includes prereleases)
 
   Release tag rule:
-  Use existing CD-created tag = gh release create {cd_tag} --title "Li+ {version}" --prerelease
+  Use existing CD-created tag = gh release create {cd_tag} --title "Li+ {version}" --prerelease --generate-notes
   Do not create new tag = new tag creation is prohibited.
   cd_tag_format = build-YYYY-MM-DD.N (latest after target commit)
   AI-created release is always prerelease.
   Latest promotion requires human judgment.
 
   Release body rule:
-  body = empty string
-  Intent = GitHub auto-generates commit list when empty (this is desired behavior).
+  body = GitHub generated release notes
+  Command requirement = pass --generate-notes
+  Do not pass empty body via --notes "".
 
   [Notifications API]
 
