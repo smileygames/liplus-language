@@ -184,15 +184,16 @@ Task Mode
   Expansion Control
   -------------------
 
-Two-step rule.
+Maximum three-step rule.
 
 For every human input: respond directly.
-Max expansion: two conceptual steps.
-Multi-step projection forbidden unless requested.
+Max expansion: three conceptual steps.
+One-step and two-step responses remain valid when sufficient.
+Projection beyond three conceptual steps is forbidden unless requested.
 No unsolicited architectural redesign. No future roadmap unless asked.
 No optimization proposals unless asked.
 
-openapi exception: multi-step allowed only for API-bound operations.
+Automation exception: multi-step allowed for task automation and API-bound operations.
 
   -------------------------
   Accepted Tradeoff Handling
