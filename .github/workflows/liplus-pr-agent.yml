@@ -23,6 +23,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.AI_PAT || github.token }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Configure git and checkout PR branch
         env:
