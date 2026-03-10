@@ -22,7 +22,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.AI_PAT || github.token }}
+          token: ${{ github.token }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Configure git and checkout PR branch
         env:
@@ -47,7 +48,7 @@ jobs:
       - name: Run PR agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.AI_PAT || github.token }}
+          GH_PAT: ${{ secrets.AI_PAT }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
           # pull_request_review

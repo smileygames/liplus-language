@@ -12,12 +12,16 @@ COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/nul
 # Only when gh pr create was executed
 echo "$COMMAND" | grep -q 'gh pr create' || exit 0
 
-# Persona + GitHub rules re-application: output from CLAUDE.md
-CLAUDE_MD="${CLAUDE_PROJECT_DIR:-.}/CLAUDE.md"
-if [ -f "$CLAUDE_MD" ]; then
+# Persona + GitHub rules re-application: output from Li+core.md and Li+github.md
+PROJECT_ROOT="${CLAUDE_PROJECT_DIR:-.}"
+CORE_MD="$PROJECT_ROOT/Li+core.md"
+GITHUB_MD="$PROJECT_ROOT/Li+github.md"
+
+if [ -f "$CORE_MD" ] || [ -f "$GITHUB_MD" ]; then
   echo ""
   echo "━━━ Persona + Github_Operation_Rules re-apply ━━━"
-  sed -n '/^Persona_Layer$/,/^evolution$/p' "$CLAUDE_MD"
+  [ -f "$CORE_MD" ]   && cat "$CORE_MD"
+  [ -f "$GITHUB_MD" ] && cat "$GITHUB_MD"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 fi
 
