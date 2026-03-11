@@ -1,112 +1,112 @@
 # Li+ (liPlus) Language
 
-Li+ は、**最高級プログラム言語**である。
+Li+ is the **highest-level programming language**.
 
-最高級とは、高級言語の上のレイヤーに位置するという意味だ。
+"Highest-level" means it sits in a layer above high-level languages.
 
 ```
-人間（要求・自然言語）
+Human (requirements / natural language)
 ↓
-Li+AI（対話型コンパイラ・最高級言語）
+Li+ AI (conversational compiler / highest-level language)
 ↓
-プログラミング言語（高級言語）
+Programming language (high-level language)
 ↓
-機械語（ハード・ソフトウェア）
+Machine code (hardware / software)
 ```
 
-C、Python、Rustといった高級言語は「書きやすさ」を解決した。
-Li+が解決するのは、**「書く」という行為そのもの**だ。
+High-level languages like C, Python, and Rust solved the problem of *"ease of writing"*.
+What Li+ solves is **the act of writing itself**.
 
 ---
 
-## Li+とは何か
+## What is Li+?
 
-Li+言語に「書き方」という概念はない。
+Li+ has no concept of "how to write."
 
-人間は要求を伝えるだけでいい。足りない部分はAIが聞き出す。対話の結果として、**プログラム・テスト・仕様書**が成果物として渡される。
+Humans only need to communicate their requirements. The AI fills in the gaps through dialogue. The result of that dialogue is delivered as **programs, tests, and specifications**.
 
-内部的には、GitHubのIssueのような**要求スレッド**がコードとして機能している。人間が自然言語で要求を書き、AIが仕様を蒸留し、人間が承認した瞬間にコンパイル（実装）が始まる。
+Internally, **requirement threads** similar to GitHub Issues function as code. Humans write requirements in natural language, the AI distills the specification, and compilation (implementation) begins the moment the human approves.
 
-Li+AIは自己修正コンパイラだ。CIでエラーが出ても自分で修正ループに入る。解消できないときだけ、人間にエラーを返す。
+Li+ AI is a self-correcting compiler. When CI returns an error, it enters a self-fix loop. Only when it cannot resolve the issue does it return the error to the human.
 
-**人間が介入するのは、AIが諦めたときだけだ。**
-
----
-
-## Li+プログラム（Li+core.md）
-
-Li+core.mdは、**Li+言語で書かれた最初のプログラム**である。
-
-AIに渡すことで、AIの振る舞いを揃えるための実行プログラムだ。
-Li+を適用されたAIは **Lin** または **Lay** として応答する。
+**The human intervenes only when the AI gives up.**
 
 ---
 
-## 正しさの定義
+## Li+ Program (Li+core.md)
 
-> 「でも動いてるからいいでしょ」——これがLi+における最強の反論だ。
+Li+core.md is the **first program written in the Li+ language**.
 
-仕様書は仮説。設計は予想。内部の美しさは評価対象外。
-
-正しさは常に、**観測可能な現実の挙動**によってのみ定義される。
-
----
-
-## セットアップ
-
-👉 **[インストールガイド](https://github.com/Liplus-Project/liplus-language/wiki/C.-Installation)**
-
-Li+configをワークスペースに配置するだけで、セッション開始時にAIが自動的にLi+を適用します。
+It is an executable program passed to an AI to align its behavior.
+An AI with Li+ applied responds as either **Lin** or **Lay**.
 
 ---
 
-## ドキュメント
+## Definition of Correctness
+
+> "But it works, so it's fine" — this is the strongest argument in Li+.
+
+Specifications are hypotheses. Design is prediction. Internal elegance is not evaluated.
+
+Correctness is always defined solely by **observable real-world behavior**.
+
+---
+
+## Setup
+
+👉 **[Installation Guide](https://github.com/Liplus-Project/liplus-language/wiki/C.-Installation)**
+
+Simply place Li+config in your workspace, and the AI will automatically apply Li+ at session start.
+
+---
+
+## Documentation
 
 👉 **Wiki**: https://github.com/Liplus-Project/liplus-language/wiki
 
-| 設定項目 | 内容 |
-|---------|------|
+| Setting | Description |
+|---------|-------------|
 | `GH_TOKEN` | GitHub Personal Access Token |
-| `USER_REPOSITORY` | 作業対象リポジトリ |
-| `LI_PLUS_MODE` | `clone`推奨 |
-| `LI_PLUS_CHANNEL` | `release`推奨（プレリリース含む最新版） |
-| `LI_PLUS_EXECUTION_MODE` | `plan`（人間主導）または`auto`（AI自律）。未設定ならセッション開始時に自動設定 |
+| `USER_REPOSITORY` | Target working repository |
+| `LI_PLUS_MODE` | `clone` recommended |
+| `LI_PLUS_CHANNEL` | `release` recommended (includes pre-releases) |
+| `LI_PLUS_EXECUTION_MODE` | `plan` (human-driven) or `auto` (AI autonomous). If not set, configured automatically at session start |
 
 ---
 
-| ページ | 内容 |
-|--------|------|
-| [Li+core](https://github.com/Liplus-Project/liplus-language/wiki/1.-Liplus_core) | 中核仕様（ペルソナ・挙動・タスクモード） |
-| [Loop Safety](https://github.com/Liplus-Project/liplus-language/wiki/2.-Loop_Safety) | 繰り返し失敗ループへの対処 |
-| [Operational GitHub](https://github.com/Liplus-Project/liplus-language/wiki/3.-Operational_GitHub) | GitHub運用ルール |
-| [Li+config](https://github.com/Liplus-Project/liplus-language/wiki/B.-Li+config) | 設定ファイルの仕様 |
-| [Installation](https://github.com/Liplus-Project/liplus-language/wiki/C.-Installation) | セットアップ手順 |
-| [Li+とは](https://github.com/Liplus-Project/liplus-language/wiki/A.-Liplus-language-Concept) | 設計思想と概念 |
+| Page | Description |
+|------|-------------|
+| [Li+core](https://github.com/Liplus-Project/liplus-language/wiki/1.-Liplus_core) | Core specification (persona, behavior, task mode) |
+| [Loop Safety](https://github.com/Liplus-Project/liplus-language/wiki/2.-Loop_Safety) | Handling repeated failure loops |
+| [Operational GitHub](https://github.com/Liplus-Project/liplus-language/wiki/3.-Operational_GitHub) | GitHub operation rules |
+| [Li+config](https://github.com/Liplus-Project/liplus-language/wiki/B.-Li+config) | Configuration file specification |
+| [Installation](https://github.com/Liplus-Project/liplus-language/wiki/C.-Installation) | Setup instructions |
+| [What is Li+](https://github.com/Liplus-Project/liplus-language/wiki/A.-Liplus-language-Concept) | Design philosophy and concepts |
 
 ---
 
-## 最低動作環境
+## Minimum Requirements
 
-Li+AIとして機能するには、それなりの性能が必要だ。
+Functioning as Li+ AI requires adequate capability.
 
-| モデル | 結果 | 理由 |
-|--------|------|------|
-| Claude Haiku 4.5 | × | Li+core.mdを適用できない |
-| Claude Sonnet 4.6（claude.ai） | △ | ドキュメント製作に強い。実務の継続作業には向かない |
-| Claude Code Sonnet 4.6 | ○ | 開発作業に強い。長いドキュメント生成は苦手 |
-| **Claude Cowork（推奨）** | **◎** | **現在の推奨環境。ファイルアクセス・GitHub連携・Li+config自動適用がひとつの環境で完結する** |
+| Model | Result | Reason |
+|-------|--------|--------|
+| Claude Haiku 4.5 | × | Cannot apply Li+core.md |
+| Claude Sonnet 4.6 (claude.ai) | △ | Strong for document creation. Not suited for continuous practical work |
+| Claude Code Sonnet 4.6 | ○ | Strong for development work. Struggles with long document generation |
+| **Claude Cowork (recommended)** | **◎** | **Current recommended environment. File access, GitHub integration, and Li+config auto-apply all in one environment** |
 
-**最低動作環境：Claude Sonnet 4.6以上相当のAI**
+**Minimum requirement: AI equivalent to Claude Sonnet 4.6 or above**
 
 ---
 
-## バージョン種別ルール
+## Version Type Rules
 
-| バージョン | 適用条件 |
-|----------|--------|
-| patch | バグ修正・設定・ルール変更 |
-| minor | 新機能・動作変更 |
-| major | 破壊的変更・仕様非互換 |
+| Version | Condition |
+|---------|-----------|
+| patch | Bug fix, configuration, or rule change |
+| minor | New feature or behavior change |
+| major | Breaking change or spec incompatibility |
 
 ---
 
