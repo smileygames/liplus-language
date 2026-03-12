@@ -33,6 +33,26 @@ Li+ AI is a self-correcting compiler. When CI returns an error, it enters a self
 
 ---
 
+## Position in the AI Ecosystem
+
+AI tooling today focuses on **connection** — how to give AI access to tools and data.
+Li+ focuses on **execution discipline** — how AI should read, act, verify, and correct.
+
+| Layer | Role | Example |
+|-------|------|---------|
+| Connection protocol | Link AI to external tools and data | MCP, Function Calling |
+| Instruction file | Tell AI project-specific notes | CLAUDE.md, .cursorrules |
+| Agent product | Package AI as a coding assistant | Devin, OpenHands |
+| **Execution protocol** | **Define how AI processes specs into output** | **Li+** |
+
+Li+ is not RAG. RAG retrieves fragments by similarity search.
+Li+ is a deterministic execution protocol: the AI reads structured specifications, implements, verifies through CI, and self-corrects — like a compiler, not a search engine.
+
+Li+ is tool-agnostic. It does not compete with MCP or any agent framework.
+It defines the behavioral layer that runs on top of them.
+
+---
+
 ## Li+ Program (Li+core.md)
 
 Li+core.md is the **first program written in the Li+ language**.
