@@ -94,5 +94,5 @@ Li+適応。
 
 ## 関連ページ
 
-- [B. Li+config](B.-Li+config) — 設定ファイルの詳細仕様
-- [1. Li+core](1.-Liplus_core) — Li+の中核仕様
+- [E. Li+config](E.-Li+config) — 設定ファイルの詳細仕様
+- [B. Liplus_core](B.-Liplus_core) — Li+の中核仕様

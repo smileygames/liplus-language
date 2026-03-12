@@ -64,4 +64,4 @@ liplus-language/
 
 - `Li+core.md` — Always Character Layer 定義
 - `Li+github.md` — GitHub 運用ルール
-- `docs/B.-Li+config.md` — Li+ 設定リファレンス
+- `docs/E.-Li+config.md` — Li+ 設定リファレンス

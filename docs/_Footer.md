@@ -30,4 +30,4 @@
 
 ---
 
-[Home](Home) | [B. Li+core](B.-Liplus_core) | [C. Loop Safety](C.-Loop_Safety) | [D. GitHub運用](D.-Operational_GitHub) | [A. Concept](A.-Liplus-language-Concept)
+[Home](Home) | [B. Li+core](B.-Liplus_core) | [C. Loop Safety](C.-Loop_Safety) | [D. GitHub運用](D.-Operational_GitHub) | [A. Concept](A.-Liplus-language_Concept)

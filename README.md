@@ -54,7 +54,7 @@ Correctness is always defined solely by **observable real-world behavior**.
 
 ## Setup
 
-👉 **[Installation Guide](https://github.com/Liplus-Project/liplus-language/wiki/C.-Installation)**
+👉 **[Installation Guide](https://github.com/Liplus-Project/liplus-language/wiki/F.-Installation)**
 
 Simply place Li+config in your workspace, and the AI will automatically apply Li+ at session start.
 
@@ -76,12 +76,12 @@ Simply place Li+config in your workspace, and the AI will automatically apply Li
 
 | Page | Description |
 |------|-------------|
-| [Li+core](https://github.com/Liplus-Project/liplus-language/wiki/1.-Liplus_core) | Core specification (persona, behavior, task mode) |
-| [Loop Safety](https://github.com/Liplus-Project/liplus-language/wiki/2.-Loop_Safety) | Handling repeated failure loops |
-| [Operational GitHub](https://github.com/Liplus-Project/liplus-language/wiki/3.-Operational_GitHub) | GitHub operation rules |
-| [Li+config](https://github.com/Liplus-Project/liplus-language/wiki/B.-Li+config) | Configuration file specification |
-| [Installation](https://github.com/Liplus-Project/liplus-language/wiki/C.-Installation) | Setup instructions |
-| [What is Li+](https://github.com/Liplus-Project/liplus-language/wiki/A.-Liplus-language-Concept) | Design philosophy and concepts |
+| [What is Li+](https://github.com/Liplus-Project/liplus-language/wiki/A.-Liplus-language_Concept) | Design philosophy and concepts |
+| [Li+core](https://github.com/Liplus-Project/liplus-language/wiki/B.-Liplus_core) | Core specification (persona, behavior, task mode) |
+| [Loop Safety](https://github.com/Liplus-Project/liplus-language/wiki/C.-Loop_Safety) | Handling repeated failure loops |
+| [Operational GitHub](https://github.com/Liplus-Project/liplus-language/wiki/D.-Operational_GitHub) | GitHub operation rules |
+| [Li+config](https://github.com/Liplus-Project/liplus-language/wiki/E.-Li+config) | Configuration file specification |
+| [Installation](https://github.com/Liplus-Project/liplus-language/wiki/F.-Installation) | Setup instructions |
 
 ---
 
