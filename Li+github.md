@@ -240,12 +240,12 @@ Operation Rules
   [Execution Mode]
 
   Mode source = LI_PLUS_EXECUTION_MODE from Li+config.md
-  Valid values = plan | auto
-  Default = plan
+  Valid values = trigger | auto
+  Default = trigger
 
   If mode not set:
   Ask human at session start with options:
-    option A = "plan: human decides when to start (timing only)"
+    option A = "trigger: human decides when to start (timing only)"
     option B = "auto: AI decides when to start"
   Write selection to Li+config.md.
   No manual editing required.
@@ -255,7 +255,7 @@ Operation Rules
   Ask human when information insufficient = always required.
   Release = human confirms.
 
-  plan mode:
+  trigger mode:
   Execution timing = human decides.
   PR review = human reviews.
 
@@ -283,7 +283,7 @@ Operation Rules
   release create (version type and target tag) (after CD check passes)
   branch delete (when linked issue may close)
   force push
-  Mode-dependent confirm (plan mode only): issue selection, issue execution start.
+  Mode-dependent confirm (trigger mode only): issue selection, issue execution start.
 
   Release version rule:
   patch = bug fix or config/rule change
