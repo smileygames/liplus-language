@@ -189,6 +189,13 @@ Operation Rules
   CI loop:
   step1 = get latest commit sha:
     gh pr view {pr} -R {owner}/{repo} --json headRefOid --jq '.headRefOid'
+  step1.5 = check mergeable state:
+    gh pr view {pr} -R {owner}/{repo} --json mergeStateStatus --jq '.mergeStateStatus'
+    if CONFLICTING:
+      attempt rebase: git fetch origin main && git rebase origin/main
+      if rebase succeeds: git push --force-with-lease -> restart CI loop from step1
+      if rebase fails: git rebase --abort -> comment on issue -> escalate to human
+    if BLOCKED or UNKNOWN: wait and recheck (GitHub may still be computing)
   step2 = wait for all check-runs to complete:
     if mcp__github-webhook-mcp available:
       poll get_pending_status every 60 seconds

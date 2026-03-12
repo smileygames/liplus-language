@@ -301,11 +301,21 @@ git が使えない環境や、他の AI エージェントとの互換性が必
 1.  **PR 作成・更新時**
     -   タイトルは ASCII 英語、本文は日本語 + Issue 番号必須
     -   作成と同時に CI ループを開始する
-2.  **チェックランの完了待機**
+2.  **マージ可能状態の確認**
     -   最新コミット SHA を取得：
         ```
         gh pr view {pr} -R {owner}/{repo} --json headRefOid --jq '.headRefOid'
         ```
+    -   マージ可能状態を確認：
+        ```
+        gh pr view {pr} -R {owner}/{repo} --json mergeStateStatus --jq '.mergeStateStatus'
+        ```
+    -   `CONFLICTING` の場合：
+        -   自動 rebase を試みる：`git fetch origin main && git rebase origin/main`
+        -   rebase 成功 → `git push --force-with-lease` → CI ループを step 1 から再開
+        -   rebase 失敗 → `git rebase --abort` → issue コメントで人間にエスカレーション
+    -   `BLOCKED` / `UNKNOWN` の場合：GitHub が計算中の可能性があるため、待機して再確認
+3.  **チェックランの完了待機**
     -   **`mcp__github-webhook-mcp` が利用可能な場合：**
         -   `get_pending_status` を 60 秒ごとにポーリング
         -   `check_run` pending あり → `list_pending_events` → SHA 照合 → `get_event` で結論取得 → `mark_processed`
@@ -316,13 +326,13 @@ git が使えない環境や、他の AI エージェントとの互換性が必
             gh api repos/{owner}/{repo}/commits/{sha}/check-runs \
               --jq '.check_runs[] | {name,status,conclusion}'
             ```
-3.  **結論判定**
+4.  **結論判定**
     -   `conclusion=failure` がある場合 → CI FAIL
     -   全て `conclusion` が `success` / `skipped` / `neutral` → CI PASS
-4.  **CI FAIL 時の自動修正ループ（Loop_Safety タスク閾値=3回）**
+5.  **CI FAIL 時の自動修正ループ（Loop_Safety タスク閾値=3回）**
     -   同一の修正アプローチを3回繰り返したら中止・アプローチ切り替え
     -   収束しない場合は自動修正を停止し、Issue にコメントとして外部化して人間に委ねる
-5.  **レビュー承認確認**
+6.  **レビュー承認確認**
     -   レビューリクエストは CODEOWNERS 設定により自動送信される。AIが手動で送信する必要はない。
     -   **`mcp__github-webhook-mcp` が利用可能な場合：**
         -   `get_pending_status` を 60 秒ごとにポーリング
