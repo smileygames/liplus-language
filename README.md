@@ -90,7 +90,7 @@ Simply place Li+config in your workspace, and the AI will automatically apply Li
 | `USER_REPOSITORY` | Target working repository |
 | `LI_PLUS_MODE` | `clone` recommended |
 | `LI_PLUS_CHANNEL` | `release` recommended (includes pre-releases) |
-| `LI_PLUS_EXECUTION_MODE` | `plan` (human-driven) or `auto` (AI autonomous). If not set, configured automatically at session start |
+| `LI_PLUS_EXECUTION_MODE` | `trigger` (human-driven) or `auto` (AI autonomous). If not set, configured automatically at session start |
 
 ---
 
