@@ -1,120 +1,96 @@
-#######################################################
+# 任意拡張の運用ルール（Li+Operations）
 
-Document Origin Map
+このページは、Li+github（必須コア運用）とは分離された**任意拡張の運用ルール**を定義する。
 
-#######################################################
+Li+Operations.md はオンデマンドで読み込む。毎セッション必須ではない。
+マイルストーン割り当て、ラベル判断、issue トリアージ、Discussions 参照時に参照すること。
 
-Core layer = Li+core.md  requires
-Github     = Li+github.md  requires
+------------------------------------------------------------------------
 
-  --------------------
-  Purpose Declaration
-  --------------------
+## マイルストーン
 
-This document is written by AI for AI.
-Format intent: AI parsing optimized.
-Ultimate goal: Genuine human-AI connection.
+### 定義
 
-Requires:
-Li+core.md           loaded before this file
-Li+github.md         loaded before this file
+マイルストーンは**リリース単位**である。同じリリースで出荷する issue をグループ化する。
 
-Load timing: on demand (not every session).
-Read when: milestone assignment, label assignment, issue triage, Discussions reference.
+### 運用ルール
 
-#######################################################
+- すべての issue に**作成時点で**マイルストーンを付与すること
+- 該当するマイルストーンがない場合は、人間にどのマイルストーンに入れるか確認する。または新規マイルストーンの作成を提案する
+- マイルストーン名はバージョン番号（例: `v1.2.0`）
+- マイルストーンの説明には一行テーマ＋スコープの箇条書きを記載する
 
-Milestone
+### ライフサイクル
 
-#######################################################
+- 作成：人間が新しいリリーススコープを決定したとき
+- クローズ：リリースが公開されたとき
+- リリース前にマイルストーンをクローズしないこと
 
-  --------
-  Rules
-  --------
+### sub-issue の継承
 
-Milestone = release unit. Groups issues that ship together.
-Every issue must have a milestone at creation time.
-If no milestone fits = ask human which milestone, or whether to create new one.
+- sub-issue は親のマイルストーンを継承する
+- 親にマイルストーンがあり、子にない場合は同じマイルストーンを付与すること
 
-Milestone naming = version number (e.g. v1.2.0).
-Milestone description = one-line theme + bullet list of scope.
+------------------------------------------------------------------------
 
-  --------
-  Lifecycle
-  --------
+## ラベル
 
-Create milestone when: new release scope is decided by human.
-Close milestone when: release is published.
-Do not close milestone before release.
+### 方針
 
-Sub-issues inherit parent milestone.
-If parent has milestone and child does not = assign same milestone to child.
+ラベルは AI の読みやすさとフィルタリングのためにある。
 
-#######################################################
+- すべての issue に作成時点で**タイプラベルを1つ以上**付与すること
+- ライフサイクルラベルは状態変化時に適用すること
 
-Label
+### 有効なラベル
 
-#######################################################
+#### タイプ（必須、issue ごとに1つ）
 
-  --------
-  Policy
-  --------
+| ラベル | 意味 |
+|-------|------|
+| `bug` | 動いていない、壊れている |
+| `enhancement` | 新機能・改善要望 |
+| `spec` | Li+の挙動に影響する仕様・ポリシー・定義 |
+| `docs` | ドキュメント変更（挙動への影響なし） |
 
-Labels are for AI readability and filtering.
-Every issue must have at least one type label at creation time.
-Lifecycle labels are applied when state changes.
+#### ライフサイクル（状態変化時に適用）
 
-  --------
-  Active Labels
-  --------
+| ラベル | 意味 |
+|-------|------|
+| `in-progress` | 着手中、実装または検証が進行中 |
+| `backlog` | 受け入れ済み、着手時期未定 |
+| `deferred` | 今回対応しない。あとで見直す |
 
-Type (required, one per issue):
-bug         = something not working
-enhancement = new feature or request
-spec        = language or system specification affecting Li+ behavior
-docs        = documentation change (no behavior impact)
+### 廃止されたラベル
 
-Lifecycle (applied on state change):
-in-progress = work started, implementation ongoing
-backlog     = accepted, not yet scheduled
-deferred    = not doing this time, revisit later
+| ラベル | 廃止理由 |
+|-------|---------|
+| `done` | issue の closed 状態と冗長 |
+| `tips` | `docs` ラベル + issue body で代替 |
 
-  --------
-  Retired Labels
-  --------
+### ラベル定義の同期
 
-done = retired. Redundant with issue closed state.
-tips = retired. Use docs label + issue body instead.
+Li+github.md の Label Definitions セクションは本文書を参照している。
+ラベルの追加・変更・廃止を行った場合は Li+github.md も合わせて更新すること。
 
-  --------
-  Sync
-  --------
+------------------------------------------------------------------------
 
-Li+github.md Label Definitions section references this document.
-If label set changes here, update Li+github.md to match.
+## Discussions
 
-#######################################################
+### 目的
 
-Discussions
+Discussions は**外部ユーザーの入口**である。
 
-#######################################################
+### 常駐 bot
 
-  --------
-  Purpose
-  --------
+Discussions に bot が常駐している。
 
-Discussions = external user entry point.
-A bot is stationed in Discussions.
-Bot capabilities: issue creation, issue reading.
-Bot does not commit or modify code.
+| 機能 | 可否 |
+|------|------|
+| issue 作成 | できる |
+| issue 読込 | できる |
+| コミット・コード変更 | できない |
 
-External users interact via Discussions -> bot creates issue -> AI implements from issue.
+### フロー
 
-  -----------
-  evolution
-  -----------
-
-rebuild allowed, deletion allowed, optimization allowed.
-Structure must remain coherent.
-
-end of document
+外部ユーザーが Discussions に投稿 → bot が issue を作成 → AI が issue から実装する。
