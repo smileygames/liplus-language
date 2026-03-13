@@ -38,5 +38,5 @@ jobs:
           COMMENT_NODE_ID: ${{ github.event.comment.node_id }}
           EVENT_NAME: ${{ github.event_name }}
           ACTOR: ${{ github.actor }}
-          CLAUDE_MODEL: claude-haiku-4-5
+          CLAUDE_MODEL: claude-sonnet-4-6-20250514
         run: python .github/scripts/liplus_discussions_agent.py

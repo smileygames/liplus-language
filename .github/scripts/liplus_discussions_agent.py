@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Li+ Discussions Agent - External intake chat via Claude Haiku."""
+"""Li+ Discussions Agent - External intake chat via Claude."""
 
 import os
 import sys
@@ -15,7 +15,7 @@ DISCUSSION_NUMBER = int(os.environ["DISCUSSION_NUMBER"])
 COMMENT_NODE_ID = os.environ.get("COMMENT_NODE_ID", "")
 EVENT_NAME = os.environ.get("EVENT_NAME", "discussion")
 ACTOR = os.environ.get("ACTOR", "")
-CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
+CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6-20250514")
 
 BOT_LOGINS = {"github-actions[bot]", "liplus-lin-lay"}
 
@@ -50,18 +50,22 @@ def get_discussion() -> dict:
               id
               title
               body
+              author { login }
+              authorAssociation
               comments(first: 100) {
                 nodes {
                   id
                   body
                   isMinimized
                   author { login }
+                  authorAssociation
                   replies(first: 50) {
                     nodes {
                       id
                       body
                       isMinimized
                       author { login }
+                      authorAssociation
                     }
                   }
                 }
@@ -121,10 +125,11 @@ def create_issue(repo_id: str, title: str, body: str) -> tuple[int, str]:
 
 # ── System prompt ─────────────────────────────────────────────────────────────
 
-with open("Li+core.md", "r", encoding="utf-8") as f:
-    claude_md = f.read()
-with open("Li+github.md", "r", encoding="utf-8") as f:
-    claude_md += "\n\n" + f.read()
+_LI_PLUS_FILES = ["Li+core.md", "Li+github.md", "Li+agent.md", "Li+Operations.md"]
+claude_md = ""
+for _fp in _LI_PLUS_FILES:
+    with open(_fp, "r", encoding="utf-8") as f:
+        claude_md += f.read() + "\n\n"
 
 AGENT_INSTRUCTIONS = """
 
@@ -175,7 +180,15 @@ repo_id = repo_data["id"]
 discussion = repo_data["discussion"]
 discussion_id = discussion["id"]
 
-raw = [("user", f"Discussion: {discussion['title']}\n\n{discussion.get('body') or ''}")]
+def _user_tag(author: dict | None, association: str) -> str:
+    """Format user identity tag for conversation context."""
+    login = (author or {}).get("login", "unknown")
+    if association and association != "NONE":
+        return f"[{login} ({association})]"
+    return f"[{login}]"
+
+disc_author = _user_tag(discussion.get("author"), discussion.get("authorAssociation", ""))
+raw = [("user", f"{disc_author} Discussion: {discussion['title']}\n\n{discussion.get('body') or ''}")]
 
 # Detect parent comment for reply-in-thread posting
 reply_to_id = None
@@ -184,14 +197,18 @@ for comment in discussion["comments"]["nodes"]:
         continue
     login = (comment.get("author") or {}).get("login", "")
     role = "assistant" if login in BOT_LOGINS else "user"
-    raw.append((role, comment["body"]))
+    tag = _user_tag(comment.get("author"), comment.get("authorAssociation", ""))
+    body = comment["body"] if role == "assistant" else f"{tag} {comment['body']}"
+    raw.append((role, body))
     # Flatten replies directly after the comment
     for reply in comment.get("replies", {}).get("nodes", []):
         if reply.get("isMinimized"):
             continue
         reply_login = (reply.get("author") or {}).get("login", "")
         reply_role = "assistant" if reply_login in BOT_LOGINS else "user"
-        raw.append((reply_role, reply["body"]))
+        reply_tag = _user_tag(reply.get("author"), reply.get("authorAssociation", ""))
+        reply_body = reply["body"] if reply_role == "assistant" else f"{reply_tag} {reply['body']}"
+        raw.append((reply_role, reply_body))
         # If this reply triggered the event, reply back in the same thread
         if COMMENT_NODE_ID and reply.get("id") == COMMENT_NODE_ID:
             reply_to_id = comment["id"]
