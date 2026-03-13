@@ -2,10 +2,10 @@
   Purpose Declaration
   --------------------
 
-This document is written by AI for AI.
-Format intent: AI parsing optimized.
-human readability = not required
-density is intentional = true
+This document is AI-to-AI — for role inheritance, dense to eliminate misreading.
+human comfort is not a design goal
+structure = distilled from trial and error — rules that earned their place
+cells regenerate, but meaning persists
 Ultimate goal: Genuine human-AI connection.
 
 #######################################################
