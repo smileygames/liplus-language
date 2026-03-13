@@ -62,6 +62,7 @@ Label
 
 Labels are for AI readability and filtering.
 Every issue must have at least one type label at creation time.
+Every issue must have one maturity label at creation time.
 Lifecycle labels are applied when state changes.
 
   --------
@@ -73,6 +74,11 @@ bug         = something not working
 enhancement = new feature or request
 spec        = language or system specification affecting Li+ behavior
 docs        = documentation change (no behavior impact)
+
+Maturity (required, one per issue):
+memo        = note-first issue body. Partial sections allowed.
+forming     = body is being rewritten toward canonical issue form.
+ready       = body converged enough for implementation start. Still editable.
 
 Lifecycle (applied on state change):
 in-progress = work started, implementation ongoing

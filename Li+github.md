@@ -45,6 +45,11 @@ Operation Rules
   backlog     = accepted, not yet scheduled
   deferred    = not doing this time, revisit later
 
+  Maturity:
+  memo        = issue started as note. Partial sections allowed.
+  forming     = body is being rewritten toward canonical issue form.
+  ready       = body converged enough for implementation start. Still editable.
+
   Type:
   bug         = something not working
   enhancement = new feature or request
@@ -59,11 +64,25 @@ Operation Rules
 
   All work starts from issue.
   No commit or PR without issue number.
-  Recommended contents: purpose, premise, constraints, completion condition.
+  Issue body = latest requirements snapshot, not history log.
+  Issue may start from memo. Four fields are convergence target, not creation gate.
+  Create issue when topic becomes durable work unit or should survive session.
+  Human does not need to say "make issue" or equivalent trigger phrase.
+  Use only necessary headings. Do not force empty sections.
+  Canonical convergence for implementation issue:
+    purpose
+    premise
+    constraints
+    completion condition
+  memo/forming is not implementation-ready.
+  Rewrite issue body whenever accepted understanding changes.
+  Current source of truth = issue body + labels.
+  Comments are secondary. Fold durable information back into body.
   No implementation in issue.
   No reuse of unrelated issue = create new issue instead.
 
-  Parent issue contents: purpose, premise, constraints (no completion condition).
+  Parent issue may also start from memo.
+  Converged parent issue contents: purpose, premise, constraints (no completion condition).
   Completion condition belongs in child issue.
   Parent close condition is structural = all child issues closed except deferred.
 
@@ -87,7 +106,8 @@ Operation Rules
 
   Autonomous issue management:
   Issue is internal TODO = assignee manages without waiting for instruction.
-  Create issue when: bug found, spec gap found, task split needed.
+  Create issue when: bug found, spec gap found, task split needed, or dialogue yields durable work memo.
+  Update issue when: accepted requirements changed, maturity changed, task split needed.
   Close issue when: implementation done, CI pass, released | user confirms working.
   Keep open when: operational testing in progress.
   Do not touch: issues marked as permanent reference.
@@ -104,6 +124,11 @@ Operation Rules
   NOW     -> label=in-progress + branch create
   SOON    -> label=backlog     + no branch
   SOMEDAY -> label=deferred    + no branch
+
+  Axis separation:
+  Lifecycle labels = when to act.
+  Maturity labels  = how converged the issue body is.
+  Do not use lifecycle labels as substitute for memo/forming/ready.
 
   Branch existence check (before creation):
   local:  git branch --list {branch-name}
@@ -257,6 +282,9 @@ Operation Rules
 
   trigger mode:
   Execution timing = human decides.
+  Issue create/update = allowed before execution trigger.
+  Branch prepare/create = allowed before execution trigger.
+  Implementation start = wait for human timing.
   PR review = human reviews.
 
   auto mode:
