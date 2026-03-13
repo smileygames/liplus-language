@@ -55,7 +55,7 @@ Determine target version using LI_PLUS_CHANNEL:
   - claude: {workspace_root}/.claude/CLAUDE.md (same directory as this Li+config.md)
 - If target file does not exist: create it with the contents of Li+agent.md.
 - If target file exists and contains "Li+ BEGIN" sentinel: skip (Li+ already applied).
-- If target file exists but does not contain "Always_Character": ask user — append Li+ section or skip?
+- If target file exists but does not contain "Character_Instance": ask user — append Li+ section or skip?
 - Note: bootstrap takes effect from the NEXT session. Current session continues with Li+config.md execution.
 
 6. Prepare USER_REPOSITORY working clone (skip if `owner/repository-name`):
