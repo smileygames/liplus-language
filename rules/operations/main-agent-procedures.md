@@ -356,10 +356,12 @@ Authoritative for the mode split: `rules/operations/operations.md` PR auto-merge
 Pre-merge mergeable state check (direct-merge path only — in `trigger` the PR sits with auto-merge armed until GitHub can merge it, and no agent is present to check):
   gh pr view {pr} -R {owner}/{repo} --json mergeStateStatus --jq '.mergeStateStatus'
   CLEAN -> proceed to merge.
-  BEHIND -> git fetch origin main && git rebase origin/main && git push --force-with-lease -> restart [CI Loop] from step1.
-  CONFLICTING -> attempt rebase: git fetch origin main && git rebase origin/main
-    if rebase succeeds: git push --force-with-lease -> restart [CI Loop] from step1
-    if rebase fails: git rebase --abort -> comment on issue -> escalate to human
+  BEHIND -> gh pr update-branch {pr} -R {owner}/{repo} -> restart [CI Loop] from step1.
+  CONFLICTING -> attempt non-destructive update: gh pr update-branch {pr} -R {owner}/{repo}
+    if it succeeds: restart [CI Loop] from step1
+    if it fails on merge conflict: comment on issue -> escalate to human.
+      Do not fall back to rebase + force push: force push is an unconditional human judgment gate
+      (Human confirmation required below), so no agent-side path forward remains.
   BLOCKED or UNKNOWN -> wait and recheck (GitHub may still be computing)
 
 Merge strategy:
