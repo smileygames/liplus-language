@@ -74,6 +74,10 @@ No past-occurrence carryover. Expired clusters are deleted in full.
 | tally 1 or 2 at t=3d | full deletion (noise floor not reached) |
 | same-kind reoccurrence on day 4+ after deletion | restart as a new cluster with t=0 (no past-occurrence carryover) |
 
+Actor = the agent holding the session the cluster is surfaced in. Firing moment = that surfacing, which is `rules/evolution/cold-start-synthesis.md` Promotion Tally Expiry Surface. A cluster past its window is re-surfaced every session until the judgment removes it, so a session that takes none loses no trigger. Opening the tally on recall is not the firing moment and was never a guaranteed one (`rules/model/subtractive-structural-beauty.md` Spec write applies (B), procedure-to-structure rider).
+
+Reconciliation before creation: both issue-creation rows above are reached through one prior step. Search the existing `promotion` marker issues (that marker is the creation-path flag Issue Creation Metadata below attaches at creation, so it is the field the search runs on) for one already covering this cluster. Found -> the verdict is not creation: fold the occurrences into that issue and delete the cluster. Not found -> create, per Issue Creation Metadata below.
+
 </threshold-rules>
 
 <exception>

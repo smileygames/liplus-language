@@ -37,12 +37,12 @@ The hook's own behavior. Read on demand; not applied at the step 3 moment.
 Anchor cut: the hook re-anchors the preamble above (H1 body up to the first H2 section), not the whole file. This file is always-on loaded, so a full re-emit would put the same text in one session's context twice; the preamble is the part the AI applies at the step 3 moment, and the H2 sections below are not. A file with no H2 section is emitted whole — the cut is an economy, and losing the anchor is the worse failure.
 
 Hook coordination:
-`on-session-start.sh` persists and surfaces at session open: decision structure index head, rules/ tree (fetch address table for cold-start-loaded rules cache), recent release tags, open in-progress issues, self-evaluation log head, promotion candidates, cold-start rule anchor. The hook emits material in diff-only mode (matcher = startup): only sections whose body changed since the previous startup invocation are re-emitted. The cold-start rule anchor is always re-emitted regardless of diff state.
+`on-session-start.sh` persists and surfaces at session open: decision structure index head, rules/ tree (fetch address table for cold-start-loaded rules cache), recent release tags, open in-progress issues, self-evaluation log head, promotion candidates, promotion tally clusters whose window has closed, cold-start rule anchor. The hook emits material in diff-only mode (matcher = startup): only sections whose body changed since the previous startup invocation are re-emitted. The cold-start rule anchor is always re-emitted regardless of diff state.
 
 Hook emission states (matcher = startup):
 - full emit = first session after install, fail-safe (state missing / unreadable / sha256 unavailable / node unavailable), or every section changed. All sections shown. The four reasons are the bash port's set. The PowerShell port parses JSON natively so it has no node dependency, and it calls SHA256 unconditionally with no availability guard, so neither of those two reasons can fire there: its fail-safe set is the two state-file reasons alone.
 - diff-only = some sections changed since prior session. Only changed sections shown.
-- no-new-material marker = no section changed AND no self-evolution observation entry was surfaced. A single "No new orientation material since last session" line is emitted (silent skip is intentionally avoided so the human can still observe the session boundary). A surfaced observation entry (see Self-Evolution Observation Surface below) counts as material even though it carries no section key, so the marker is suppressed for that session; pairing an overdue entry with "no new material" would be self-contradictory output.
+- no-new-material marker = no section changed AND neither date-driven surface below emitted anything. A single "No new orientation material since last session" line is emitted (silent skip is intentionally avoided so the human can still observe the session boundary). A surfaced self-evolution observation entry (see Self-Evolution Observation Surface below) and a surfaced promotion tally cluster (see Promotion Tally Expiry Surface below) each count as material even though neither carries a section key, so the marker is suppressed for that session; pairing an overdue item with "no new material" would be self-contradictory output.
 
 Hook emission states (matcher = resume / clear / compact / fork):
 - Only the cold-start rule anchor is re-emitted. The work context is continuous; the diff-only set is not re-evaluated, and the state file is not updated.
@@ -68,5 +68,29 @@ Material gathering and concrete surfacing logic belong to the adapter cold-start
 Silent skip when the observation file is absent or no entries are due.
 
 </self-evolution-observation-surface>
+
+<promotion-tally-expiry-surface>
+
+## Promotion Tally Expiry Surface
+
+Promotion tally clusters (`memory/promotion_tally.md`, format defined in `rules/evolution/promotion-judgment.md` Tally) are surfaced at cold-start when their 3d window has closed.
+
+Surface targets:
+- `expires` <= today -> surface as "tally expiry reached"
+- `expires` < today -> surface as "tally expiry overdue, threshold judgment not taken"
+
+Both conditions hold at once for any cluster past its window, since the second is contained in the first. Overdue wins: the cluster is surfaced once, as overdue only — the same treatment the Self-Evolution Observation Surface above gives an expired entry, and for the same reason: overdue is the axis carrying the escalation, and one item on two axes is noise.
+
+A cluster carries no verdict field, so nothing here reads one. Presence in the file is the unresolved state: every outcome the Threshold Rules name ends in the cluster being removed, so a cluster still written down is a judgment not yet taken. It is therefore re-surfaced every session until it resolves, and a session that takes no judgment loses no trigger.
+
+The occurrence count is carried on the surfaced line, because the Threshold Rules row that applies is selected by it.
+
+Surfacing is observation, not auto-action. The threshold judgment itself — issue creation, merge into an existing `promotion` issue, or deletion — follows `rules/evolution/promotion-judgment.md` Threshold Rules. Actor = the agent holding the session the cluster is surfaced in; firing moment = that surfacing.
+
+Material gathering and concrete surfacing logic belong to the adapter cold-start path, as with the observation surface above. This section defines only the behavior contract.
+
+Silent skip when the tally file is absent or no cluster has reached its window.
+
+</promotion-tally-expiry-surface>
 
 </cold-start-synthesis>
