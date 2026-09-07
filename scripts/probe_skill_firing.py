@@ -35,6 +35,7 @@ not add up to it, or whose total exceeds the ceiling below.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -51,6 +52,7 @@ from measure_rule_effect import (  # noqa: E402
     LockUnavailable,
     acquire_lock,
     find_workspace_root,
+    file_digests,
     harness_root,
     launch,
     materialize_arm,
@@ -195,6 +197,46 @@ def _reject_skill_vocabulary(arm_name: str, probe: str) -> None:
             f"arm {arm_name!r} probe names the mechanism it measures: {hit.group(0)!r}; "
             "declare the arm as 'control' if the naming is deliberate"
         )
+
+
+RULES_SUBTREE = Path(".claude") / "rules"
+
+
+def tree_digest(root: Path) -> str | None:
+    """One sha256 over every file under `root`, path and content both.
+
+    `None` when the subtree is absent, which is a fact about the arm rather than an
+    error - the caller writes it down as absent instead of omitting the field.
+    """
+    if not root.exists():
+        return None
+    per_file = file_digests(root)
+    joined = "\n".join(f"{name}:{per_file[name]}" for name in sorted(per_file))
+    return hashlib.sha256(joined.encode("utf-8")).hexdigest()
+
+
+def arm_provenance(arm_root: Path, materialized_at: datetime) -> dict[str, Any]:
+    """What this arm actually copied, and when it copied it.
+
+    The first run of this harness recorded neither, and a concurrent edit to the
+    shared source tree then left it undecidable which arms had carried the edited
+    file - the times had to be reconstructed afterwards from session directories
+    that happened to survive. Both fields are cheap and neither can be recovered
+    once the arm is wiped, so they are taken at materialization rather than
+    inferred later.
+
+    `rules_digest` is carried beside the whole-arm one because the two answer
+    different questions. Arms differ in their hooks by design, so the whole-arm
+    digest is expected to differ between a hooks-on and a hooks-off arm and says
+    nothing on its own; the rules subtree is the part that must be identical
+    across every arm of one run, and a mismatch there is the contamination this
+    field exists to make visible.
+    """
+    return {
+        "materialized_at": materialized_at.isoformat(),
+        "arm_digest": tree_digest(arm_root),
+        "rules_digest": tree_digest(arm_root / RULES_SUBTREE),
+    }
 
 
 def arm_command(probe: str, model: str) -> list[str]:
@@ -353,6 +395,7 @@ def build_run_record(
     selected: Sequence[ArmPlan],
     results: Sequence[dict[str, Any]],
     started_at: datetime,
+    provenance: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """The only thing that outlives the run, and it is written outside the work dir."""
     return {
@@ -361,6 +404,7 @@ def build_run_record(
         "model": plan.model,
         "invocation_budget": plan.invocation_budget,
         "selected_arms": [arm.name for arm in selected],
+        "provenance": provenance or {},
         "arms": [
             {
                 "name": arm.name,
@@ -448,9 +492,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         arms_dir = reset_work_dir(root)
         results: list[dict[str, Any]] = []
+        provenance: dict[str, dict[str, Any]] = {}
         for arm in selected:
             arm_root = arms_dir / arm.name
             materialize_arm(source_root, arm_root, neutralize=not arm.hooks)
+            provenance[arm.name] = arm_provenance(arm_root, datetime.now(timezone.utc))
             for index in range(arm.repetitions):
                 entry: dict[str, Any] = {
                     "arm": arm.name,
@@ -463,7 +509,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                     entry.update(run_arm(arm_root, arm.probe, plan.model, args.timeout))
                 results.append(entry)
 
-        record = build_run_record(plan, source_root, selected, results, started_at)
+        record = build_run_record(
+            plan, source_root, selected, results, started_at, provenance
+        )
     except HarnessError as error:
         print(f"probe_skill_firing: {error}", file=sys.stderr)
         return 2
