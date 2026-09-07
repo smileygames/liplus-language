@@ -31,6 +31,7 @@ import unittest
 from unittest import mock
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
@@ -235,6 +236,29 @@ class WorkDirTest(TempDirCase):
         self.assertEqual(recreated, arms)
         self.assertEqual(list(recreated.iterdir()), [])
 
+    def test_a_read_only_entry_does_not_wedge_the_wipe(self) -> None:
+        """The copy carries the live tree's read-only attribute; the wipe clears it.
+
+        Measured: an arm's copied `.claude` refused removal while sitting empty, and
+        the wipe that raises does so at the *head* of the next run - aborting it
+        before it launches anything.
+        """
+        root = self.temp_path()
+        arms = root / module.ARMS_DIRNAME
+        nested = arms / "a-off" / ".claude"
+        nested.mkdir(parents=True)
+        (nested / "settings.json").write_text("{}", encoding="utf-8")
+        module.os.chmod(nested / "settings.json", module.stat.S_IREAD)
+        module.os.chmod(nested, module.stat.S_IREAD | module.stat.S_IEXEC)
+
+        module.reset_work_dir(root)
+
+        self.assertTrue(arms.is_dir())
+        self.assertEqual(list(arms.iterdir()), [])
+
+    def test_removing_an_absent_tree_is_silent(self) -> None:
+        module.remove_tree(self.temp_path() / "never-existed")
+
     def test_the_wipe_does_not_take_the_lock_with_it(self) -> None:
         """The two are siblings on purpose; wiping the lock would defeat it."""
         root = self.temp_path() / "harness"
@@ -404,6 +428,43 @@ class CommandAndRecordTest(TempDirCase):
         self.assertIn("what is the version type?", command)
         self.assertIn("--output-format", command)
         self.assertIn("opus", command)
+
+    def test_the_executable_is_resolved_against_path_before_launch(self) -> None:
+        """npm ships `claude.CMD` on Windows; the extensionless sibling will not start.
+
+        Asserted through a stubbed `which` rather than a real binary, so the check
+        holds on a host that has no `claude` installed - which is every CI runner.
+        """
+        with mock.patch.object(
+            module.shutil, "which", return_value=r"C:\npm\claude.CMD"
+        ):
+            argv = module.launch_argv(["claude", "-p", "probe"])
+        self.assertEqual(argv, [r"C:\npm\claude.CMD", "-p", "probe"])
+
+    def test_an_unresolvable_executable_is_refused_by_name(self) -> None:
+        with mock.patch.object(module.shutil, "which", return_value=None):
+            with self.assertRaises(module.HarnessError) as caught:
+                module.launch_argv(["claude", "-p", "probe"])
+        self.assertIn("claude", str(caught.exception))
+
+    def test_resolution_happens_inside_the_launch_seam(self) -> None:
+        """A caller that substitutes the launch must lose the PATH dependency with it.
+
+        Measured: resolution sitting ahead of an injected runner raised on CI, where
+        nothing was ever going to be launched.
+        """
+        seen: dict[str, object] = {}
+
+        def fake_run(argv, **kwargs):  # type: ignore[no-untyped-def]
+            seen["argv"] = argv
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        with mock.patch.object(
+            module.shutil, "which", return_value="/usr/bin/claude"
+        ), mock.patch.object(module.subprocess, "run", fake_run):
+            module.launch(["claude", "-p", "probe"], capture_output=True)
+
+        self.assertEqual(seen["argv"], ["/usr/bin/claude", "-p", "probe"])
 
     def test_the_run_record_names_the_model_and_the_contrast(self) -> None:
         plan = module.load_plan(valid_plan_data())

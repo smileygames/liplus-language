@@ -26,8 +26,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -263,6 +265,52 @@ def release_lock(lock_dir: Path) -> None:
     shutil.rmtree(lock_dir, ignore_errors=True)
 
 
+def _force_writable_and_retry(func: Any, path: str, _exc: BaseException) -> None:
+    """Clear what made the entry unremovable, then try the removal again.
+
+    Measured on this harness: an arm's copied `.claude` refused `rmdir` with
+    WinError 5 while sitting empty, and the same path removed cleanly from a shell.
+    The live `.claude` carries the Windows read-only attribute; `copytree` copies
+    file metadata, so every arm inherits it, and Windows refuses to unlink a
+    read-only entry. Nothing about it is transient - a retry alone waits forever,
+    so the handler is a chmod rather than a sleep.
+
+    Both the entry and its parent are cleared, because the two platforms put the
+    obstacle in different places. On Windows the read-only attribute sits on the
+    entry being removed. On POSIX a file is unlinked through its directory, so a
+    copied-off write bit on the parent is what refuses, and clearing the child
+    alone would leave the removal failing for the same reason it already did.
+    """
+    parent = Path(path).parent
+    for candidate in (parent, Path(path)):
+        try:
+            os.chmod(candidate, stat.S_IRWXU)
+        except OSError:
+            pass
+    func(path)
+
+
+def remove_tree(path: Path) -> None:
+    """Remove a directory tree, including entries the copy marked read-only.
+
+    The two cleanup layers this module rests on are only as good as their ability
+    to actually delete. A wipe that raises at the head of a run aborts it before it
+    launches anything and hands the operator a manual `rm -rf` - the procedure this
+    design replaces with structure.
+    """
+    if not path.exists():
+        return
+    if sys.version_info >= (3, 12):
+        shutil.rmtree(path, onexc=_force_writable_and_retry)
+    else:  # pragma: no cover - exercised only on hosts below 3.12
+        shutil.rmtree(
+            path,
+            onerror=lambda func, target, _info: _force_writable_and_retry(
+                func, target, RuntimeError()
+            ),
+        )
+
+
 def reset_work_dir(root: Path) -> Path:
     """Wipe and recreate the arms directory unconditionally, leaving the lock alone.
 
@@ -272,7 +320,7 @@ def reset_work_dir(root: Path) -> Path:
     """
     arms_dir = root / ARMS_DIRNAME
     if arms_dir.exists():
-        shutil.rmtree(arms_dir)
+        remove_tree(arms_dir)
     arms_dir.mkdir(parents=True)
     return arms_dir
 
@@ -286,11 +334,20 @@ def find_workspace_root(start: Path) -> Path:
     raise HarnessError(f"no workspace root with a .claude directory at or above {start}")
 
 
-def materialize_arm(source_root: Path, arm_root: Path) -> list[str]:
+def materialize_arm(
+    source_root: Path, arm_root: Path, *, neutralize: bool = True
+) -> list[str]:
     """Copy the always-loaded surface of `source_root` into a fresh arm.
 
     `.git` is not among the copied entries, so the arm has no remote by
     construction rather than by a step that removes one.
+
+    `neutralize` defaults to removing the arm's hooks, which is what this module's
+    own contrast requires and what `neutralize_hooks` gives its reason for. It is a
+    keyword rather than a fixture because a measurement whose variable *is* the
+    presence of hooks cannot have them removed from both arms
+    (`scripts/probe_skill_firing.py`). The default carries the contrast principle;
+    the parameter carries the one case that principle does not cover.
     """
     for entry in REQUIRED_ENTRIES:
         if not (source_root / entry).exists():
@@ -309,7 +366,8 @@ def materialize_arm(source_root: Path, arm_root: Path) -> list[str]:
             shutil.copy2(source, destination)
         copied.append(entry)
 
-    neutralize_hooks(arm_root)
+    if neutralize:
+        neutralize_hooks(arm_root)
     return copied
 
 
@@ -413,14 +471,58 @@ def arm_command(probe: str, model: str) -> list[str]:
     return ["claude", "-p", probe, "--output-format", "json", "--model", model]
 
 
+def launch_argv(command: Sequence[str]) -> list[str]:
+    """The command with its executable resolved against PATH, ready for `subprocess`.
+
+    `claude` is installed by npm, which on Windows puts the executable at
+    `claude.CMD` and leaves the extensionless `claude` as a shell script the Win32
+    process loader cannot start. Launching without a shell therefore fails with
+    WinError 2 while `which claude` in the operator's shell answers fine - the
+    launch is refused for a reason the surrounding environment gives no sign of.
+    Resolution happens here rather than in `arm_command` so the run record keeps
+    naming the command as it was written, not as one host spells it, and it is
+    reached only from `launch` below - the one place a process is actually started.
+    A resolution done any earlier runs on hosts that launch nothing, which is every
+    host running the tests: CI has no `claude` on PATH and does not need one, and a
+    harness that raises there is asserting an external dependency the test seam was
+    built to do without.
+    """
+    argv = list(command)
+    resolved = shutil.which(argv[0])
+    if resolved is None:
+        raise HarnessError(f"{argv[0]!r} was not found on PATH")
+    argv[0] = resolved
+    return argv
+
+
+def launch(command: Sequence[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+    """Start one arm process. The only caller of `launch_argv`, and the only seam.
+
+    A harness caller that injects its own runner is testing what the surrounding
+    function does with a result, not how a process is started, so it substitutes
+    this whole function - PATH resolution included. Keeping the resolution inside
+    means the substitution actually removes the external dependency instead of
+    leaving half of it standing in front of the injected runner.
+    """
+    return subprocess.run(  # noqa: S603 - fixed argv, no shell
+        launch_argv(command), **kwargs
+    )
+
+
 def run_arm(arm_root: Path, probe: str, model: str, timeout: float | None = None) -> dict[str, Any]:
     """Launch one arm and capture its output. External dependency; not run in CI."""
     command = arm_command(probe, model)
-    completed = subprocess.run(  # noqa: S603 - fixed argv, no shell
+    completed = launch(
         command,
         cwd=str(arm_root),
         capture_output=True,
         text=True,
+        # The arm answers in the workspace's own language, and the host console
+        # codepage is not it. Left to the locale default, a Japanese reply raises
+        # UnicodeDecodeError inside the reader thread and the run loses a paid
+        # invocation to an encoding, not to anything it was measuring.
+        encoding="utf-8",
+        errors="replace",
         timeout=timeout,
     )
     return {
@@ -525,7 +627,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"measure_rule_effect: {error}", file=sys.stderr)
         return 2
     finally:
-        shutil.rmtree(root / ARMS_DIRNAME, ignore_errors=True)
+        try:
+            remove_tree(root / ARMS_DIRNAME)
+        except OSError:
+            pass
         release_lock(lock_dir)
 
     payload = json.dumps(record, indent=2, ensure_ascii=False) + "\n"
