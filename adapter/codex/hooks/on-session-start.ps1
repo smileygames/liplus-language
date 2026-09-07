@@ -1000,13 +1000,24 @@ if ($tallyBody) {
 $failSafeFull = $false
 $failSafeReason = ''
 
-# Read prior state.
+# Read prior state. $priorEmitAt is the one field the state file has carried
+# with no reader (#1910); left empty when the state holds no well-formed stamp,
+# which only drops the read-back line below and never forces a full emit.
 $priorFp = @{}
+$priorEmitAt = ''
 if (Test-Path -LiteralPath $stateFile) {
   try {
-    $prior = Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json
+    $priorRaw = Get-Content -LiteralPath $stateFile -Raw
+    $prior = $priorRaw | ConvertFrom-Json
     if ($prior -and $prior.sections) {
       foreach ($prop in $prior.sections.PSObject.Properties) { $priorFp[$prop.Name] = $prop.Value }
+    }
+    # Taken from the raw text, not from the parsed object: ConvertFrom-Json
+    # coerces an ISO-8601 stamp into [datetime], and coerces several
+    # malformed shapes along with it. Reading the text keeps the accepted
+    # shape byte-identical to the regex the two bash ports apply.
+    if ($priorRaw -cmatch '"last_emit_at"\s*:\s*"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z)"') {
+      $priorEmitAt = $matches[1]
     }
   } catch {
     $failSafeFull = $true; $failSafeReason = 'state file malformed JSON'
@@ -1032,8 +1043,22 @@ for ($i = 0; $i -lt $sectionKeys.Count; $i++) {
 # The two date-driven surfaces count as material: pairing a just-emitted overdue
 # entry or an expired tally cluster with "No new orientation material" would be
 # self-contradictory output.
+$markerEmitted = $false
 if (-not $emittedAny -and -not $observationEmitted -and -not $tallyEmitted -and -not $failSafeFull) {
   Emit-Section 'Orientation diff' 'No new orientation material since last session. Prior in-context state remains authoritative.'
+  $markerEmitted = $true
+}
+
+# Prior-baseline read-back. Emitted in the diff-only state only: under full emit
+# nothing was suppressed, so the prior time is not judgment material, and under
+# the no-new-material marker the session boundary is already stated in one line.
+#
+# Signal, not detector. The state file carries no identifier, so "another session
+# in this shared workspace consumed the baseline" and "this session was reopened"
+# read identically here.
+if (-not $failSafeFull -and -not $markerEmitted -and $priorEmitAt) {
+  Emit-Section 'Prior baseline' ("Diff baseline last consumed at $priorEmitAt (UTC).`n" +
+    'No identifier is recorded, so this does not say who consumed it.')
 }
 
 # Persist new state (best-effort).

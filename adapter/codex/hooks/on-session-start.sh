@@ -924,14 +924,23 @@ if [ "$FAIL_SAFE_FULL_EMIT" -eq 0 ] && [ -z "$NODE_BIN" ]; then FAIL_SAFE_FULL_E
 # one "key<TAB>fingerprint" line per recorded section (flat text, easy to
 # grep from bash without needing associative arrays).
 PRIOR_FP_DUMP=""
+# The one field the state file has carried with no reader (#1910). Left empty
+# when the state holds no well-formed stamp; that only drops the read-back line
+# below, and is never a reason to fall through to full emit.
+PRIOR_EMIT_AT=""
 if [ "$FAIL_SAFE_FULL_EMIT" -eq 0 ]; then
   if [ -f "$STATE_FILE" ]; then
-    PRIOR_FP_DUMP=$("$NODE_BIN" -e '
+    PRIOR_STATE_DUMP=$("$NODE_BIN" -e '
       const fs = require("fs");
       try {
         const raw = fs.readFileSync(process.argv[1], "utf8");
         const data = JSON.parse(raw);
-        const sections = (data && typeof data === "object" && data.sections) || {};
+        const obj = (data && typeof data === "object") ? data : {};
+        const stamp = obj.last_emit_at;
+        const shaped = typeof stamp === "string" &&
+          /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/.test(stamp);
+        process.stdout.write((shaped ? stamp : "") + "\n");
+        const sections = obj.sections || {};
         for (const k of Object.keys(sections)) {
           process.stdout.write(k + "\t" + String(sections[k]) + "\n");
         }
@@ -942,6 +951,9 @@ if [ "$FAIL_SAFE_FULL_EMIT" -eq 0 ]; then
     if [ "$?" -ne 0 ]; then
       FAIL_SAFE_FULL_EMIT=1
       FAIL_SAFE_REASON="state file malformed JSON"
+    else
+      PRIOR_EMIT_AT=$(printf '%s\n' "$PRIOR_STATE_DUMP" | sed -n '1p')
+      PRIOR_FP_DUMP=$(printf '%s\n' "$PRIOR_STATE_DUMP" | tail -n +2)
     fi
   else
     FAIL_SAFE_FULL_EMIT=1
@@ -957,6 +969,7 @@ prior_fp_of() {
 }
 
 EMITTED_ANY=0
+MARKER_EMITTED=0
 NEW_FP_KEYS=(); NEW_FP_VALS=()
 i=0
 while [ "$i" -lt "${#SECTION_KEYS[@]}" ]; do
@@ -982,6 +995,19 @@ done
 # self-contradictory output.
 if [ "$EMITTED_ANY" -eq 0 ] && [ "$OBSERVATION_EMITTED" -eq 0 ] && [ "$TALLY_EMITTED" -eq 0 ] && [ "$FAIL_SAFE_FULL_EMIT" -eq 0 ]; then
   emit_section "Orientation diff" "No new orientation material since last session. Prior in-context state remains authoritative."
+  MARKER_EMITTED=1
+fi
+
+# Prior-baseline read-back. Emitted in the diff-only state only: under full emit
+# nothing was suppressed, so the prior time is not judgment material, and under
+# the no-new-material marker the session boundary is already stated in one line.
+#
+# Signal, not detector. The state file carries no identifier, so "another session
+# in this shared workspace consumed the baseline" and "this session was reopened"
+# read identically here.
+if [ "$FAIL_SAFE_FULL_EMIT" -eq 0 ] && [ "$MARKER_EMITTED" -eq 0 ] && [ -n "$PRIOR_EMIT_AT" ]; then
+  emit_section "Prior baseline" "Diff baseline last consumed at ${PRIOR_EMIT_AT} (UTC).
+No identifier is recorded, so this does not say who consumed it."
 fi
 
 # Persist new state (best-effort; failure is non-fatal — next session will
