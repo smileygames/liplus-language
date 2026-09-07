@@ -134,7 +134,7 @@ Subagent_Delegation:
     address from there and resume; this branch does not fall to the reconstruction fallback.
   - Across sessions there is no such recovery: `ListAgents` reaches only what the current session spawned,
     so nothing enumerates a subagent another session spawned. That is the state the spawning-session bullet
-    below names, and the reconstruction fallback it points to is the whole of what remains.
+    below names.
   - There is no path through the child. A subagent does not hold its own agent id, so asking it for one
     yields no address; the spawning side is the only holder.
   - The id lives in the spawning session's context. A parent that does not hold it has no resume target, which
