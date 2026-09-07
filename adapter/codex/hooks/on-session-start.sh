@@ -341,8 +341,7 @@ SURFACE_CAP=10
 # an empty higher-precedence directory would otherwise shadow a populated
 # lower-precedence one and silence every consumer at once.
 # The marker set is the files MEMORY_DIR consumers read: the observation surface,
-# the promotion tally expiry surface (#1894 — it became a consumer when it got
-# its reader, and the criterion is consumer-read, not file identity),
+# the promotion tally expiry surface,
 # the per-topic entry-file prefixes the promotion detectors scan, plus
 # self-evaluation_log.md so that both resolution paths agree on what counts as a
 # memory directory. That last member never decides a case in practice: the
@@ -372,10 +371,7 @@ memory_dir_populated() {
 # files, each of which has its own dedicated reader: MEMORY.md is read by the
 # index emit, self-evaluation_log.md by the self-eval head, and the two
 # date-driven surfaces below read self-evolution-observation.md and
-# promotion_tally.md. The last of those four carried no reader until #1894, so
-# the stated reason held for three members and not for the fourth; the exclusion
-# was right either way (a tally cluster is not a memory entry), but what the
-# exclusion stands in for is the dedicated reader. Flat feedback.md /
+# promotion_tally.md. Flat feedback.md /
 # project.md are NOT excluded, so a workspace that has not migrated is still
 # scanned. Sorted, because the detector output is sha256-fingerprinted for
 # diff-only emission and must not depend on directory order.
