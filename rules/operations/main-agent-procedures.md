@@ -491,9 +491,17 @@ foreground handling:
 own-operation arrival confirmation:
   webhook notifications include results of own operations (push, PR, issue, release).
   these serve as arrival confirmation = proof that the operation reached GitHub.
-  mark_processed own-operation events promptly during foreground check or after the triggering operation.
+  mark_processed own-operation events promptly during the foreground check.
   do not accumulate own-operation events for bulk clearing later.
   external events (other users, bots) = preserve for foreground reporting or explicit handling.
+
+  ownership test - run it; own / external is not judged by feel:
+    1. head_branch = this session's working branch -> own.
+    2. head_branch = main -> read `gh run view <id> --json displayTitle` and match it against what
+       this session authored (event=issues carries the issue title, push the commit title,
+       pull_request the PR title).
+    3. sender is another account -> external, preserve.
+    4. nothing above settles it -> hold, and leave the event unprocessed.
 
 </foreground-webhook-notification-intake>
 
