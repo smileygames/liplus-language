@@ -502,9 +502,6 @@ own-operation arrival confirmation:
        pull_request the PR title).
     3. sender is another account -> external, preserve.
     4. nothing above settles it -> hold, and leave the event unprocessed.
-  Sender account alone is not the test: two sessions sharing one account and one store each read
-  the other's events as arrival confirmation of their own, and both defer. Step 4 is the landing
-  for what displayTitle cannot split - an issue both sessions touched carries no session identity.
 
 </foreground-webhook-notification-intake>
 
