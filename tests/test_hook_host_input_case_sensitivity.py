@@ -89,8 +89,10 @@ MIXED_CASE_MATCHERS = ("Resume", "RESUME", "Compact", "cLear", "Startup")
 
 # The lower-case control. Held to `resume` alone: this file is about casing, and
 # which of the documented literals each port accepts is
-# `test_on_session_start_observation_surface.py`'s (the codex ports omit `fork`,
-# which is a coverage gap on its own axis and not a casing split).
+# `test_on_session_start_observation_surface.py`'s (the codex ports carry no
+# `fork` because Codex documents no such SessionStart source — see the Matcher
+# notes in `adapter/codex/hooks-config.md` — so that difference is not a casing
+# split either).
 LOWER_CASE_CONTROL = "resume"
 
 FIRST_TOKEN = "QQCASEDIFFONEQQ"

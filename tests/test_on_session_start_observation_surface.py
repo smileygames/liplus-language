@@ -1140,9 +1140,11 @@ class MatcherResolutionTest(ObservationSurfaceTestCase):
     would stay silent, a hook that fell back to startup re-emits and rewrites.
     """
 
-    # `fork` is claude-only here. It is registered in the Claude settings
-    # template (F6) against the documented SessionStart matcher set; the codex
-    # hooks.json matcher set is out of this issue's scope and unchanged.
+    # `fork` is claude-only. Codex documents no such SessionStart source, so
+    # the codex ports carry three literals and not four — see the Matcher notes
+    # in `adapter/codex/hooks-config.md` for the set Codex matches. The claude
+    # entry is registered in the settings template (F6) against the documented
+    # Claude SessionStart matcher set.
     NON_STARTUP = {
         "claude_sh": ("resume", "clear", "compact", "fork"),
         "codex_sh": ("resume", "clear", "compact"),
