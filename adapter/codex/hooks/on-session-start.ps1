@@ -414,6 +414,8 @@ $surfaceCap = 10
 # an empty higher-precedence directory would otherwise shadow a populated
 # lower-precedence one and silence every consumer at once.
 # The marker set is the files $memoryDir consumers read: the observation surface,
+# the promotion tally expiry surface (#1894 — it became a consumer when it got
+# its reader, and the criterion is consumer-read, not file identity),
 # the per-topic entry-file prefixes the promotion detectors scan, plus
 # self-evaluation_log.md so that both resolution paths agree on what counts as a
 # memory directory. That last member never decides a case in practice: the
@@ -429,7 +431,8 @@ function Test-MemoryDirPopulated {
   param([string]$Dir)
   foreach ($markerFile in @(
       'self-evaluation_log.md',
-      'self-evolution-observation.md')) {
+      'self-evolution-observation.md',
+      'promotion_tally.md')) {
     if (Test-Path -LiteralPath (Join-Path $Dir $markerFile) -PathType Leaf) { return $true }
   }
   foreach ($markerPrefix in @('feedback', 'project', 'reference', 'user')) {
@@ -442,7 +445,13 @@ function Test-MemoryDirPopulated {
 
 # Memory entry files inside a resolved $memoryDir, under the same one-memory-
 # per-file layout. Excluded are the index and the three transient operational
-# files, each of which has its own dedicated reader. Flat feedback.md /
+# files, each of which has its own dedicated reader: MEMORY.md is read by the
+# index emit, self-evaluation_log.md by the self-eval head, and the two
+# date-driven surfaces below read self-evolution-observation.md and
+# promotion_tally.md. The last of those four carried no reader until #1894, so
+# the stated reason held for three members and not for the fourth; the exclusion
+# was right either way (a tally cluster is not a memory entry), but what the
+# exclusion stands in for is the dedicated reader. Flat feedback.md /
 # project.md are NOT excluded, so a workspace that has not migrated is still
 # scanned. Ordinal sort, because the detector output is sha256-fingerprinted for
 # diff-only emission and must not depend on directory order — and to match the
@@ -918,6 +927,77 @@ if ($observationBody) {
   $observationEmitted = $true
 }
 
+# --- promotion tally expiry surface (due / overdue) ---
+# Implements rules/evolution/cold-start-synthesis.md "Promotion Tally Expiry
+# Surface" (#1894). Port of the same block in adapter/claude/hooks/on-session-start.sh:
+#   expires <= today -> "tally expiry reached"
+#   expires <  today -> "tally expiry overdue, threshold judgment not taken"
+#
+# Same treatment as the observation surface above and for the same reasons: not
+# passed through Register-Section (date-driven trigger over a content-driven
+# body), overdue reported alone, empty body = silent skip, CompareOrdinal on
+# ISO YYYY-MM-DD.
+#
+# No verdict field is read because the tally format carries none: every outcome
+# the Threshold Rules name removes the cluster, so a cluster still written down
+# is a judgment not yet taken. The occurrence count is carried on the line
+# because it selects the Threshold Rules row that applies.
+$tallyBody = ''
+$tallyFile = ''
+if ($memoryDir) {
+  $tallyCand = Join-Path $memoryDir 'promotion_tally.md'
+  if (Test-Path -LiteralPath $tallyCand) { $tallyFile = $tallyCand }
+}
+if ($tallyFile) {
+  $today = (Get-Date).ToString('yyyy-MM-dd')
+  $clusters = @()
+  $curC = $null
+  # -cmatch (not -match): same case-sensitivity parity with the awk ports as the
+  # observation block above.
+  foreach ($l in (Get-Content -LiteralPath $tallyFile -ErrorAction SilentlyContinue)) {
+    if ($l -cmatch '^##\s+cluster:\s*(.*)$') {
+      if ($curC) { $clusters += $curC }
+      $curC = @{ name = $matches[1].Trim(); expires = ''; occ = 0 }
+      continue
+    }
+    if ($l -cmatch '^##\s') { if ($curC) { $clusters += $curC; $curC = $null }; continue }
+    if (-not $curC) { continue }
+    if ($l -cmatch '^\s*expires:\s*(.*)$') { $curC.expires = $matches[1].Trim(); continue }
+    if ($l -cmatch '^\s*-\s')              { $curC.occ++; continue }
+  }
+  if ($curC) { $clusters += $curC }
+
+  $tallyList = ''
+  foreach ($c in $clusters) {
+    # Empty descriptor = malformed header; the awk ports drop it in flush().
+    if (-not $c.name) { continue }
+    $label = ''
+    if ($c.expires -and ([string]::CompareOrdinal($c.expires, $today) -lt 0)) {
+      $label = "OVERDUE (expires $($c.expires), threshold judgment not taken)"
+    } elseif ($c.expires -and ([string]::CompareOrdinal($c.expires, $today) -le 0)) {
+      $label = "DUE (expires $($c.expires))"
+    }
+    if ($label) {
+      $tallyList += "  - $($label): $($c.name) [occurrences: $($c.occ)]`n"
+    }
+  }
+  if ($tallyList) {
+    $tallyBody = "memory/promotion_tally.md - clusters whose 3d window has closed:`n" +
+      $tallyList +
+      "Surfacing is observation, not auto-action. The threshold judgment (issue`n" +
+      "creation / merge into an existing promotion-marker issue / deletion) follows`n" +
+      "rules/evolution/promotion-judgment.md Threshold Rules."
+  }
+}
+
+# Emitted next to the observation surface, before the diff sections, for the
+# same reason: a closed window must not be buried under whatever else changed.
+$tallyEmitted = $false
+if ($tallyBody) {
+  Emit-Section 'Tally expiry (due / overdue)' $tallyBody
+  $tallyEmitted = $true
+}
+
 # ===================================================================
 # Diff-only emission (startup matcher)
 # ===================================================================
@@ -953,9 +1033,10 @@ for ($i = 0; $i -lt $sectionKeys.Count; $i++) {
   }
 }
 
-# The observation surface counts as material: pairing a just-emitted overdue
-# entry with "No new orientation material" would be self-contradictory output.
-if (-not $emittedAny -and -not $observationEmitted -and -not $failSafeFull) {
+# The two date-driven surfaces count as material: pairing a just-emitted overdue
+# entry or an expired tally cluster with "No new orientation material" would be
+# self-contradictory output.
+if (-not $emittedAny -and -not $observationEmitted -and -not $tallyEmitted -and -not $failSafeFull) {
   Emit-Section 'Orientation diff' 'No new orientation material since last session. Prior in-context state remains authoritative.'
 }
 

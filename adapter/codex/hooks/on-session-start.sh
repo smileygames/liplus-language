@@ -341,6 +341,8 @@ SURFACE_CAP=10
 # an empty higher-precedence directory would otherwise shadow a populated
 # lower-precedence one and silence every consumer at once.
 # The marker set is the files MEMORY_DIR consumers read: the observation surface,
+# the promotion tally expiry surface (#1894 — it became a consumer when it got
+# its reader, and the criterion is consumer-read, not file identity),
 # the per-topic entry-file prefixes the promotion detectors scan, plus
 # self-evaluation_log.md so that both resolution paths agree on what counts as a
 # memory directory. That last member never decides a case in practice: the
@@ -355,7 +357,8 @@ SURFACE_CAP=10
 memory_dir_populated() {
   for markerfile in \
     self-evaluation_log.md \
-    self-evolution-observation.md; do
+    self-evolution-observation.md \
+    promotion_tally.md; do
     [ -f "$1/$markerfile" ] && return 0
   done
   for markerglob in "$1"/feedback*.md "$1"/project*.md "$1"/reference*.md "$1"/user*.md; do
@@ -366,7 +369,13 @@ memory_dir_populated() {
 
 # Memory entry files inside a resolved MEMORY_DIR, under the same one-memory-
 # per-file layout. Excluded are the index and the three transient operational
-# files, each of which has its own dedicated reader. Flat feedback.md /
+# files, each of which has its own dedicated reader: MEMORY.md is read by the
+# index emit, self-evaluation_log.md by the self-eval head, and the two
+# date-driven surfaces below read self-evolution-observation.md and
+# promotion_tally.md. The last of those four carried no reader until #1894, so
+# the stated reason held for three members and not for the fourth; the exclusion
+# was right either way (a tally cluster is not a memory entry), but what the
+# exclusion stands in for is the dedicated reader. Flat feedback.md /
 # project.md are NOT excluded, so a workspace that has not migrated is still
 # scanned. Sorted, because the detector output is sha256-fingerprinted for
 # diff-only emission and must not depend on directory order.
@@ -816,12 +825,84 @@ Observation Format."
   fi
 fi
 
+# --- promotion tally expiry surface (due / overdue) ---
+# Implements rules/evolution/cold-start-synthesis.md "Promotion Tally Expiry
+# Surface" (#1894). Port of the same block in adapter/claude/hooks/on-session-start.sh:
+#   expires <= today -> "tally expiry reached"
+#   expires <  today -> "tally expiry overdue, threshold judgment not taken"
+#
+# Same treatment as the observation surface above and for the same reasons: NOT
+# registered via register_section (date-driven trigger over a content-driven
+# body, so a fingerprint would surface a cluster once and then suppress it for
+# the whole period it still needs a judgment), overdue reported alone (one item
+# on two axes is noise), empty body = silent skip, lexicographic ISO date
+# comparison.
+#
+# No verdict field is read because the tally format carries none: every outcome
+# the Threshold Rules name removes the cluster, so a cluster still written down
+# is a judgment not yet taken. The occurrence count is carried on the line
+# because it selects the Threshold Rules row that applies.
+TALLY_BODY=""
+TALLY_FILE=""
+if [ -n "$MEMORY_DIR" ] && [ -f "$MEMORY_DIR/promotion_tally.md" ]; then
+  TALLY_FILE="$MEMORY_DIR/promotion_tally.md"
+fi
+if [ -n "$TALLY_FILE" ]; then
+  TODAY=$(date +%Y-%m-%d 2>/dev/null || echo "")
+  if [ -n "$TODAY" ]; then
+    TALLY_LIST=$(awk -v today="$TODAY" '
+      function flush(   label) {
+        if (name == "") return
+        label = ""
+        if (expires != "" && expires < today) {
+          label = "OVERDUE (expires " expires ", threshold judgment not taken)"
+        } else if (expires != "" && expires <= today) {
+          label = "DUE (expires " expires ")"
+        }
+        if (label != "") {
+          printf "  - %s: %s [occurrences: %d]\n", label, name, occ
+        }
+        name = ""; expires = ""; occ = 0
+      }
+      /^##[[:space:]]+cluster:/ {
+        flush()
+        v = $0
+        sub(/^##[[:space:]]+cluster:[[:space:]]*/, "", v)
+        gsub(/[[:space:]]+$/, "", v)
+        name = v
+        next
+      }
+      name != "" && /^[[:space:]]*expires:[[:space:]]*/ {
+        v = $0; sub(/^[[:space:]]*expires:[[:space:]]*/, "", v); gsub(/[[:space:]]+$/, "", v); expires = v; next
+      }
+      name != "" && /^[[:space:]]*-[[:space:]]/ { occ++; next }
+      /^##[[:space:]]/ { flush() }
+      END { flush() }
+    ' "$TALLY_FILE")
+    if [ -n "$TALLY_LIST" ]; then
+      TALLY_BODY="memory/promotion_tally.md - clusters whose 3d window has closed:
+${TALLY_LIST}
+Surfacing is observation, not auto-action. The threshold judgment (issue
+creation / merge into an existing promotion-marker issue / deletion) follows
+rules/evolution/promotion-judgment.md Threshold Rules."
+    fi
+  fi
+fi
+
 # Emitted before the diff sections so a due/overdue entry is not buried under
 # whatever else changed.
 OBSERVATION_EMITTED=0
 if [ -n "$OBSERVATION_BODY" ]; then
   emit_section "Self-evolution observation (due / overdue)" "$OBSERVATION_BODY"
   OBSERVATION_EMITTED=1
+fi
+
+# Emitted next to the observation surface, before the diff sections, for the
+# same reason: a closed window must not be buried under whatever else changed.
+TALLY_EMITTED=0
+if [ -n "$TALLY_BODY" ]; then
+  emit_section "Tally expiry (due / overdue)" "$TALLY_BODY"
+  TALLY_EMITTED=1
 fi
 
 # ===================================================================
@@ -900,9 +981,10 @@ while [ "$i" -lt "${#SECTION_KEYS[@]}" ]; do
   fi
 done
 
-# The observation surface counts as material: pairing a just-emitted overdue
-# entry with "No new orientation material" would be self-contradictory output.
-if [ "$EMITTED_ANY" -eq 0 ] && [ "$OBSERVATION_EMITTED" -eq 0 ] && [ "$FAIL_SAFE_FULL_EMIT" -eq 0 ]; then
+# The two date-driven surfaces count as material: pairing a just-emitted overdue
+# entry or an expired tally cluster with "No new orientation material" would be
+# self-contradictory output.
+if [ "$EMITTED_ANY" -eq 0 ] && [ "$OBSERVATION_EMITTED" -eq 0 ] && [ "$TALLY_EMITTED" -eq 0 ] && [ "$FAIL_SAFE_FULL_EMIT" -eq 0 ]; then
   emit_section "Orientation diff" "No new orientation material since last session. Prior in-context state remains authoritative."
 fi
 
